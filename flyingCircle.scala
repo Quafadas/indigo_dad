@@ -9,21 +9,21 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 import org.scalajs.dom
 
 @JSExportTopLevel("main")
-object Game{
-  def main(args:Array[String]): Unit =
-      HelloIndigo.launch("indigo-container", Map[String, String](
-          "width" -> dom.window.innerWidth.toString,
-          "height" -> dom.window.innerHeight.toString
-        )
+object Game:
+  def main(args: Array[String]): Unit =
+    HelloIndigo.launch(
+      "indigo-container",
+      Map[String, String](
+        "width" -> dom.window.innerWidth.toString,
+        "height" -> dom.window.innerHeight.toString
       )
-}
+    )
+end Game
 
-object HelloIndigo extends IndigoSandbox[Unit, Model] {
-
+object HelloIndigo extends IndigoSandbox[Unit, Model]:
 
   val dotsAsset = AssetName("dots")
   val magnification = 1
-
 
   val config: GameConfig =
     GameConfig.default.withMagnification(magnification)
@@ -68,7 +68,6 @@ object HelloIndigo extends IndigoSandbox[Unit, Model] {
           println("right click - dont' fire")
           Outcome(model.copy(center = e.position))
 
-
         case MouseButton.LeftMouseButton =>
           val clickPoint = e.position
           val adjustedPosition = clickPoint - model.center
@@ -89,6 +88,7 @@ object HelloIndigo extends IndigoSandbox[Unit, Model] {
         case _ =>
           println("other detected")
           Outcome(model)
+      end match
     case MouseEvent.Click(position, buttons) =>
       println("This could fire, if right click skipped the first match, but IDE tells me unreachable.")
       Outcome(model.copy(center = context.mouse.position))
@@ -126,21 +126,20 @@ object HelloIndigo extends IndigoSandbox[Unit, Model] {
         .withRef(8, 8)
         .moveTo(position)
     }
+end HelloIndigo
 
-}
-
-final case class Model(center: Point, dots: Batch[Dot]) {
+final case class Model(center: Point, dots: Batch[Dot]):
   def addDot(dot: Dot): Model =
     this.copy(dots = dot :: dots)
 
   def update(timeDelta: Seconds): Model =
     this.copy(dots = dots.map(_.update(timeDelta)))
-}
-object Model {
+end Model
+object Model:
   def initial(center: Point): Model = Model(center, Batch.empty)
-}
+end Model
 
-final case class Dot(orbitDistance: Int, angle: Radians) {
+final case class Dot(orbitDistance: Int, angle: Radians):
   def update(timeDelta: Seconds): Dot =
     this.copy(angle = angle + Radians.fromSeconds(timeDelta) / 6)
-}
+end Dot
