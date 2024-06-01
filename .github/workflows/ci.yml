@@ -40,7 +40,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: page
-          path: .out/
+          path: /home/runner/work/indigoLite/indigoLite/.out/
           if-no-files-found: error
   deploy:
     needs: build
