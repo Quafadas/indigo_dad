@@ -14,7 +14,7 @@ copyAssets:
 ## Builds the front end project
 buildJs:
   mkdir -p {{outDir}}
-  scala-cli --power package . -o {{outDir}} -f
+  scala-cli --power package . -o {{outDir}} -f --js-mode release
 
 format:
   scala-cli fmt .
