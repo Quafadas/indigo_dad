@@ -9,7 +9,7 @@ dev:
   cs launch io.github.quafadas:live-server-scala-cli-js_3:0.0.20 -- --path-to-index-html {{invocation_directory()}}/static
 
 copyAssets:
-  cp -r {{justfile_directory()}}/static/ {{outDir}}
+  cp -r {{justfile_directory()}}/static/. {{outDir}}
 
 ## Builds the front end project
 buildJs:
