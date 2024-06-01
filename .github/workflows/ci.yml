@@ -33,11 +33,12 @@ jobs:
       - run: just package
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      - uses: scala-cli
+      - uses: just buildJs
+      - uses: just copyAssets
       - uses: actions/upload-artifact@v3
         with:
           name: page
-          path: out/mygame/servable.dest
+          path: .out/
           if-no-files-found: error
   deploy:
     needs: build
