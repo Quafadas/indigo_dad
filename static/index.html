@@ -32,7 +32,7 @@
     <script type="text/javascript" src="scripts/indigo-support.js"></script>
     <script type="module" src="main.js"></script>
     <script>
-      const sse = new EventSource("/api/v1/sse");
+      const sse = new EventSource("/refresh/v1/sse");
       sse.addEventListener("message", (e) => {
         const msg = JSON.parse(e.data);
 
