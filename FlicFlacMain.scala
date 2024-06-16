@@ -25,16 +25,28 @@ end Game
 
 // gameSize can be one of 2,3,4,5,6 and is the number of major hexagons across one side where ...
 // ... a major hexagon is ring of 6 hexagons, with a central 7th black hexagon
-val gameSize = 4 // <<<<<<<<<<<<<<<<<<<<<<<
-
-// 
-val boardBasePoint : Point = Point(400,50)  // where the (inisible) top left hand corner of the hex grid board is positioned
+//val gameSize = 2 // <<<<<<<<<<<<<<<<<<<<<<<
+//val boardBasePoint : Point = Point(400,50)  // where the (inisible) top left hand corner of the hex grid board is positioned
 
 object HelloIndigo extends IndigoSandbox[Unit, Model]:
+  val boardCfg = BoardConfig(
+    "hex2", // hex asset name
+    "assets/Hex2.png", // path of hex asset
+    "bg", // background asset name
+    "assets/BackGroundWhite.png", // path of background asset
+    91, // GWIDTH pixel width of graphic
+    81, // GHEIGHT pixel height of graphic
+    Point(
+      400,
+      50
+    ), // where the (inisible) top left hand corner of the hex grid board is positioned
+    2, // game size
+    70, // amount to add to a hex centre x coord to reach the vertical line of the next column
+    40, // half the amount to add to a hex centre y coord to reach the next hexagon below
+    10 // xcoord of halfway along the top left diagonal line of first hex
+  )
 
-  val hexBoard = HexBoard(boardBasePoint, gameSize)
-  val hex2Asset = hexBoard.assetName
-  val bgAsset   = AssetName("bg")
+  val hexBoard = HexBoard(boardCfg)
   val magnification = 1
 
   val config: GameConfig =
@@ -44,10 +56,7 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
     Set()
 
   val assets: Set[AssetType] =
-    Set(
-      AssetType.Image(hex2Asset, hexBoard.assetPath),
-      AssetType.Image(bgAsset,   AssetPath("assets/BackGroundWhite.png"))
-    )
+    boardCfg.getAssets()
 
   val fonts: Set[FontInfo] =
     Set()
@@ -91,22 +100,22 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
           println("other detected")
           Outcome(model)
       end match
-    
-//    case MouseEvent.Click(position, buttons) =>
+//      case MouseEvent.Click(position, buttons) =>
 //      println("This could fire, if right click skipped the first match, but IDE tells me unreachable.")
 //      Outcome(model.copy(center = context.mouse.position))
 
     case FrameTick =>
       Outcome(model.update(context.delta))
 
-    case e: MouseEvent.MouseUp => 
+    case e: MouseEvent.MouseUp =>
       e._8 match
         case MouseButton.RightMouseButton =>
           hexBoard.changeScale(0.2)
         case _ =>
           ;
-        Outcome(model.update(context.delta))
-      
+      end match
+      Outcome(model.update(context.delta))
+
     case _ =>
       Outcome(model)
   }
@@ -114,69 +123,19 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
   def present(
       context: FrameContext[Unit],
       model: Model
-      ): Outcome[SceneUpdateFragment] = Outcome {
-      
-    var fragsCombined = SceneUpdateFragment.empty
+  ): Outcome[SceneUpdateFragment] = Outcome {
 
-    // White background fragment
-    val bgGraphic : Graphic[Material.ImageEffects] = Graphic(0,0,256,256,1, Material.ImageEffects(AssetName("bg")))
-    val bgLayer = bgGraphic.modifyMaterial(_.withTint(RGBA.White))
-    val bgFrag = SceneUpdateFragment(Layer(bgLayer.scaleBy(12,12))) // 12 chosen but needs optimising to scale factor
-    fragsCombined = fragsCombined |+| bgFrag
+    val fragsCombined = SceneUpdateFragment.empty |+|
+      boardCfg.getBackgroundFrag() |+|
+      hexBoard.paint() |+|
+      hexBoard.paintTestHex()
 
-    // Hex board fragments
-    fragsCombined = fragsCombined |+| hexBoard.paint()
-    fragsCombined = fragsCombined |+| hexBoard.paintTestHex()
-
-    /*
-    // Magenta Test Box fragments used to pinpoint positions on the grid and debug
-    // the various routines contained in HexBoard.scala
-
-    val bgGraphic2 : Graphic[Material.ImageEffects] = Graphic(0,0,256,256,1, Material.ImageEffects(AssetName("bg")))
-    val bgLayer2 = bgGraphic2.modifyMaterial(_.withTint(RGBA.Magenta))
-
-    val zz = hexBoard.fS
-
-    val xLeftUp = 400 + math.round(45*zz).toInt
-    val yLeftUp =  50 + math.round(40*zz).toInt
-    
-    var xRightDown = 500    // dummy values of 500
-    var yRightDown = 500    // dummy values of 500
-
-    if (gameSize == 2) then           // size 2 verified
-      xRightDown = 400+ math.round((45+(10*70))*zz).toInt
-      yRightDown = 50 + math.round((0 + (11*80))*zz).toInt
-    else if (gameSize == 3 )          // size 3 verified
-      xRightDown = 400+ math.round((45+(16*70))*zz).toInt
-      yRightDown = 50 + math.round((0 + (17*80))*zz).toInt
-    else if (gameSize == 4 )          // size 4 verified
-      xRightDown = 400+ math.round((45+(22*70))*zz).toInt
-      yRightDown = 50 + math.round((0 + (23*80))*zz).toInt
-    else if (gameSize == 5 )          // size 5 verified
-      xRightDown = 400+ math.round((45+(28*70))*zz).toInt
-      yRightDown = 50 + math.round((0 + (29*80))*zz).toInt
-    else if (gameSize == 6 )          // size 6 verified
-      xRightDown = 400+ math.round((45+(34*70))*zz).toInt
-      yRightDown = 50 + math.round((0 + (35*80))*zz).toInt
-    else
-      xRightDown = 500
-      yRightDown = 500
-    
-
-    val bgFrag1 = SceneUpdateFragment(Layer(bgLayer2.scaleBy(0.1,0.1).moveTo(xLeftUp,yLeftUp)))
-    fragsCombined = fragsCombined |+| bgFrag1
-    val bgFrag2 = SceneUpdateFragment(Layer(bgLayer2.scaleBy(0.1,0.1).moveTo(xRightDown,yRightDown)))
-    fragsCombined = fragsCombined |+| bgFrag2
-    val bgFrag3 = SceneUpdateFragment(Layer(bgLayer2.scaleBy(0.1,0.1).moveTo(400+math.round((45+(5*70))*zz).toInt,50+math.round((0+(6*80))*zz).toInt)))
-    fragsCombined = fragsCombined |+| bgFrag3
-
-*/
     fragsCombined
   }
 
 end HelloIndigo
-final case class Model(center: Point) :
-  def update(timeDelta: Seconds) : Model =
+final case class Model(center: Point):
+  def update(timeDelta: Seconds): Model =
     this.copy()
 end Model
 object Model:
