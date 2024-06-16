@@ -130,7 +130,7 @@ class HexBoard(boardCfg: BoardConfig):
         val q = col
         val r = (row - col) / 2
         val s = (-row - col) / 2
-        hexArray(n)(row) = HH(col, row, CK, q, r, s, 0, 0)
+        hexArray(n)(row) = HH(col, row, CW, q, r, s, 0, 0)
         col += 2
         n += 1
       end while

@@ -37,7 +37,7 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
     91, // GWIDTH pixel width of graphic
     81, // GHEIGHT pixel height of graphic
     Point(
-      400,
+      40,
       50
     ), // where the (inisible) top left hand corner of the hex grid board is positioned
     2, // game size
@@ -47,6 +47,20 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
   )
 
   val hexBoard = HexBoard(boardCfg)
+
+  val pieces = Pieces(
+    "cylinders",                // cylinders asset name
+    "assets/Cylinders.png",     // path of cylinders asset
+    "blocks",                   // blocks asset name
+    "assets/Blocks.png",        // path of blocks asset
+    boardCfg,
+    hexBoard)
+    //91, // GWIDTH pixel width of graphic
+    //81, // GHEIGHT pixel height of graphic
+    //Point(400,50) // where the (invisible) top left hand corner of the hex grid board is positioned
+//
+//  )
+
   val magnification = 1
 
   val config: GameConfig =
@@ -56,7 +70,7 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
     Set()
 
   val assets: Set[AssetType] =
-    boardCfg.getAssets()
+    boardCfg.getAssets() ++ pieces.getAssets()
 
   val fonts: Set[FontInfo] =
     Set()
@@ -111,6 +125,7 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
       e._8 match
         case MouseButton.RightMouseButton =>
           hexBoard.changeScale(0.2)
+          pieces.changeScale(0.2)
         case _ =>
           ;
       end match
@@ -128,7 +143,8 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
     val fragsCombined = SceneUpdateFragment.empty |+|
       boardCfg.getBackgroundFrag() |+|
       hexBoard.paint() |+|
-      hexBoard.paintTestHex()
+      hexBoard.paintTestHex() |+|
+      pieces.paint()
 
     fragsCombined
   }
