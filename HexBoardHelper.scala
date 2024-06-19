@@ -5,7 +5,8 @@ import indigo.*
 /* HexBoardHelper contains additional functions used to test the hex board during development.
  */
 
-class HexBoardHelper(boardCfg: BoardConfig) extends HexBoard(boardCfg: BoardConfig):
+class HexBoardHelper(boardCfg: BoardConfig, fS : Double) 
+    extends HexBoard(boardCfg: BoardConfig, fS : Double) :
 
   /*
   printBoard is prints the details of each hexagon on a new line

@@ -17,7 +17,7 @@ case class HH(
     yP: Int // pixel y offset from base point for origin of png to paint this hex
 )
 
-class HexBoard(boardCfg: BoardConfig):
+class HexBoard(boardCfg: BoardConfig, initScale : Double):
 
   /** ******************* The Hex Board ***
     *
@@ -43,8 +43,6 @@ class HexBoard(boardCfg: BoardConfig):
     * NB The storage for this snippet would be HexArray(4,5) ... even though the xy coords range from (0,0) to (7,4)
     */
 
-  var fS = 1.0 // scale factor
-
   val gHex = boardCfg.getHexGraphic() // The Hex graphic used to paint the grid
 
   // The hexagons are aligned such that they have a flat bottom and top
@@ -53,15 +51,11 @@ class HexBoard(boardCfg: BoardConfig):
 
   var hexBoardUpdated =
     true // set true when paint needs to recalculate the board image
-  var testHexUpdated = true
   var hexFragsCombined =
     SceneUpdateFragment.empty // holds the latest calculations from the paint routine
-  var testFrag =
-    SceneUpdateFragment.empty // the latest fragment for the test hexagon
 
-  val sZ =
-    boardCfg
-      .getSideSize() // The number of hexagonal rings (ring of 6 with centre) composing one side of the board
+  // The number of hexagonal rings (ring of 6 with centre) composing one side of the board
+  val sZ = boardCfg.getSideSize() 
   val borderlessArrayWidth = 6 * (sZ - 1) + 3 // 3,9,15,21 ...
   val borderlessArrayHeight = 12 * (sZ - 1) + 6 // 7,17,29,41 ...
   val arrayWidth = (borderlessArrayWidth + 1 + 2) / 2 // +2 because of borders
@@ -70,41 +64,27 @@ class HexBoard(boardCfg: BoardConfig):
   var hexArray = createArrayOfHH(arrayWidth, arrayHeight)
   // println("hexArray size:" + sZ + " w:h" + borderlessArrayWidth +":" + height + " aw:ah" + + arrayWidth +":" + borderlessArrayHeight + " .rowLength:" + hexArray.length)
 
-  fillBoard(
-    arrayWidth,
-    arrayHeight,
-    mix(CK)
-  ) // start with black board (for debugging the helper routine printBoard can follow this line)
-  fillHorizontalBorder(
-    0,
-    2,
-    arrayWidth,
-    CX
-  ) // The first two rows are an invisible border
-  colorBoardHexes(
-    2,
-    arrayWidth,
-    arrayHeight
-  ) // this is the pattern of the board
-  fillVerticalBorder(0, 0, arrayHeight, CX) // first column is border
-  fillVerticalBorder(
-    arrayWidth - 1,
-    0,
-    arrayHeight,
-    CX
-  ) // last two columns are borders
+  // start with black board, populates q,r,s (for debugging the helper routine printBoard can follow this line)
+  fillBoard(arrayWidth, arrayHeight, mix(CK), initScale )
+
+  // The first two rows are an invisible border
+  fillHorizontalBorder(0, 2, arrayWidth, CX ) 
+
+  // this is the pattern of the board
+  colorBoardHexes(2, arrayWidth, arrayHeight ) 
+
+  // first column is border
+  fillVerticalBorder(0, 0, arrayHeight, CX) 
+
+  // last two columns are borders
+  fillVerticalBorder(arrayWidth - 1, 0, arrayHeight, CX ) 
   fillVerticalBorder(arrayWidth - 1, 1, arrayHeight, CX)
-  fillHorizontalBorder(
-    arrayHeight - 2,
-    2,
-    arrayWidth,
-    CX
-  ) // The last two rows are an invisible border
-  trimBoard(
-    arrayWidth,
-    arrayHeight,
-    CX
-  ) // trim off the four corners (uses q,r,s coords)
+
+  // The last two rows are an invisible border
+  fillHorizontalBorder(arrayHeight - 2, 2, arrayWidth, CX ) 
+
+  // trim off the four corners (uses q,r,s coords)
+  trimBoard( arrayWidth, arrayHeight, CX ) 
 
   // ########################################################
 
@@ -121,7 +101,7 @@ class HexBoard(boardCfg: BoardConfig):
   after the while loops calculateXpyP calcualtes the paint position
   for the graphic to paint the hex cell
    */
-  def fillBoard(width: Int, height: Int, color: RGBA): Unit =
+  def fillBoard(width: Int, height: Int, color: RGBA, fS : Double): Unit =
     var row = 0
     while row < height do
       var col = row & 1
@@ -163,7 +143,7 @@ class HexBoard(boardCfg: BoardConfig):
       Vector(CG, CO, CG), // 14
       Vector(CK, CK, CK), // 15
       Vector(CB, CR, CB), // 16
-      Vector(CP, CP, CG) // 17
+      Vector(CP, CP, CG)  // 17
     )
     val sZ = boardCfg.getSideSize()
     var col = 0
@@ -303,21 +283,17 @@ class HexBoard(boardCfg: BoardConfig):
   in a modulo fashion on each call such that 0.2 <= scale <= 2. For testing purposes this function is invoked
   by right mouse button
    */
-  def changeScale(change: Double): Unit =
-    fS = fS + change
-    if fS >= 2 then fS = 0.2
-    end if
+  def changeScale(fS: Double): Unit =
     println("changeScale to: " + fS)
     calculateXpYp(fS)
     hexBoardUpdated = true
-    testHexUpdated = true
   end changeScale
 
   /*
   calculateXpYp calculates the positions of the origins for the graphics used to paint each cell
   This function is invoked when the board is first established and when the scale changes
    */
-  def calculateXpYp(scale: Double): Unit =
+  def calculateXpYp(fS: Double): Unit =
     val xWidth =
       boardCfg.xWidth // amount to add to a hex centre x coord to reach the vertical line of the next column
     val yHeight =
@@ -348,11 +324,23 @@ class HexBoard(boardCfg: BoardConfig):
     end while
   end calculateXpYp
 
+  def getXpYp(pSrc: Point) : Point =
+    var pValidated = Point(0,0)
+    val x = pSrc.x
+    val y = pSrc.y
+    if (x >= 0) && (x < arrayWidth) && (y >= 0) && (y < arrayHeight) then
+      pValidated = pSrc
+    val pResult = Point(hexArray(x)(y).xP, hexArray(x)(y).yP)
+    pResult
+
+  def isThisHexBlack(hexPosn: Point) : Boolean =
+    (hexArray(hexPosn.x)(hexPosn.y).c == CK)
+      
   /*
   paint supplies the "SceneUpdateFragment" that contains all the graphics required to paint the hexboard
   Experience shows that this routine is time critical, so optimisation is key
    */
-  def paint(): SceneUpdateFragment =
+  def paint(fS: Double): SceneUpdateFragment =
     if hexBoardUpdated then
       // we are beginning a new calculation for the board position, scale and or size
       hexFragsCombined = SceneUpdateFragment.empty // start this combination with an empty update
@@ -395,8 +383,8 @@ class HexBoard(boardCfg: BoardConfig):
   At the moment, if there is no underlying hex, then the resulting point defaults to (0,0)
    */
 
-  def hexXYCoordsFromDisplayXY(pDs: Point): Point =
-    println("hexXYFromDisplayXY START:" + pDs)
+  def hexXYCoordsFromDisplayXY(pDs: Point, fS: Double): Point =
+    //println("hexXYFromDisplayXY START:" + pDs)
     val GWIDTH =
       boardCfg.gWidth // The Hex graphic width without overlap of one pixel
     val GHEIGHT =
@@ -437,7 +425,7 @@ class HexBoard(boardCfg: BoardConfig):
     val xH =
       (xHalfway * fS).toInt // scaling the tiny offset required for detection grid alignment
 
-    println("hexXYFromDisplayXY BOUNDARIES:: " + pC1 + " :: " + pC2)
+    //println("hexXYFromDisplayXY BOUNDARIES:: " + pC1 + " :: " + pC2)
     var hexXYCoords = Point(0, 0)
 
     // The detection grid needs to start halfway up the top LH diagonal of the first hex which (before scaling) is 10,20)
@@ -452,9 +440,7 @@ class HexBoard(boardCfg: BoardConfig):
       val y =
         ((offsetY / yHeightScaled) & 0xfffe) + (x & 1) // << this enforces  ((x & y are even) || (x & y are odd))
 
-      println(
-        "hexXYFromDisplayXY OFFSETS X/Y " + offsetX + ":" + offsetY + " POS X/Y " + x + ":" + y + " W:" + xWidth + " H:" + yHeight
-      )
+      //println("hexXYFromDisplayXY OFFSETS X/Y " + offsetX + ":" + offsetY + " POS X/Y " + x + ":" + y + " W:" + xWidth + " H:" + yHeight)
 
       if hexArray(x / 2)(y).c != CX
       then // exclude hexes from display if color is CX
@@ -465,37 +451,4 @@ class HexBoard(boardCfg: BoardConfig):
     hexXYCoords
   end hexXYCoordsFromDisplayXY
 
-  // Although these last two routines and the var testPoint are included in this class, but
-  // perhaps they need to be in a seperate class or extension as they are not longer dealing
-  // with the board itself.
-  // These routines are the starting point for positioning the pieces
-
-  var testPoint: Point =
-    Point(0, 0) // testPoint is a simple coordinate inside hexArray
-
-  /*
-  testPointReposition repositions the magenta hex as appropriate
-   */
-  def testPointReposition(newPos: Point): Unit =
-    testPoint = newPos
-    testHexUpdated = true
-  end testPointReposition
-
-  /*
-  paintTestHex generates a "SceneUpdateFragment" containing the new position of the Megenta Hex
-   */
-  def paintTestHex(): SceneUpdateFragment =
-    if testHexUpdated then
-      val pB =
-        boardCfg.pB // Base Corner (Top LHS) of Rectangle containing board
-      val layer = gHex.modifyMaterial(_.withTint(mix(CM)))
-      val xP = hexArray(testPoint.x)(testPoint.y).xP
-      val yP = hexArray(testPoint.x)(testPoint.y).yP
-      testFrag = SceneUpdateFragment(
-        Layer(layer.moveTo(pB.x + xP, pB.y + yP).scaleBy(fS, fS))
-      )
-      testHexUpdated = false
-    end if
-    testFrag
-  end paintTestHex
 end HexBoard
