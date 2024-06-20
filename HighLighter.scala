@@ -21,7 +21,6 @@ class HighLighter(boardCfg: BoardConfig, hexBoard: HexBoard, fS : Double) :
   /* 
   show enables or disables the display of the HighLighter hex
    */
-
   def show(onOff : Boolean) : Unit = 
     displayOn = onOff
 
@@ -29,11 +28,9 @@ class HighLighter(boardCfg: BoardConfig, hexBoard: HexBoard, fS : Double) :
   paint generates a "SceneUpdateFragment" containing the new position of the Highligter Hex
    */
   def paint(fS : Double): SceneUpdateFragment =
-
-    var frag = SceneUpdateFragment.empty // the latest fragment for the test hexagon
+    var frag = SceneUpdateFragment.empty  // the latest fragment for the test hexagon
     if displayOn then
-      val pB =
-        boardCfg.pB // Base Corner (Top LHS) of Rectangle containing board
+      val pB = boardCfg.pB                // Base Corner (Top LHS) of Rectangle containing board
       val layer = gHex.modifyMaterial(_.withTint(mix(CM)))
       val pPos = hexBoard.getXpYp(currentPos)
       frag = SceneUpdateFragment(Layer(layer.moveTo(pB.x + pPos.x, pB.y + pPos.y).scaleBy(fS, fS))

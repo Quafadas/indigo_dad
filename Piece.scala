@@ -5,9 +5,9 @@ import indigo.*
 class Piece(  pieceShape: Boolean, 
               pieceHome: Point, 
               pieceIdentity: Int,
-              iHexPixelWidth: Int,  // GWIDTH pixel height of graphic
-              iHexPixelHeight: Int, // GHEIGHT pixel height of graphic
-              assetName: AssetName  // The asset name of the graphic containing the images for the pieces 
+              iHexPixelWidth: Int,    // GWIDTH pixel height of graphic
+              iHexPixelHeight: Int,   // GHEIGHT pixel height of graphic
+              assetName: AssetName    // The asset name of the graphic containing the images for the pieces 
 ) :
   val bType = pieceShape              // true=block, false=cylinder
   val homePos: Point = pieceHome      // home position (in hexArray coords)

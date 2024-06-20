@@ -83,8 +83,7 @@ class Pieces (  sCylindersAssetName: String,
 
 
   /* paint draws the 12 pieces and the magenta highligter if one piece is selected
-  */
-  
+  */  
   def paint(fS : Double): SceneUpdateFragment =
     var frag = SceneUpdateFragment.empty
     var p = 0
@@ -110,9 +109,5 @@ class Pieces (  sCylindersAssetName: String,
       pieces(p).setSelected(false)
       p += 1
     end while
-
-
-  
-
 
 end Pieces

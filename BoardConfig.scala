@@ -41,29 +41,23 @@ class BoardConfig(
     )
 
   def getSideSize(): Int =
-    val sSz =
-      ((sZ - 2) % 5) + 2 // The number of hexagonal rings (ring of 6 with centre) composing one side of the board
-    sSz // FIXME this formala currently limits 2<=size<=6 where as this should be determined by canvas
+    val sSz = ((sZ - 2) % 5) + 2  // The number of hexagonal rings (ring of 6 with centre) composing one side of the board
+    sSz                           // FIXME this formala currently limits 2<=size<=6 where as this should be determined by canvas
   end getSideSize
 
+  // White background fragment
   def getBackgroundFrag(): SceneUpdateFragment =
-    // White background fragment
-    val bgGraphic: Graphic[Material.ImageEffects] =
-      Graphic(0, 0, 256, 256, 1, Material.ImageEffects(bgrndAssetName))
-    val bgFrag = SceneUpdateFragment(
-      Layer(bgGraphic.scaleBy(12, 12))
-    ) // 12 chosen but needs optimising to scale factor
+    val bgGraphic: Graphic[Material.ImageEffects] = Graphic(0, 0, 256, 256, 1, Material.ImageEffects(bgrndAssetName))
+    val bgFrag = SceneUpdateFragment(Layer(bgGraphic.scaleBy(12, 12))) // 12 chosen but needs optimising to scale factor
     bgFrag
   end getBackgroundFrag
 
+  // Hex for grid on Layer 2
   def getHexGraphic(): Graphic[Material.ImageEffects] =
     val rHex = Rectangle(0, 0, gWidth + 1, gHeight + 1)
     val gHex: Graphic[Material.ImageEffects] =
-      Graphic(
-        rHex,
-        2,
-        Material.ImageEffects(hexAssetName)
-      ) // Hex Grid on Layer 2
+      Graphic(rHex,2,Material.ImageEffects(hexAssetName)) 
     gHex
   end getHexGraphic
+
 end BoardConfig

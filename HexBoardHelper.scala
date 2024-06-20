@@ -49,28 +49,10 @@ class HexBoardHelper(boardCfg: BoardConfig, fS : Double)
     val centre: Int = (width - 1) / 2
     if ((width - 1) & 1) == 1 then
       val hh = hexArray(centre)(1)
-      hexArray(centre)(1) = HH(
-        2 * centre + 1,
-        1,
-        color,
-        hh.q,
-        hh.r,
-        hh.s,
-        hh.xP,
-        hh.yP
-      ) // tested for 2,4,6
+      hexArray(centre)(1) = HH(2*centre+1,1,color,hh.q,hh.r,hh.s,hh.xP,hh.yP) // tested for 2,4,6
     else
       val hh = hexArray(centre)(0)
-      hexArray(centre)(0) = HH(
-        2 * centre,
-        0,
-        color,
-        hh.q,
-        hh.r,
-        hh.s,
-        hh.xP,
-        hh.yP
-      ) // tested for 3,5
+      hexArray(centre)(0) = HH(2*centre,  0,color,hh.q,hh.r,hh.s,hh.xP,hh.yP) // tested for 3,5
     end if
   end fillTopCentreHex
 
@@ -83,28 +65,10 @@ class HexBoardHelper(boardCfg: BoardConfig, fS : Double)
     val centre: Int = (width - 1) / 2
     if ((width - 1) & 1) == 1 then
       val hh = hexArray(centre)(height - 1)
-      hexArray(centre)(height - 1) = HH(
-        2 * centre + 1,
-        height - 1,
-        color,
-        hh.q,
-        hh.r,
-        hh.s,
-        hh.xP,
-        hh.yP
-      ) // even size
+      hexArray(centre)(height - 1) = HH(2*centre+1, height-1, color, hh.q,hh.r,hh.s,hh.xP,hh.yP)  // even size
     else
       val hh = hexArray(centre)(height - 2)
-      hexArray(centre)(height - 2) = HH(
-        2 * centre,
-        height - 2,
-        color,
-        hh.q,
-        hh.r,
-        hh.s,
-        hh.xP,
-        hh.yP
-      ) // odd size
+      hexArray(centre)(height - 2) = HH(2*centre,   height-2, color, hh.q,hh.r,hh.s,hh.xP,hh.yP) // odd size
     end if
   end fillBottomCentreHex
 
@@ -118,10 +82,10 @@ class HexBoardHelper(boardCfg: BoardConfig, fS : Double)
     val y: Int = height / 2
     if ((width - 1) & 1) == 1 then
       val hh = hexArray(x)(y)
-      hexArray(x)(y) = HH(2 * x + 1, y, color, hh.q, hh.r, hh.s, hh.xP, hh.yP) // even size
+      hexArray(x)(y) = HH(2 * x + 1, y, color, hh.q, hh.r, hh.s, hh.xP, hh.yP)      // even size
     else
       val hh = hexArray(x)(y - 1)
-      hexArray(x)(y - 1) = HH(2 * x, y - 1, color, hh.q, hh.r, hh.s, hh.xP, hh.yP) // odd size
+      hexArray(x)(y - 1) = HH(2 * x, y - 1, color, hh.q, hh.r, hh.s, hh.xP, hh.yP)  // odd size
     end if
   end fillCentreHex
 end HexBoardHelper

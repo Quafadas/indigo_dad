@@ -7,9 +7,6 @@ import indigo.shared.events.MouseEvent
 import scala.scalajs.js.annotation.JSExportTopLevel
 
 import org.scalajs.dom
-//import scala.collection.mutable.ListBuffer
-
-//------
 
 @JSExportTopLevel("main")
 object Game:
@@ -30,36 +27,33 @@ end Game
 
 object HelloIndigo extends IndigoSandbox[Unit, Model]:
   val boardCfg = BoardConfig(
-    "hex2", // hex asset name
-    "assets/Hex2.png", // path of hex asset
-    "bg", // background asset name
-    "assets/BackGroundWhite.png", // path of background asset
-    91, // GWIDTH pixel width of graphic
-    81, // GHEIGHT pixel height of graphic
-    Point(
-      40,
-      50
-    ), // where the (inisible) top left hand corner of the hex grid board is positioned
-    2, // game size
-    70, // amount to add to a hex centre x coord to reach the vertical line of the next column
-    40, // half the amount to add to a hex centre y coord to reach the next hexagon below
-    10 // xcoord of halfway along the top left diagonal line of first hex
+    "hex2",                         // hex asset name
+    "assets/Hex2.png",              // path of hex asset
+    "bg",                           // background asset name
+    "assets/BackGroundWhite.png",   // path of background asset
+    91,                             // GWIDTH pixel width of graphic
+    81,                             // GHEIGHT pixel height of graphic
+    Point(40,50),                   // where the (inisible) top left hand corner of the hex grid board is positioned
+    2,                              // game size
+    70,                             // amount to add to a hex centre x coord to reach the vertical line of the next column
+    40,                             // half the amount to add to a hex centre y coord to reach the next hexagon below
+    10                              // xcoord of halfway along the top left diagonal line of first hex
   )
 
-  // FIXME, eventually we will calculate / fix scale factor boardCfg Base Point ...
+  // FIXME, eventually we will calculate / fix scaleFactor and boardCfg BasePoint ...
   // ... from window dimensions supplied in main
+  var scaleFactor = 1.0
 
-  var scaleFactor = 1.0         
-  
   val hexBoard = HexBoard(boardCfg, scaleFactor)
 
   val pieces = Pieces(
-    "cylinders",                // cylinders asset name
-    "assets/Cylinders.png",     // path of cylinders asset
-    "blocks",                   // blocks asset name
-    "assets/Blocks.png",        // path of blocks asset
+    "cylinders",                    // cylinders asset name
+    "assets/Cylinders.png",         // path of cylinders asset
+    "blocks",                       // blocks asset name
+    "assets/Blocks.png",            // path of blocks asset
     boardCfg,
-    hexBoard)
+    hexBoard
+  )
 
   val highLighter = HighLighter(boardCfg, hexBoard, scaleFactor)
 
@@ -114,9 +108,10 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
           println("other detected")
           Outcome(model)
       end match
-//      case MouseEvent.Click(position, buttons) =>
-//      println("This could fire, if right click skipped the first match, but IDE tells me unreachable.")
-//      Outcome(model.copy(center = context.mouse.position))
+
+    //  case MouseEvent.Click(position, buttons) =>
+    //    println("This could fire, if right click skipped the first match, but IDE tells me unreachable.")
+    //    Outcome(model.copy(center = context.mouse.position))
 
     case FrameTick =>
       Outcome(model.update(context.delta))
@@ -126,21 +121,21 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
         case MouseButton.RightMouseButton =>
           println("MouseEventRightButtonUp @ " + e.position)
           scaleFactor = scaleFactor + 0.2
-          if scaleFactor >= 2.1 then 
-            scaleFactor = 0.2
+          if scaleFactor >= 2.1 then scaleFactor = 0.2
           end if
           hexBoard.changeScale(scaleFactor)
           Outcome(model)
 
-        case MouseButton.LeftMouseButton => 
+        case MouseButton.LeftMouseButton =>
           println("MouseEventLeftButtonUp @ " + e.position)
           val clickPoint = e.position
-          val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
+          val hexPosn =
+            hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
           pieces.findPieceSelected() match
-            case Some(piece) => 
+            case Some(piece) =>
               piece.setPosition(hexPosn)
               if (hexBoard.isThisHexBlack(hexPosn) == true) then
-                piece.toggleFlip()             
+                piece.toggleFlip()
 
             case None => ;
           highLighter.show(false)
@@ -149,28 +144,29 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
         case _ =>
           Outcome(model.update(context.delta))
       end match
-      //Outcome(model.update(context.delta))
+    // Outcome(model.update(context.delta))
 
     case e: MouseEvent.MouseDown =>
       e._8 match
         case MouseButton.LeftMouseButton =>
           println("MouseEventLeftButtonDown @ " + e.position)
           val clickPoint = e.position
-          val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
+          val hexPosn =
+            hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
           highLighter.setPos(hexPosn)
           highLighter.show(true)
           pieces.deselectAllPieces()
           pieces.findPieceByPos(hexPosn) match {
             case Some(piece) => piece.setSelected(true)
-            case None => ;
+            case None        => ;
           }
           Outcome(model)
-        
+
         case _ =>
           Outcome(model.update(context.delta))
-      
+
       end match
-      //Outcome(model.update(context.delta))
+    // Outcome(model.update(context.delta))
 
     case _ =>
       Outcome(model)
