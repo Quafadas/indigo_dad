@@ -84,6 +84,13 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
   // trim off the four corners (uses q,r,s coords)
   trimBoard( arrayWidth, arrayHeight, CX ) 
 
+  // establish extra hex for the Cylinder's Home
+  establishCylinderHome( arrayWidth, arrayHeight, CK)
+
+  // establish extra hex for the Block's Home
+  establishBlockHome( arrayWidth, arrayHeight, CK)
+
+
   // ########################################################
 
   /*
@@ -276,6 +283,24 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
     end while
   end trimBoard
 
+  /* 
+  establishCylinderHome sets up extra black hex for the starting point for cylinder pieces
+   */
+  def establishCylinderHome(width: Int, height: Int, color: Int): Unit =
+    val p = GetHomePos1()    
+    val hh = hexArray(p.x)(p.y)
+    hexArray(p.x)(p.y) = HH(hh.x, hh.y, color, hh.q, hh.r, hh.s, hh.xP, hh.yP)
+  end establishCylinderHome
+
+  /* 
+  establishBlockHome sets up extra black hex for the starting point for block pieces
+   */
+  def establishBlockHome(width: Int, height: Int, color: Int): Unit =
+    val p = GetHomePos2()    
+    val hh = hexArray(p.x)(p.y)
+    hexArray(p.x)(p.y) = HH(hh.x, hh.y, color, hh.q, hh.r, hh.s, hh.xP, hh.yP)
+  end establishBlockHome
+
   /*
   changeScale changes the scale of the board. At the moment (for test purposes) the scale is incremented
   in a modulo fashion on each call such that 0.2 <= scale <= 2. For testing purposes this function is invoked
@@ -408,5 +433,17 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
     println("hexXYFromDisplayXY FINISH:" + hexXYCoords)
     hexXYCoords
   end hexXYCoordsFromDisplayXY
+
+  def GetHomePos1() : Point = 
+    Point(0,3)
+  end GetHomePos1
+
+  def GetHomePos2() : Point = 
+    if ((sZ & 1) == 0) then             
+      Point(arrayWidth-2,arrayHeight-3) // even sizes
+    else
+      Point(arrayWidth-2,arrayHeight-5) // odd sizes
+    end if
+  end GetHomePos2
 
 end HexBoard

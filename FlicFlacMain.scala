@@ -33,7 +33,7 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
     "assets/BackGroundWhite.png",   // path of background asset
     91,                             // GWIDTH pixel width of graphic
     81,                             // GHEIGHT pixel height of graphic
-    Point(40,50),                   // where the (inisible) top left hand corner of the hex grid board is positioned
+    Point(100,50),                   // where the (inisible) top left hand corner of the hex grid board is positioned
     2,                              // game size
     70,                             // amount to add to a hex centre x coord to reach the vertical line of the next column
     40,                             // half the amount to add to a hex centre y coord to reach the next hexagon below
@@ -139,7 +139,7 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
                 piece.toggleFlip()
 
             case None => ;
-          highLighter.show(false)
+          highLighter.shine(false)
           Outcome(model)
 
         case _ =>
@@ -152,10 +152,9 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
         case MouseButton.LeftMouseButton =>
           println("MouseEventLeftButtonDown @ " + e.position)
           val clickPoint = e.position
-          val hexPosn =
-            hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
+          val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
           highLighter.setPos(hexPosn)
-          highLighter.show(true)
+          highLighter.shine(true)
           pieces.deselectAllPieces()
           pieces.findPieceByPos(hexPosn) match {
             case Some(piece) => piece.setSelected(true)

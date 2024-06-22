@@ -59,20 +59,23 @@ class Pieces (  sCylindersAssetName: String,
   val w = boardCfg.gWidth
   val h = boardCfg.gHeight
 
-  var pieces : Vector[Piece] = Vector(
-    Piece(CYLINDER, Point(2,9),  CB, w,h, cylindersAssetName),
-    Piece(CYLINDER, Point(2,11), CG, w,h, cylindersAssetName),
-    Piece(CYLINDER, Point(2,13), CY, w,h, cylindersAssetName),
-    Piece(CYLINDER, Point(1,10), CO, w,h, cylindersAssetName),
-    Piece(CYLINDER, Point(1,7),  CR, w,h, cylindersAssetName),
-    Piece(CYLINDER, Point(1,14), CP, w,h, cylindersAssetName),
+  val hP1 = hexBoard.GetHomePos1()    // the home posiiton for the blue cylinder
+  val hP2 = hexBoard.GetHomePos2()    // the home posiiton for the orange cylinder
 
-    Piece(BLOCK,    Point(3,5),  CB, w,h, blocksAssetName),
-    Piece(BLOCK,    Point(3,7),  CG, w,h, blocksAssetName),
-    Piece(BLOCK,    Point(3,9),  CY, w,h, blocksAssetName),
-    Piece(BLOCK,    Point(4,8),  CO, w,h, blocksAssetName),
-    Piece(BLOCK,    Point(4,11), CR, w,h, blocksAssetName),
-    Piece(BLOCK,    Point(4,12), CP, w,h, blocksAssetName)
+  var pieces : Vector[Piece] = Vector(
+    Piece(CYLINDER, hP1, CB, w,h, cylindersAssetName),
+    Piece(CYLINDER, hP1, CG, w,h, cylindersAssetName),
+    Piece(CYLINDER, hP1, CY, w,h, cylindersAssetName),
+    Piece(CYLINDER, hP1, CO, w,h, cylindersAssetName),
+    Piece(CYLINDER, hP1, CR, w,h, cylindersAssetName),
+    Piece(CYLINDER, hP1, CP, w,h, cylindersAssetName),
+
+    Piece(BLOCK,    hP2, CB, w,h, blocksAssetName),
+    Piece(BLOCK,    hP2, CG, w,h, blocksAssetName),
+    Piece(BLOCK,    hP2, CY, w,h, blocksAssetName),
+    Piece(BLOCK,    hP2, CO, w,h, blocksAssetName),
+    Piece(BLOCK,    hP2, CR, w,h, blocksAssetName),
+    Piece(BLOCK,    hP2, CP, w,h, blocksAssetName)
     )
 
   def getAssets(): Set[AssetType] =
@@ -86,14 +89,15 @@ class Pieces (  sCylindersAssetName: String,
   */  
   def paint(fS : Double): SceneUpdateFragment =
     var frag = SceneUpdateFragment.empty
-    var p = 0
-    while p < pieces.length do
+    // traverse the pieces in reverse order, so that last displayed matches first found
+    var p = pieces.length-1
+    while p >= 0 do
       val pSrc = pieces(p).pCurPos
       val pPos = hexBoard.getXpYp(pSrc)
       val layer = pieces(p).getGraphic()
       val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB.x + pPos.x, pB.y + pPos.y).scaleBy(fS, fS)))
       frag = frag |+| newFrag
-      p += 1
+      p -= 1
     end while
     frag
 
