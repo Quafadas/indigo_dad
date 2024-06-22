@@ -121,7 +121,8 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
         case MouseButton.RightMouseButton =>
           println("MouseEventRightButtonUp @ " + e.position)
           scaleFactor = scaleFactor + 0.2
-          if scaleFactor >= 2.1 then scaleFactor = 0.2
+          if scaleFactor >= 2.1 then 
+            scaleFactor = 0.2
           end if
           hexBoard.changeScale(scaleFactor)
           Outcome(model)
