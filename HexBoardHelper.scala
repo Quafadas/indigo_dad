@@ -35,8 +35,10 @@ class HexBoardHelper(boardCfg: BoardConfig, fS : Double)
   def fillVerticalCentreLine(width: Int, height: Int, color: Int): Unit =
     //  println("fillVerticalCentreLine width:" + width + " height:" + height + " color:" + color)
     val centre: Int = (width - 1) / 2
-    if ((width - 1) & 1) == 1 then fillVerticalBorder(centre, 1, height, color)
-    else fillVerticalBorder(centre, 0, height, color)
+    if ((width - 1) & 1) == 1 then 
+      fillVerticalBorder(centre, 1, height, color)
+    else 
+      fillVerticalBorder(centre, 0, height, color)
     end if
   end fillVerticalCentreLine
 
