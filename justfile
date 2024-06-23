@@ -16,6 +16,6 @@ buildJs:
   mkdir -p {{outDir}}
   scala-cli --power package . -o {{outDir}} -f --js-mode release
 
-## JP 20/06/2024 "format" disabled until we can get .scalafmt.conf sorted out
+## JP 23/06/2024 switched to scalafmt during skype call with Simon
 format:
-  scala-cli fmt .
+  scalafmt ~/GIT/indigoLite
