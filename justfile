@@ -17,5 +17,5 @@ buildJs:
   scala-cli --power package . -o {{outDir}} -f --js-mode release
 
 ## JP 20/06/2024 "format" disabled until we can get .scalafmt.conf sorted out
-##format:
-##  scala-cli fmt .
+format:
+  scala-cli fmt .

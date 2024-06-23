@@ -11,6 +11,3 @@
 //> using dep io.indigoengine::indigo::0.17.0
 //> using dep io.indigoengine::indigo-extras::0.17.0
 //> using dep io.indigoengine::indigo-json-circe::0.17.0
-
-
-
