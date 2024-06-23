@@ -76,5 +76,10 @@ class Piece(  pieceShape: Boolean,
 
   def pieceName() : String = 
     sName
+  
+  def moveToHome() : Point = 
+    pCurPos = homePos
+    pCurPos
+    
 
 end Piece

@@ -388,7 +388,7 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
   At the moment, if there is no underlying hex, then the resulting point defaults to (0,0)
    */
 
-  def hexXYCoordsFromDisplayXY(pDs: Point, fS: Double): Point =
+  def hexXYCoordsFromDisplayXY(pDs: Point, fS: Double): Option[Point] =
     //println("hexXYFromDisplayXY START:" + pDs)
     val GWIDTH = boardCfg.gWidth                                // The Hex graphic width without overlap of one pixel
     val GHEIGHT = boardCfg.gHeight                              // The Hex graphic height without overlap of one pixel
@@ -408,7 +408,6 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
     val xH = (xHalfway * fS).toInt                              // scaling the tiny offset required for detection grid alignment
 
     //println("hexXYFromDisplayXY BOUNDARIES:: " + pC1 + " :: " + pC2)
-    var hexXYCoords = Point(0, 0)
 
     // The detection grid needs to start halfway up the top LH diagonal of the first hex which (before scaling) is 10,20)
     if (pDs.x >= pC1.x + xH) && (pDs.x < pC2.x - xH) && (pDs.y >= pC1.y) && (pDs.y < pC2.y) then
@@ -422,12 +421,19 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
 
       //println("hexXYFromDisplayXY OFFSETS X/Y " + offsetX + ":" + offsetY + " POS X/Y " + x + ":" + y + " W:" + xWidth + " H:" + yHeight)
 
-      if hexArray(x / 2)(y).c != CX then  // exclude hexes from display if color is CX
-        hexXYCoords = Point(x / 2, y)     // x/2 because hexArray has even/odd columns
+      val c = hexArray(x / 2)(y).c
+      if (c != CX) then                       // exclude hexes from display if color is CX
+        val hexXYCoords = Point(x / 2, y)     // x/2 because hexArray has even/odd columns
+        println("hexXYFromDisplayXY FINISH:" + hexXYCoords)
+        Some(hexXYCoords)
+      else 
+        println("hexXYFromDisplayXY FINISHES with NONE (non-displayable hex)")    
+        None
       end if
+    else
+      println("hexXYFromDisplayXY FINISHES with NONE (outside detection grid)")    
+      None
     end if
-    println("hexXYFromDisplayXY FINISH:" + hexXYCoords)
-    hexXYCoords
   end hexXYCoordsFromDisplayXY
 
 

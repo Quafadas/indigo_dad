@@ -130,15 +130,29 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
         case MouseButton.LeftMouseButton =>
           println("MouseEventLeftButtonUp @ " + e.position)
           val clickPoint = e.position
-          val hexPosn =
-            hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
-          pieces.findPieceSelected() match
-            case Some(piece) =>
-              piece.setPosition(hexPosn)
-              if (hexBoard.isThisHexBlack(hexPosn) == true) then
-                piece.toggleFlip()
+          val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
+          hexPosn match
+            // Mouse Up ... The position is on the hex grid
+            case Some(pos) =>
+              pieces.findPieceSelected() match
+                // Mouse Up ... piece selected and valid position
+                case Some(piece) =>
+                  piece.setPosition(pos)
+                  if (hexBoard.isThisHexBlack(pos) == true) then
+                    piece.toggleFlip()
+                // Mouse Up ... no piece selected but on the grid
+                case None => ;
+            
+            // Mouse Up ... the position is off the hex grid
+            case None =>
+              pieces.findPieceSelected() match
+                // Mouse Up ... we have selected a piece but moved it off the grid
+                case Some(piece) =>
+                  piece.moveToHome()
 
-            case None => ;
+                // Mouse Up ... no piece selected and also off the grid
+                case None => ;
+          // Mouse Up so turn highlighter off      
           highLighter.shine(false)
           Outcome(model)
 
@@ -153,13 +167,20 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
           println("MouseEventLeftButtonDown @ " + e.position)
           val clickPoint = e.position
           val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
-          highLighter.setPos(hexPosn)
-          highLighter.shine(true)
-          pieces.deselectAllPieces()
-          pieces.findPieceByPos(hexPosn) match {
-            case Some(piece) => piece.setSelected(true)
-            case None        => ;
-          }
+          hexPosn match
+            // Mouse Down ... position on the grid
+            case Some(pos) =>
+              highLighter.setPos(pos)    
+              highLighter.shine(true)
+              pieces.deselectAllPieces()
+              pieces.findPieceByPos(pos) match 
+                // Mouse Down ... piece found and on the grid
+                case Some(piece) => piece.setSelected(true)
+                case None => ;
+
+            // Mouse Down ... position off the grid
+            case None => ;
+          
           Outcome(model)
 
         case _ =>
