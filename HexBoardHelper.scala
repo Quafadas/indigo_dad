@@ -8,6 +8,12 @@ import indigo.*
 class HexBoardHelper(boardCfg: BoardConfig, fS : Double) 
     extends HexBoard(boardCfg: BoardConfig, fS : Double) :
 
+  fillCentreCentreHex(arrayWidth, arrayHeight, CM)
+  fillCentreTopHex(arrayWidth, arrayHeight, CM)
+  fillCentreBottomHex(arrayWidth, arrayHeight, CM)
+  fillLeftCentreHex(arrayWidth, arrayHeight, CM)
+  fillRightCentreHex(arrayWidth, arrayHeight, CM)
+  
   /*
   printBoard is prints the details of each hexagon on a new line
   once a complete row is printed, an additional line of "---"
@@ -43,51 +49,76 @@ class HexBoardHelper(boardCfg: BoardConfig, fS : Double)
   end fillVerticalCentreLine
 
   /*
-  fillTopCentreHex sets the top centre hex to a color
+  fillTopCentreHex sets the NORTH hex to a color
   This is a debug/test function
    */
-  def fillTopCentreHex(width: Int, height: Int, color: Int): Unit =
+  def fillCentreTopHex(width: Int, height: Int, color: Int): Unit =
     //  println("fillTopCentreHex width:" + width + " height:" + height + " color:" + color)
     val centre: Int = (width - 1) / 2
     if ((width - 1) & 1) == 1 then
-      val hh = hexArray(centre)(1)
-      hexArray(centre)(1) = HH(2*centre+1,1,color,hh.q,hh.r,hh.s,hh.xP,hh.yP) // tested for 2,4,6
+      setHexColor(Point(centre,1),color)
     else
-      val hh = hexArray(centre)(0)
-      hexArray(centre)(0) = HH(2*centre,  0,color,hh.q,hh.r,hh.s,hh.xP,hh.yP) // tested for 3,5
+      setHexColor(Point(centre,0),color)
     end if
-  end fillTopCentreHex
+  end fillCentreTopHex
 
   /*
-  fillTopBottomHex sets the bottom centre hex to a color
+  fillTopBottomHex sets the SOUTH hex to a color
   This is a debug/test function
    */
-  def fillBottomCentreHex(width: Int, height: Int, color: Int): Unit =
+  def fillCentreBottomHex(width: Int, height: Int, color: Int): Unit =
     //  println("fillBottomCentreHex width:" + width + " height:" + height + " color:" + color)
     val centre: Int = (width - 1) / 2
     if ((width - 1) & 1) == 1 then
-      val hh = hexArray(centre)(height - 1)
-      hexArray(centre)(height - 1) = HH(2*centre+1, height-1, color, hh.q,hh.r,hh.s,hh.xP,hh.yP)  // even size
+      setHexColor(Point(centre,height-1),color)
     else
-      val hh = hexArray(centre)(height - 2)
-      hexArray(centre)(height - 2) = HH(2*centre,   height-2, color, hh.q,hh.r,hh.s,hh.xP,hh.yP) // odd size
+      setHexColor(Point(centre,height-2),color)
     end if
-  end fillBottomCentreHex
+  end fillCentreBottomHex
 
   /*
-  fillCentreHex sets the central hex to a color
+  fillCentreCentreHex sets the central hex to a color
   This is a debug/test function
    */
-  def fillCentreHex(width: Int, height: Int, color: Int): Unit =
+  def fillCentreCentreHex(width: Int, height: Int, color: Int): Unit =
     //  println("fillCentreHex width:" + width + " height:" + height + " color:" + color)
     val x: Int = (width - 1) / 2
     val y: Int = height / 2
     if ((width - 1) & 1) == 1 then
-      val hh = hexArray(x)(y)
-      hexArray(x)(y) = HH(2 * x + 1, y, color, hh.q, hh.r, hh.s, hh.xP, hh.yP)      // even size
+      setHexColor(Point(x,y),color)
     else
-      val hh = hexArray(x)(y - 1)
-      hexArray(x)(y - 1) = HH(2 * x, y - 1, color, hh.q, hh.r, hh.s, hh.xP, hh.yP)  // odd size
+      setHexColor(Point(x,y-1),color)
     end if
-  end fillCentreHex
+  end fillCentreCentreHex
+
+  /*
+  fillLeftCentreHex sets WEST hex to a color
+  This is a debug/test function
+   */
+  def fillLeftCentreHex(width: Int, height: Int, color: Int): Unit =
+    //  println("fillCentreHex width:" + width + " height:" + height + " color:" + color)
+    val x: Int = 0
+    val y: Int = height / 2
+    if ((width - 1) & 1) == 1 then
+      setHexColor(Point(x,y),color)
+    else
+      setHexColor(Point(x,y-1),color)
+    end if
+  end fillLeftCentreHex
+
+  /*
+  fillRightCentreHex sets EAST hex to a color
+  This is a debug/test function
+   */
+  def fillRightCentreHex(width: Int, height: Int, color: Int): Unit =
+    //  println("fillCentreHex width:" + width + " height:" + height + " color:" + color)
+    val x: Int = width - 1
+    val y: Int = height / 2
+    if ((width - 1) & 1) == 1 then
+      setHexColor(Point(x,y),color)
+    else
+      setHexColor(Point(x,y-1),color)
+    end if
+  end fillRightCentreHex  
+
 end HexBoardHelper

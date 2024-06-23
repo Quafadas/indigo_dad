@@ -51,6 +51,7 @@ class Pieces (  sCylindersAssetName: String,
                 hexBoard : HexBoard
               ) :
 
+
   val cylindersAssetName = AssetName(sCylindersAssetName)
   val cylindersAssetPath = AssetPath(sCylindersAssetPath)
   val blocksAssetName = AssetName(sBlocksAssetName)
@@ -59,23 +60,21 @@ class Pieces (  sCylindersAssetName: String,
   val w = boardCfg.gWidth
   val h = boardCfg.gHeight
 
-  val hP1 = hexBoard.GetHomePos1()    // the home posiiton for the blue cylinder
-  val hP2 = hexBoard.GetHomePos2()    // the home posiiton for the orange cylinder
 
   var pieces : Vector[Piece] = Vector(
-    Piece(CYLINDER, hP1, CB, w,h, cylindersAssetName),
-    Piece(CYLINDER, hP1, CG, w,h, cylindersAssetName),
-    Piece(CYLINDER, hP1, CY, w,h, cylindersAssetName),
-    Piece(CYLINDER, hP1, CO, w,h, cylindersAssetName),
-    Piece(CYLINDER, hP1, CR, w,h, cylindersAssetName),
-    Piece(CYLINDER, hP1, CP, w,h, cylindersAssetName),
+    Piece(CYLINDER, hexBoard.getCylinderHomePos(CB), CB, w,h, cylindersAssetName),
+    Piece(CYLINDER, hexBoard.getCylinderHomePos(CG), CG, w,h, cylindersAssetName),
+    Piece(CYLINDER, hexBoard.getCylinderHomePos(CY), CY, w,h, cylindersAssetName),
+    Piece(CYLINDER, hexBoard.getCylinderHomePos(CO), CO, w,h, cylindersAssetName),
+    Piece(CYLINDER, hexBoard.getCylinderHomePos(CR), CR, w,h, cylindersAssetName),
+    Piece(CYLINDER, hexBoard.getCylinderHomePos(CP), CP, w,h, cylindersAssetName),
 
-    Piece(BLOCK,    hP2, CB, w,h, blocksAssetName),
-    Piece(BLOCK,    hP2, CG, w,h, blocksAssetName),
-    Piece(BLOCK,    hP2, CY, w,h, blocksAssetName),
-    Piece(BLOCK,    hP2, CO, w,h, blocksAssetName),
-    Piece(BLOCK,    hP2, CR, w,h, blocksAssetName),
-    Piece(BLOCK,    hP2, CP, w,h, blocksAssetName)
+    Piece(BLOCK,    hexBoard.getBlockHomePos(CB),    CB, w,h, blocksAssetName),
+    Piece(BLOCK,    hexBoard.getBlockHomePos(CG),    CG, w,h, blocksAssetName),
+    Piece(BLOCK,    hexBoard.getBlockHomePos(CY),    CY, w,h, blocksAssetName),
+    Piece(BLOCK,    hexBoard.getBlockHomePos(CO),    CO, w,h, blocksAssetName),
+    Piece(BLOCK,    hexBoard.getBlockHomePos(CR),    CR, w,h, blocksAssetName),
+    Piece(BLOCK,    hexBoard.getBlockHomePos(CP),    CP, w,h, blocksAssetName)
     )
 
   def getAssets(): Set[AssetType] =

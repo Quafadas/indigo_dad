@@ -33,7 +33,7 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
     "assets/BackGroundWhite.png",   // path of background asset
     91,                             // GWIDTH pixel width of graphic
     81,                             // GHEIGHT pixel height of graphic
-    Point(100,50),                   // where the (inisible) top left hand corner of the hex grid board is positioned
+    Point(100,50),                  // where the (inisible) top left hand corner of the hex grid board is positioned
     2,                              // game size
     70,                             // amount to add to a hex centre x coord to reach the vertical line of the next column
     40,                             // half the amount to add to a hex centre y coord to reach the next hexagon below
@@ -45,7 +45,7 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
   var scaleFactor = 1.0
 
   val hexBoard = HexBoard(boardCfg, scaleFactor)
-
+  
   val pieces = Pieces(
     "cylinders",                    // cylinders asset name
     "assets/Cylinders.png",         // path of cylinders asset

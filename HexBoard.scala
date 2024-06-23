@@ -75,7 +75,7 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
   fillVerticalBorder(0, 0, arrayHeight, CX) 
 
   // last two columns are borders
-  fillVerticalBorder(arrayWidth - 1, 0, arrayHeight, CX ) 
+  fillVerticalBorder(arrayWidth - 1, 0, arrayHeight, CX) 
   fillVerticalBorder(arrayWidth - 1, 1, arrayHeight, CX)
 
   // The last two rows are an invisible border
@@ -84,12 +84,8 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
   // trim off the four corners (uses q,r,s coords)
   trimBoard( arrayWidth, arrayHeight, CX ) 
 
-  // establish extra hex for the Cylinder's Home
-  establishCylinderHome( arrayWidth, arrayHeight, CK)
-
-  // establish extra hex for the Block's Home
-  establishBlockHome( arrayWidth, arrayHeight, CK)
-
+  // establish extra hexes for homepositions of pieces
+  establishHomeHexes( arrayWidth, arrayHeight, CW)
 
   // ########################################################
 
@@ -164,12 +160,9 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
       end if
 
       while n < arrayWidth - 1 do
-        val offset =
-          (sZ & 1) * 10 // an odd size requires a vertical shift of the hex grid
-        val hexColor =
-          rowTemplate((thisRow - 2 + offset) % rowTemplate.length)(n % 3)
-        val hh = hexArray(n)(thisRow)
-        hexArray(n)(thisRow) = HH(col, thisRow, hexColor, hh.q, hh.r, hh.s, hh.xP, hh.yP)
+        val offset = (sZ & 1) * 10 // an odd size requires a vertical shift of the hex grid
+        val hexColor = rowTemplate((thisRow - 2 + offset) % rowTemplate.length)(n % 3)
+        setHexColor(Point(n,thisRow),hexColor)
         col += 2
         n += 1
       end while
@@ -196,8 +189,7 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
       var col = thisRow & 1
       var n = 0
       while n < arrayWidth do
-        val hh = hexArray(n)(thisRow)
-        hexArray(n)(thisRow) = HH(col, thisRow, color, hh.q, hh.r, hh.s, hh.xP, hh.yP)
+        setHexColor(Point(n,thisRow),color)
         col += 2
         n += 1
       end while
@@ -216,10 +208,7 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
     //  println("fillVerticalBorder col:" + col + " row:" + row + " height:" + height)
     var y = row & 1
     while y < height do
-      val hh = hexArray(col)(y)
-      if (y & 1) == 1 then hexArray(col)(y) = HH((col * 2) + 1, y, color, hh.q, hh.r, hh.s, hh.xP, hh.yP)
-      else hexArray(col)(y) = HH(col * 2, y, color, hh.q, hh.r, hh.s, hh.xP, hh.yP)
-      end if
+      setHexColor(Point(col,y),color)
       y += 2
     end while
   end fillVerticalBorder
@@ -273,10 +262,9 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
       var x = 0
       while x < width do
         val hh = hexArray(x)(y)
-        if (hh.s >= topQRS._3) || (hh.r <= topQRS._2) || (hh.s <= bottomQRS._3) || (hh.r >= bottomQRS._2)
-        then hexArray(x)(y) = HH(hh.x, hh.y, color, hh.q, hh.r, hh.s, hh.xP, hh.yP)
+        if (hh.s >= topQRS._3) || (hh.r <= topQRS._2) || (hh.s <= bottomQRS._3) || (hh.r >= bottomQRS._2) then
+          setHexColor(Point(x,y),color)
         end if
-
         x += 1
       end while
       y += 1
@@ -284,22 +272,32 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
   end trimBoard
 
   /* 
-  establishCylinderHome sets up extra black hex for the starting point for cylinder pieces
+  establishHomeHexes sets up extra black hex for the starting point for cylinder pieces
    */
-  def establishCylinderHome(width: Int, height: Int, color: Int): Unit =
-    val p = GetHomePos1()    
-    val hh = hexArray(p.x)(p.y)
-    hexArray(p.x)(p.y) = HH(hh.x, hh.y, color, hh.q, hh.r, hh.s, hh.xP, hh.yP)
-  end establishCylinderHome
+  def establishHomeHexes(width: Int, height: Int, color: Int): Unit =
+    setHexColor(getCylinderHomePos(CB), color)
+    setHexColor(getCylinderHomePos(CG), color)
+    setHexColor(getCylinderHomePos(CY), color)
+    setHexColor(getCylinderHomePos(CO), color)
+    setHexColor(getCylinderHomePos(CR), color)
+    setHexColor(getCylinderHomePos(CP), color)
+    setHexColor(getBlockHomePos(CB), color)
+    setHexColor(getBlockHomePos(CG), color)
+    setHexColor(getBlockHomePos(CY), color)
+    setHexColor(getBlockHomePos(CO), color)
+    setHexColor(getBlockHomePos(CR), color)
+    setHexColor(getBlockHomePos(CP), color)
+  end establishHomeHexes
+
 
   /* 
-  establishBlockHome sets up extra black hex for the starting point for block pieces
+  sethexColor sets the color of a hex
    */
-  def establishBlockHome(width: Int, height: Int, color: Int): Unit =
-    val p = GetHomePos2()    
-    val hh = hexArray(p.x)(p.y)
-    hexArray(p.x)(p.y) = HH(hh.x, hh.y, color, hh.q, hh.r, hh.s, hh.xP, hh.yP)
-  end establishBlockHome
+
+  def setHexColor(pos: Point, col : Int) : Unit = 
+    val hh = hexArray(pos.x)(pos.y)
+    hexArray(pos.x)(pos.y) = HH(hh.x, hh.y, col, hh.q, hh.r, hh.s, hh.xP, hh.yP)
+  end setHexColor
 
   /*
   changeScale changes the scale of the board. At the moment (for test purposes) the scale is incremented
@@ -413,16 +411,14 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
     var hexXYCoords = Point(0, 0)
 
     // The detection grid needs to start halfway up the top LH diagonal of the first hex which (before scaling) is 10,20)
-    if (pDs.x >= pC1.x + xH) && (pDs.x < pC2.x - xH) && (pDs.y >= pC1.y) && (pDs.y < pC2.y)
-    then
+    if (pDs.x >= pC1.x + xH) && (pDs.x < pC2.x - xH) && (pDs.y >= pC1.y) && (pDs.y < pC2.y) then
       // we know that point pDs is valid, ie it is in the detection rectangle
       val offsetX = pDs.x - pB.x - xH
       val xWidthScaled = math.round((xWidth * fS)).toInt
       val x = math.round(offsetX / xWidthScaled).toInt
       val yHeightScaled = math.round(yHeight * fS).toInt
       val offsetY = pDs.y - pB.y - ((x & 1) * yHeightScaled)
-      val y =
-        ((offsetY / yHeightScaled) & 0xfffe) + (x & 1) // << this enforces  ((x & y are even) || (x & y are odd))
+      val y = ((offsetY / yHeightScaled) & 0xfffe) + (x & 1) // << this enforces  ((x & y are even) || (x & y are odd))
 
       //println("hexXYFromDisplayXY OFFSETS X/Y " + offsetX + ":" + offsetY + " POS X/Y " + x + ":" + y + " W:" + xWidth + " H:" + yHeight)
 
@@ -434,16 +430,32 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
     hexXYCoords
   end hexXYCoordsFromDisplayXY
 
-  def GetHomePos1() : Point = 
-    Point(0,3)
-  end GetHomePos1
 
-  def GetHomePos2() : Point = 
-    if ((sZ & 1) == 0) then             
-      Point(arrayWidth-2,arrayHeight-3) // even sizes
-    else
-      Point(arrayWidth-2,arrayHeight-5) // odd sizes
-    end if
-  end GetHomePos2
+  def getCylinderHomePos(id: Int): Point =
+    val p1 = Point(0,1)
+    val p3 = Point(0, arrayHeight-1 - ((sZ&1)*2))
+    id match {
+        case CB => p1 + Point(0,0)  // Blue
+        case CR => p1 + Point(0,2)  // Red
+        case CY => p1 + Point(1,1)  // Yellow
+        case CO => p3 + Point(0,0)  // Orange
+        case CG => p3 + Point(0,-2) // Green
+        case CP => p3 + Point(1,-1) // Purple
+        }
+  end getCylinderHomePos
+
+  def getBlockHomePos(id: Int): Point =
+    val p2 = Point(arrayWidth-2,1)
+    val p4 = Point(arrayWidth-2, arrayHeight-1-((sZ&1)*2))
+    id match {
+        case CB => p4 + Point(0,0)  // Blue
+        case CR => p4 + Point(0,-2) // Red
+        case CY => p4 + Point(0,-1) // Yellow
+        case CO => p2 + Point(0,0)  // Orange
+        case CG => p2 + Point(0,2)  // Green
+        case CP => p2 + Point(0,1)  // Purple
+        }
+  end getBlockHomePos
 
 end HexBoard
+
