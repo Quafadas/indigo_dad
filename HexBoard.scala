@@ -17,7 +17,9 @@ case class HH(
     yP: Int // pixel y offset from base point for origin of png to paint this hex
 )
 
-class HexBoard(boardCfg: BoardConfig, initScale : Double):
+class HexBoard(boardCfg: BoardConfig, initScale: Double):
+
+// format: off
 
   /** ******************* The Hex Board ***
     *
@@ -34,14 +36,16 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
     * first four rows of the hexArray grid looks like this (so this is the top left hand corner with structure
     * abbrievated)...
     *
-    * HH(0,0,c,0,0,0,xP,yP), HH(2,0,c,2,-1,-1,xP,yP), HH(4,0,c,4,-2,-2,xP,yP), HH(6,0,c,6,-3,-3,xP,yP)
-    * * * * * * * HH(1,1,c,1,0,-1,xP,yP), HH(3,1,c,3,-1,-2,xP,yP), HH(5,1,c,5,-2,-3,xP,yP), HH(7,1,c,7,-3,-4,xP,yP)
-    * HH(0,2,c,0,1,-1,xP,yP), HH(2,2,c,2,0,-2,xP,yP), HH(4,2,c,4,-1,-3,xP,yP), HH(6,2,c,6,-2,-4,xP,yP)
-    * * * * * * * HH(1,3,c,1,1,-2,xP,yP), HH(3,3,c,3,0,-3,xP,yP), HH(5,3,c,5,-1,-4,xP,yP), HH(7,3,c,7,-2,-5,xP,yP)
-    * HH(0,4,c,0,2,-2,xP,yP), HH(2,4,c,2,1,-3,xP,yP), HH(4,4,c,4,0,-4,xP,yP), HH(6,4,c,6,-1,-5,xP,yP)
+    * HH(0,0,c,0,0,0,xP,yP),   HH(2,0,c,2,-1,-1,xP,yP),   HH(4,0,c,4,-2,-2,xP,yP),   HH(6,0,c,6,-3,-3,xP,yP)
+    *            HH(1,1,c,1,0,-1,xP,yP),  HH(3,1,c,3,-1,-2,xP,yP),   HH(5,1,c,5,-2,-3,xP,yP),   HH(7,1,c,7,-3,-4,xP,yP)
+    * HH(0,2,c,0,1,-1,xP,yP),  HH(2,2,c,2,0,-2,xP,yP),    HH(4,2,c,4,-1,-3,xP,yP),   HH(6,2,c,6,-2,-4,xP,yP)
+    *            HH(1,3,c,1,1,-2,xP,yP),  HH(3,3,c,3,0,-3,xP,yP),    HH(5,3,c,5,-1,-4,xP,yP),   HH(7,3,c,7,-2,-5,xP,yP)
+    * HH(0,4,c,0,2,-2,xP,yP),  HH(2,4,c,2,1,-3,xP,yP),    HH(4,4,c,4,0,-4,xP,yP),    HH(6,4,c,6,-1,-5,xP,yP)
     *
     * NB The storage for this snippet would be HexArray(4,5) ... even though the xy coords range from (0,0) to (7,4)
     */
+// format : on
+
 
   val gHex = boardCfg.getHexGraphic() // The Hex graphic used to paint the grid
 
@@ -340,8 +344,10 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
     val y = pSrc.y
     if (x >= 0) && (x < arrayWidth) && (y >= 0) && (y < arrayHeight) then
       pValidated = pSrc
+    end if
     val pResult = Point(hexArray(x)(y).xP, hexArray(x)(y).yP)
     pResult
+  end getXpYp
 
   def isThisHexBlack(hexPosn: Point) : Boolean =
     (hexArray(hexPosn.x)(hexPosn.y).c == CK)
@@ -414,7 +420,7 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
       // we know that point pDs is valid, ie it is in the detection rectangle
       val offsetX = pDs.x - pB.x - xH
       val xWidthScaled = math.round((xWidth * fS)).toInt
-      val x = math.round(offsetX / xWidthScaled).toInt
+      val x = (offsetX / xWidthScaled).toInt
       val yHeightScaled = math.round(yHeight * fS).toInt
       val offsetY = pDs.y - pB.y - ((x & 1) * yHeightScaled)
       val y = ((offsetY / yHeightScaled) & 0xfffe) + (x & 1) // << this enforces  ((x & y are even) || (x & y are odd))
@@ -440,27 +446,27 @@ class HexBoard(boardCfg: BoardConfig, initScale : Double):
   def getCylinderHomePos(id: Int): Point =
     val p1 = Point(0,1)
     val p3 = Point(0, arrayHeight-1 - ((sZ&1)*2))
-    id match {
+    id match
         case CB => p1 + Point(0,0)  // Blue
         case CR => p1 + Point(0,2)  // Red
         case CY => p1 + Point(1,1)  // Yellow
         case CO => p3 + Point(0,0)  // Orange
         case CG => p3 + Point(0,-2) // Green
         case CP => p3 + Point(1,-1) // Purple
-        }
+    end match
   end getCylinderHomePos
 
   def getBlockHomePos(id: Int): Point =
     val p2 = Point(arrayWidth-2,1)
     val p4 = Point(arrayWidth-2, arrayHeight-1-((sZ&1)*2))
-    id match {
+    id match
         case CB => p4 + Point(0,0)  // Blue
         case CR => p4 + Point(0,-2) // Red
         case CY => p4 + Point(0,-1) // Yellow
         case CO => p2 + Point(0,0)  // Orange
         case CG => p2 + Point(0,2)  // Green
         case CP => p2 + Point(0,1)  // Purple
-        }
+    end match
   end getBlockHomePos
 
 end HexBoard

@@ -19,3 +19,7 @@ buildJs:
 ## JP 23/06/2024 switched to scalafmt during skype call with Simon
 format:
   scalafmt ~/GIT/indigoLite
+
+## JP 24/06/2024 added "clean", sometimes help with browser synchronisation with build
+clean:
+  scala-cli clean .

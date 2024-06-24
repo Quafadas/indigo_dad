@@ -26,6 +26,7 @@ end Game
 //val boardBasePoint : Point = Point(400,50)  // where the (inisible) top left hand corner of the hex grid board is positioned
 
 object HelloIndigo extends IndigoSandbox[Unit, Model]:
+// format: off
   val boardCfg = BoardConfig(
     "hex2",                         // hex asset name
     "assets/Hex2.png",              // path of hex asset
@@ -54,6 +55,7 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
     boardCfg,
     hexBoard
   )
+// format: on
 
   val highLighter = HighLighter(boardCfg, hexBoard, scaleFactor)
 
@@ -108,7 +110,6 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
           println("other detected")
           Outcome(model)
       end match
-
     //  case MouseEvent.Click(position, buttons) =>
     //    println("This could fire, if right click skipped the first match, but IDE tells me unreachable.")
     //    Outcome(model.copy(center = context.mouse.position))
@@ -121,8 +122,7 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
         case MouseButton.RightMouseButton =>
           println("MouseEventRightButtonUp @ " + e.position)
           scaleFactor = scaleFactor + 0.2
-          if scaleFactor >= 2.1 then 
-            scaleFactor = 0.2
+          if scaleFactor >= 2.1 then scaleFactor = 0.2
           end if
           hexBoard.changeScale(scaleFactor)
           Outcome(model)
@@ -138,11 +138,11 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
                 // Mouse Up ... piece selected and valid position
                 case Some(piece) =>
                   piece.setPosition(pos)
-                  if (hexBoard.isThisHexBlack(pos) == true) then
-                    piece.toggleFlip()
+                  if hexBoard.isThisHexBlack(pos) == true then piece.toggleFlip()
+                  end if
                 // Mouse Up ... no piece selected but on the grid
                 case None => ;
-            
+
             // Mouse Up ... the position is off the hex grid
             case None =>
               pieces.findPieceSelected() match
@@ -152,7 +152,8 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
 
                 // Mouse Up ... no piece selected and also off the grid
                 case None => ;
-          // Mouse Up so turn highlighter off      
+          end match
+          // Mouse Up so turn highlighter off
           highLighter.shine(false)
           Outcome(model)
 
@@ -170,17 +171,18 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
           hexPosn match
             // Mouse Down ... position on the grid
             case Some(pos) =>
-              highLighter.setPos(pos)    
+              highLighter.setPos(pos)
               highLighter.shine(true)
               pieces.deselectAllPieces()
-              pieces.findPieceByPos(pos) match 
+              pieces.findPieceByPos(pos) match
                 // Mouse Down ... piece found and on the grid
                 case Some(piece) => piece.setSelected(true)
-                case None => ;
-
+                case None        => ;
+              end match
             // Mouse Down ... position off the grid
             case None => ;
-          
+          end match
+
           Outcome(model)
 
         case _ =>
