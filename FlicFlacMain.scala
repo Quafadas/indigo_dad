@@ -1,6 +1,8 @@
 package game
 
 import indigo.*
+import indigo.scenes._
+import indigoextras.ui._
 import indigo.shared.assets.AssetType
 import indigo.shared.scenegraph.SceneUpdateFragment
 import indigo.shared.events.MouseEvent
@@ -8,7 +10,7 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 
 import org.scalajs.dom
 
-@JSExportTopLevel("main")
+@JSExportTopLevel("IndigoGame")
 object Game:
   def main(args: Array[String]): Unit =
     HelloIndigo.launch(
@@ -25,7 +27,7 @@ end Game
 //val gameSize = 2 // <<<<<<<<<<<<<<<<<<<<<<<
 //val boardBasePoint : Point = Point(400,50)  // where the (inisible) top left hand corner of the hex grid board is positioned
 
-object HelloIndigo extends IndigoSandbox[Unit, Model]:
+object HelloIndigo extends IndigoGame[Unit, Unit, Model, Unit]:
 // format: off
   val boardCfg = BoardConfig(
     "hex2",                         // hex asset name
@@ -64,19 +66,30 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
   val config: GameConfig =
     GameConfig.default.withMagnification(magnification)
 
-  val animations: Set[Animation] =
-    Set()
-
   val assets: Set[AssetType] =
-    boardCfg.getAssets() ++ pieces.getAssets()
+    Set(AssetType.Image(AssetName("TestButtons"), AssetPath("assets/TestButtons.png")))
+      ++ boardCfg.getAssets() 
+      ++ pieces.getAssets()
 
-  val fonts: Set[FontInfo] =
-    Set()
+  val button1Assets: ButtonAssets =
+    ButtonAssets(
+      up = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 0, 80, 40),
+      over = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 40, 80, 40),
+      down = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 80, 80, 40)
+    )
 
-  val shaders: Set[Shader] =
-    Set()
+  val button2Assets: ButtonAssets =
+    ButtonAssets(
+      up = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 0, 80, 40),
+      over = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 40, 80, 40),
+      down = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 80, 80, 40)
+    )
+
+  val eventFilters: EventFilters =
+    EventFilters.Permissive
 
   def setup(
+      bootData: Unit,
       assetCollection: AssetCollection,
       dice: Dice
   ): Outcome[Startup[Unit]] =
@@ -88,6 +101,29 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
         config.viewport.giveDimensions(magnification).center
       )
     )
+  def initialScene(bootData: Unit): Option[SceneName] = 
+    None
+  
+  def scenes(bootData: Unit): NonEmptyList[Scene[Unit, Model, Unit]] =
+    NonEmptyList(Scene.empty)
+
+  def boot(flags: Map[String, String]): Outcome[BootResult[Unit, Model]] =
+    Outcome(
+      BootResult
+        .noData(config)
+        .withAssets(assets)
+    )
+
+  def initialViewModel(startupData: Unit, model: Model): Outcome[Unit] =
+    Outcome(())
+
+  def updateViewModel(
+      context: FrameContext[Unit],
+      model: Model,
+      viewModel: Unit
+  ): GlobalEvent => Outcome[Unit] =
+    _ => Outcome(())
+    
 
   def updateModel(
       context: FrameContext[Unit],
@@ -197,7 +233,8 @@ object HelloIndigo extends IndigoSandbox[Unit, Model]:
 
   def present(
       context: FrameContext[Unit],
-      model: Model
+      model: Model,
+      viewModel: Unit
   ): Outcome[SceneUpdateFragment] = Outcome {
 
     val fragsCombined = SceneUpdateFragment.empty |+|
