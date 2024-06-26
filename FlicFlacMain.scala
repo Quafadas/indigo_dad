@@ -7,8 +7,18 @@ import indigo.shared.assets.AssetType
 import indigo.shared.scenegraph.SceneUpdateFragment
 import indigo.shared.events.MouseEvent
 import scala.scalajs.js.annotation.JSExportTopLevel
+import scala.math._
 
 import org.scalajs.dom
+
+// *******************************************
+// Outstanding issues ...
+// Browser refresh resets game
+// Remove scale factor from Right Mouse Button
+// Support Scenes
+// Brown Area for Home & perhaps boarder ?
+// Rework to ViewModelControl
+// *******************************************
 
 @JSExportTopLevel("IndigoGame")
 object Game:
@@ -27,7 +37,7 @@ end Game
 //val gameSize = 2 // <<<<<<<<<<<<<<<<<<<<<<<
 //val boardBasePoint : Point = Point(400,50)  // where the (inisible) top left hand corner of the hex grid board is positioned
 
-object HelloIndigo extends IndigoGame[Unit, Unit, Model, Unit]:
+object HelloIndigo extends IndigoGame[Unit, Unit, Model, MyViewModel]:
 // format: off
   val boardCfg = BoardConfig(
     "hex2",                         // hex asset name
@@ -104,7 +114,7 @@ object HelloIndigo extends IndigoGame[Unit, Unit, Model, Unit]:
   def initialScene(bootData: Unit): Option[SceneName] = 
     None
   
-  def scenes(bootData: Unit): NonEmptyList[Scene[Unit, Model, Unit]] =
+  def scenes(bootData: Unit): NonEmptyList[Scene[Unit, Model, MyViewModel]] =
     NonEmptyList(Scene.empty)
 
   def boot(flags: Map[String, String]): Outcome[BootResult[Unit, Model]] =
@@ -114,15 +124,27 @@ object HelloIndigo extends IndigoGame[Unit, Unit, Model, Unit]:
         .withAssets(assets)
     )
 
-  def initialViewModel(startupData: Unit, model: Model): Outcome[Unit] =
-    Outcome(())
+  def initialViewModel(startupData: Unit, model: Model): Outcome[MyViewModel] =
+    Outcome(
+      MyViewModel(
+        button1 = Button( button1Assets, bounds = Rectangle(10,50,80,40), depth = Depth(6) ).withUpActions(AdjustEvent(+0.2)),
+        button2 = Button( button2Assets, bounds = Rectangle(10,100,80,40), depth = Depth(6) ).withUpActions(AdjustEvent(-0.2))
+      )
+    )
 
   def updateViewModel(
       context: FrameContext[Unit],
       model: Model,
-      viewModel: Unit
-  ): GlobalEvent => Outcome[Unit] =
-    _ => Outcome(())
+      viewModel: MyViewModel
+  ): GlobalEvent => Outcome[MyViewModel] =
+    case FrameTick => 
+      for {
+            b1 <- viewModel.button1.update(context.inputState.mouse)
+            b2 <- viewModel.button2.update(context.inputState.mouse)
+      } yield viewModel.copy(button1 = b1, button2 = b2)
+
+    case _ => 
+      Outcome(viewModel)
     
 
   def updateModel(
@@ -227,6 +249,13 @@ object HelloIndigo extends IndigoGame[Unit, Unit, Model, Unit]:
       end match
     // Outcome(model.update(context.delta))
 
+    case AdjustEvent(sFactor) =>
+      scaleFactor = scaleFactor + sFactor
+      scaleFactor = math.min(scaleFactor,2.0)
+      scaleFactor = math.max(scaleFactor,0.2)
+      hexBoard.changeScale(scaleFactor)
+      Outcome(model)
+
     case _ =>
       Outcome(model)
   }
@@ -234,19 +263,28 @@ object HelloIndigo extends IndigoGame[Unit, Unit, Model, Unit]:
   def present(
       context: FrameContext[Unit],
       model: Model,
-      viewModel: Unit
+      viewModel: MyViewModel
   ): Outcome[SceneUpdateFragment] = Outcome {
 
     val fragsCombined = SceneUpdateFragment.empty |+|
       boardCfg.getBackgroundFrag() |+|
       hexBoard.paint(scaleFactor) |+|
       highLighter.paint(scaleFactor) |+|
-      pieces.paint(scaleFactor)
+      pieces.paint(scaleFactor) |+|
+      SceneUpdateFragment(viewModel.button1.draw) |+|
+      SceneUpdateFragment(viewModel.button2.draw)
 
     fragsCombined
   }
-
 end HelloIndigo
+
+// defining a view model that contains UI features for this scene
+final case class MyViewModel(button1: Button, button2: Button)
+
+// defining the global event to adjust scale factor. The two test buttons broadcast this
+final case class AdjustEvent(scaleF: Double) extends GlobalEvent
+
+
 final case class Model(center: Point):
   def update(timeDelta: Seconds): Model =
     this.copy()
