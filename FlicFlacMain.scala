@@ -32,12 +32,13 @@ object Game:
     )
 end Game
 
+
 // gameSize can be one of 2,3,4,5,6 and is the number of major hexagons across one side where ...
 // ... a major hexagon is ring of 6 hexagons, with a central 7th black hexagon
 //val gameSize = 2 // <<<<<<<<<<<<<<<<<<<<<<<
 //val boardBasePoint : Point = Point(400,50)  // where the (inisible) top left hand corner of the hex grid board is positioned
 
-object HelloIndigo extends IndigoGame[Unit, Unit, Model, MyViewModel]:
+object HelloIndigo extends IndigoGame[BootData, StartUpData, Model, ViewModel]:
 // format: off
   val boardCfg = BoardConfig(
     "hex2",                         // hex asset name
@@ -73,8 +74,8 @@ object HelloIndigo extends IndigoGame[Unit, Unit, Model, MyViewModel]:
 
   val magnification = 1
 
-  val config: GameConfig =
-    GameConfig.default.withMagnification(magnification)
+  //val config: GameConfig =
+  //  GameConfig.default.withMagnification(magnification)
 
   val assets: Set[AssetType] =
     Set(AssetType.Image(AssetName("TestButtons"), AssetPath("assets/TestButtons.png")))
@@ -99,70 +100,69 @@ object HelloIndigo extends IndigoGame[Unit, Unit, Model, MyViewModel]:
     EventFilters.Permissive
 
   def setup(
-      bootData: Unit,
+      bootData: BootData,
       assetCollection: AssetCollection,
       dice: Dice
-  ): Outcome[Startup[Unit]] =
-    Outcome(Startup.Success(()))
+  ): Outcome[Startup[StartUpData]] =
+    Outcome(Startup.Success(StartUpData("StartUp-A", "StartUp-B")))
 
-  def initialModel(startupData: Unit): Outcome[Model] =
-    Outcome(
-      Model.initial(
-        config.viewport.giveDimensions(magnification).center
-      )
-    )
-  def initialScene(bootData: Unit): Option[SceneName] = 
+  def initialModel(startupData: StartUpData): Outcome[Model] =
+    Outcome(Model())
+    
+  def initialScene(bootData: BootData): Option[SceneName] = 
     None
   
-  def scenes(bootData: Unit): NonEmptyList[Scene[Unit, Model, MyViewModel]] =
-    NonEmptyList(Scene.empty)
+    
+  def scenes(bootData: BootData): NonEmptyList[Scene[StartUpData, Model, ViewModel]] =
+    //NonEmptyList(Scene.empty)
+    NonEmptyList(SceneA, SceneB)
+    // object SceneA is defined like this (SceneB the same)...
+    // object SceneA extends Scene[StartUpData, GameModel, Unit]
+    // trait scene is defined like this ...
+    // trait Scene[StartUpData, GameModel, ViewModel] derives CanEqual {
 
-  def boot(flags: Map[String, String]): Outcome[BootResult[Unit, Model]] =
+
+  def boot(flags: Map[String, String]): Outcome[BootResult[BootData, Model]] =
     Outcome(
-      BootResult
-        .noData(config)
+      BootResult(Config.config, BootData())
         .withAssets(assets)
     )
 
-  def initialViewModel(startupData: Unit, model: Model): Outcome[MyViewModel] =
-    Outcome(
-      MyViewModel(
-        button1 = Button( button1Assets, bounds = Rectangle(10,50,80,40), depth = Depth(6) ).withUpActions(AdjustEvent(+0.2)),
-        button2 = Button( button2Assets, bounds = Rectangle(10,100,80,40), depth = Depth(6) ).withUpActions(AdjustEvent(-0.2))
-      )
-    )
+  def initialViewModel(startupData: StartUpData, model: Model): Outcome[ViewModel] =
+    Outcome(ViewModel())
 
   def updateViewModel(
-      context: FrameContext[Unit],
+      context: FrameContext[StartUpData],
       model: Model,
-      viewModel: MyViewModel
-  ): GlobalEvent => Outcome[MyViewModel] =
-    case FrameTick => 
-      for {
-            b1 <- viewModel.button1.update(context.inputState.mouse)
-            b2 <- viewModel.button2.update(context.inputState.mouse)
-      } yield viewModel.copy(button1 = b1, button2 = b2)
+      viewModel: ViewModel
+    ): GlobalEvent => Outcome[ViewModel] =
+    //case FrameTick => 
+    //for {
+    //        b1 <- viewModel.button1.update(context.inputState.mouse)
+    //        b2 <- viewModel.button2.update(context.inputState.mouse)
+    //  } yield viewModel.copy(button1 = b1, button2 = b2)
 
-    case _ => 
+     case _ => 
       Outcome(viewModel)
     
 
   def updateModel(
-      context: FrameContext[Unit],
+      context: FrameContext[StartUpData],
       model: Model
-  ): GlobalEvent => Outcome[Model] = {
+    ): GlobalEvent => Outcome[Model] = {
     case e: MouseEvent.Click =>
       println("Mouse click detected")
       println(e._8)
       e.button match
         case MouseButton.RightMouseButton =>
           println("right click - dont' fire")
-          Outcome(model.copy(center = e.position))
+          //Outcome(model.copy(center = e.position))
+          Outcome(model)
 
         case MouseButton.LeftMouseButton =>
           val clickPoint = e.position
           println("MouseClick @ " + e.position)
-          val adjustedPosition = clickPoint - model.center
+          //val adjustedPosition = clickPoint - model.center
           Outcome(model)
         case _ =>
           println("other detected")
@@ -173,7 +173,7 @@ object HelloIndigo extends IndigoGame[Unit, Unit, Model, MyViewModel]:
     //    Outcome(model.copy(center = context.mouse.position))
 
     case FrameTick =>
-      Outcome(model.update(context.delta))
+      Outcome(model)
 
     case e: MouseEvent.MouseUp =>
       e._8 match
@@ -216,7 +216,7 @@ object HelloIndigo extends IndigoGame[Unit, Unit, Model, MyViewModel]:
           Outcome(model)
 
         case _ =>
-          Outcome(model.update(context.delta))
+          Outcome(model)
       end match
     // Outcome(model.update(context.delta))
 
@@ -244,7 +244,7 @@ object HelloIndigo extends IndigoGame[Unit, Unit, Model, MyViewModel]:
           Outcome(model)
 
         case _ =>
-          Outcome(model.update(context.delta))
+          Outcome(model)
 
       end match
     // Outcome(model.update(context.delta))
@@ -261,34 +261,41 @@ object HelloIndigo extends IndigoGame[Unit, Unit, Model, MyViewModel]:
   }
 
   def present(
-      context: FrameContext[Unit],
+      context: FrameContext[StartUpData],
       model: Model,
-      viewModel: MyViewModel
+      viewModel: ViewModel
   ): Outcome[SceneUpdateFragment] = Outcome {
 
     val fragsCombined = SceneUpdateFragment.empty |+|
       boardCfg.getBackgroundFrag() |+|
       hexBoard.paint(scaleFactor) |+|
       highLighter.paint(scaleFactor) |+|
-      pieces.paint(scaleFactor) |+|
-      SceneUpdateFragment(viewModel.button1.draw) |+|
-      SceneUpdateFragment(viewModel.button2.draw)
+      pieces.paint(scaleFactor) 
+      //SceneUpdateFragment(viewModel.button1.draw) |+|
+      //SceneUpdateFragment(viewModel.button2.draw)
 
     fragsCombined
   }
 end HelloIndigo
 
 // defining a view model that contains UI features for this scene
-final case class MyViewModel(button1: Button, button2: Button)
+//final case class ViewModel(button1: Button, button2: Button)
 
 // defining the global event to adjust scale factor. The two test buttons broadcast this
 final case class AdjustEvent(scaleF: Double) extends GlobalEvent
 
 
-final case class Model(center: Point):
-  def update(timeDelta: Seconds): Model =
-    this.copy()
-end Model
-object Model:
-  def initial(center: Point): Model = Model(center)
-end Model
+//final case class Model(center: Point):
+//  def update(timeDelta: Seconds): Model =
+//    this.copy()
+//end Model
+//object Model:
+//  def initial(center: Point): Model = Model(center)
+//end Model
+
+final case class BootData()
+final case class StartUpData(messageA: String, messageB: String)
+final case class Model()
+final case class ViewModel()
+final case class SceneAViewModel(button1: Button)
+final case class SceneBViewModel(button2: Button)
