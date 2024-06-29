@@ -2,12 +2,12 @@ package game
 
 import indigo.*
 
-final case class SSB(initialMessage: String) extends SubSystem[Model] {
+final case class SSParams(initialMessage: String) extends SubSystem[Model] {
   type EventType = GlobalEvent
   type SubSystemModel = String
   type ReferenceData = Unit
 
-  val id: SubSystemId = SubSystemId("SubSystemB")
+  val id: SubSystemId = SubSystemId("SubSystemParams")
 
   val eventFilter: GlobalEvent => Option[EventType] =
     _ =>None

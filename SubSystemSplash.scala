@@ -2,12 +2,12 @@ package game
 
 import indigo.*
 
-final case class SSA(initialMessage: String) extends SubSystem[Model] { // I added [GameModel] here 
+final case class SSSplash(initialMessage: String) extends SubSystem[Model] { 
   type EventType = GlobalEvent
   type SubSystemModel = String
   type ReferenceData = Unit
 
-  val id: SubSystemId = SubSystemId("SubSystemA")
+  val id: SubSystemId = SubSystemId("SubSystemSplash")
 
   val eventFilter: GlobalEvent => Option[EventType] =
     _ =>None

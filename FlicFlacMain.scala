@@ -74,27 +74,43 @@ object HelloIndigo extends IndigoGame[BootData, StartUpData, Model, ViewModel]:
 
   val magnification = 1
 
-  //val config: GameConfig =
-  //  GameConfig.default.withMagnification(magnification)
+  val config: GameConfig =
+    GameConfig.default.withMagnification(magnification)
 
   val assets: Set[AssetType] =
     Set(AssetType.Image(AssetName("TestButtons"), AssetPath("assets/TestButtons.png")))
       ++ boardCfg.getAssets() 
       ++ pieces.getAssets()
 
-  val button1Assets: ButtonAssets =
+  val buttonSplashAssets: ButtonAssets =
     ButtonAssets(
       up = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 0, 80, 40),
       over = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 40, 80, 40),
       down = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 80, 80, 40)
     )
 
-  val button2Assets: ButtonAssets =
+  val buttonParamsAssets: ButtonAssets =
     ButtonAssets(
       up = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 0, 80, 40),
       over = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 40, 80, 40),
       down = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 80, 80, 40)
     )
+
+  val buttonGameAssets: ButtonAssets =
+    ButtonAssets(
+      up = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 0, 80, 40),
+      over = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 40, 80, 40),
+      down = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 80, 80, 40)
+    )
+
+  val buttonResultsAssets: ButtonAssets =
+    ButtonAssets(
+      up = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 0, 80, 40),
+      over = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 40, 80, 40),
+      down = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 80, 80, 40)
+    )
+
+
 
   val eventFilters: EventFilters =
     EventFilters.Permissive
@@ -104,46 +120,76 @@ object HelloIndigo extends IndigoGame[BootData, StartUpData, Model, ViewModel]:
       assetCollection: AssetCollection,
       dice: Dice
   ): Outcome[Startup[StartUpData]] =
-    Outcome(Startup.Success(StartUpData("StartUp-A", "StartUp-B")))
+    Outcome(Startup.Success(StartUpData("StartUp OK")))
 
   def initialModel(startupData: StartUpData): Outcome[Model] =
     Outcome(Model())
     
   def initialScene(bootData: BootData): Option[SceneName] = 
-    None
+    Some(SceneSplash.name)
   
     
   def scenes(bootData: BootData): NonEmptyList[Scene[StartUpData, Model, ViewModel]] =
     //NonEmptyList(Scene.empty)
-    NonEmptyList(SceneA, SceneB)
-    // object SceneA is defined like this (SceneB the same)...
-    // object SceneA extends Scene[StartUpData, GameModel, Unit]
-    // trait scene is defined like this ...
-    // trait Scene[StartUpData, GameModel, ViewModel] derives CanEqual {
+    NonEmptyList(SceneSplash, SceneParams, SceneGame, SceneResults)
 
 
   def boot(flags: Map[String, String]): Outcome[BootResult[BootData, Model]] =
     Outcome(
-      BootResult(Config.config, BootData())
+      BootResult(config, BootData())
         .withAssets(assets)
     )
 
   def initialViewModel(startupData: StartUpData, model: Model): Outcome[ViewModel] =
-    Outcome(ViewModel())
+    Outcome(
+      ViewModel(
+        buttonSplash = Button(
+          buttonAssets = buttonSplashAssets,
+          bounds = Rectangle(20,20,80,40),
+          depth = Depth(6)
+        ).withUpActions(ButtonSplashEvent),
+
+        buttonParams = Button(
+          buttonAssets = buttonParamsAssets,
+          bounds = Rectangle(20,80,80,40),
+          depth = Depth(6)
+        ).withUpActions(ButtonParamsEvent),
+
+        buttonGame = Button(
+          buttonAssets = buttonSplashAssets,  // <<< FIXME
+          bounds = Rectangle(20,140,80,40),
+          depth = Depth(6)
+        ).withUpActions(ButtonGameEvent),
+
+        buttonResults = Button(
+          buttonAssets = buttonParamsAssets,  // <<< FIXME
+          bounds = Rectangle(20,200,80,40),
+          depth = Depth(6)
+        ).withUpActions(ButtonResultsEvent)
+
+
+      )
+    )
 
   def updateViewModel(
       context: FrameContext[StartUpData],
       model: Model,
       viewModel: ViewModel
     ): GlobalEvent => Outcome[ViewModel] =
-    //case FrameTick => 
-    //for {
-    //        b1 <- viewModel.button1.update(context.inputState.mouse)
-    //        b2 <- viewModel.button2.update(context.inputState.mouse)
-    //  } yield viewModel.copy(button1 = b1, button2 = b2)
+      case FrameTick => 
+        for {
+          b1 <- viewModel.buttonSplash.update(context.inputState.mouse)
+          b2 <- viewModel.buttonParams.update(context.inputState.mouse)
+          b3 <- viewModel.buttonGame.update(context.inputState.mouse)
+          b4 <- viewModel.buttonResults.update(context.inputState.mouse)
+        } yield viewModel.copy( buttonSplash = b1, 
+                                buttonParams = b2,
+                                buttonGame = b3,
+                                buttonResults = b4
+                              )
 
-     case _ => 
-      Outcome(viewModel)
+      case _ => 
+        Outcome(viewModel)
     
 
   def updateModel(
@@ -172,6 +218,26 @@ object HelloIndigo extends IndigoGame[BootData, StartUpData, Model, ViewModel]:
     //    println("This could fire, if right click skipped the first match, but IDE tells me unreachable.")
     //    Outcome(model.copy(center = context.mouse.position))
 
+    case ButtonSplashEvent =>
+      println("Main-ButtonSplashEvent")
+      Outcome(model).addGlobalEvents(SceneEvent.JumpTo(SceneSplash.name))
+
+    case ButtonParamsEvent =>
+      println("Main-ButtonParamsEvent")
+      Outcome(model).addGlobalEvents(SceneEvent.JumpTo(SceneParams.name))
+
+    case ButtonGameEvent =>
+      println("Main-ButtonGameEvent")
+      Outcome(model).addGlobalEvents(SceneEvent.JumpTo(SceneGame.name))
+
+    case ButtonResultsEvent =>
+      println("Main-ButtonResultsEvent")
+      Outcome(model).addGlobalEvents(SceneEvent.JumpTo(SceneResults.name))
+
+    case ButtonsTestEvent => 
+      println("Main-ButtonsTestevent")
+      Outcome(model)
+    
     case FrameTick =>
       Outcome(model)
 
@@ -265,16 +331,19 @@ object HelloIndigo extends IndigoGame[BootData, StartUpData, Model, ViewModel]:
       model: Model,
       viewModel: ViewModel
   ): Outcome[SceneUpdateFragment] = Outcome {
-
+/*
     val fragsCombined = SceneUpdateFragment.empty |+|
       boardCfg.getBackgroundFrag() |+|
       hexBoard.paint(scaleFactor) |+|
-      highLighter.paint(scaleFactor) |+|
+      highLighter.paint(scaleFac1tor) |+|
       pieces.paint(scaleFactor) 
       //SceneUpdateFragment(viewModel.button1.draw) |+|
       //SceneUpdateFragment(viewModel.button2.draw)
 
     fragsCombined
+*/
+    //SceneUpdateFragment(viewModel.button1.draw)
+    SceneUpdateFragment.empty
   }
 end HelloIndigo
 
@@ -294,8 +363,22 @@ final case class AdjustEvent(scaleF: Double) extends GlobalEvent
 //end Model
 
 final case class BootData()
-final case class StartUpData(messageA: String, messageB: String)
+final case class StartUpData(messageA: String)
 final case class Model()
-final case class ViewModel()
-final case class SceneAViewModel(button1: Button)
-final case class SceneBViewModel(button2: Button)
+final case class ViewModel( buttonSplash: Button, 
+                            buttonParams: Button, 
+                            buttonGame: Button,
+                            buttonResults: Button
+                          )
+final case class SceneSplashViewModel(buttonSplash: Button)
+final case class SceneParamsViewModel(buttonConfig: Button)
+
+case object ButtonSplashEvent extends GlobalEvent
+case object ButtonParamsEvent extends GlobalEvent
+case object ButtonGameEvent extends GlobalEvent
+case object ButtonResultsEvent extends GlobalEvent
+case object ButtonsTestEvent extends GlobalEvent
+
+
+
+
