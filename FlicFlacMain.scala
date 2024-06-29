@@ -78,39 +78,37 @@ object HelloIndigo extends IndigoGame[BootData, StartUpData, Model, ViewModel]:
     GameConfig.default.withMagnification(magnification)
 
   val assets: Set[AssetType] =
-    Set(AssetType.Image(AssetName("TestButtons"), AssetPath("assets/TestButtons.png")))
+    Set(AssetType.Image(AssetName("FourButtons"), AssetPath("assets/FourButtons.png")))
       ++ boardCfg.getAssets() 
       ++ pieces.getAssets()
 
   val buttonSplashAssets: ButtonAssets =
     ButtonAssets(
-      up = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 0, 80, 40),
-      over = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 40, 80, 40),
-      down = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 80, 80, 40)
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(0, 0, 240, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(0, 80, 240, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(0, 160, 240, 80)
     )
 
   val buttonParamsAssets: ButtonAssets =
     ButtonAssets(
-      up = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 0, 80, 40),
-      over = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 40, 80, 40),
-      down = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 80, 80, 40)
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(240, 0, 240, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(240, 80, 240, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(240, 160, 240, 80)
     )
 
   val buttonGameAssets: ButtonAssets =
     ButtonAssets(
-      up = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 0, 80, 40),
-      over = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 40, 80, 40),
-      down = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(0, 80, 80, 40)
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(480, 0, 240, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(480, 80, 240, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(480, 160, 240, 80)
     )
 
   val buttonResultsAssets: ButtonAssets =
     ButtonAssets(
-      up = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 0, 80, 40),
-      over = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 40, 80, 40),
-      down = Graphic(0, 0, 80, 40, 6, Material.Bitmap(AssetName("TestButtons"))).withCrop(80, 80, 80, 40)
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(720, 0, 240, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(720, 80, 240, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(720, 1200, 240, 80)
     )
-
-
 
   val eventFilters: EventFilters =
     EventFilters.Permissive
@@ -145,28 +143,27 @@ object HelloIndigo extends IndigoGame[BootData, StartUpData, Model, ViewModel]:
       ViewModel(
         buttonSplash = Button(
           buttonAssets = buttonSplashAssets,
-          bounds = Rectangle(20,20,80,40),
+          bounds = Rectangle(20,20,240,80),
           depth = Depth(6)
         ).withUpActions(ButtonSplashEvent),
 
         buttonParams = Button(
           buttonAssets = buttonParamsAssets,
-          bounds = Rectangle(20,80,80,40),
+          bounds = Rectangle(20,120,240,80),
           depth = Depth(6)
         ).withUpActions(ButtonParamsEvent),
 
         buttonGame = Button(
-          buttonAssets = buttonSplashAssets,  // <<< FIXME
-          bounds = Rectangle(20,140,80,40),
+          buttonAssets = buttonGameAssets,
+          bounds = Rectangle(20,220,240,80),
           depth = Depth(6)
         ).withUpActions(ButtonGameEvent),
 
         buttonResults = Button(
-          buttonAssets = buttonParamsAssets,  // <<< FIXME
-          bounds = Rectangle(20,200,80,40),
+          buttonAssets = buttonResultsAssets,
+          bounds = Rectangle(20,320,240,80),
           depth = Depth(6)
         ).withUpActions(ButtonResultsEvent)
-
 
       )
     )
