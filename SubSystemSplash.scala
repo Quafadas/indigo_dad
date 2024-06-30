@@ -2,7 +2,7 @@ package game
 
 import indigo.*
 
-final case class SSSplash(initialMessage: String) extends SubSystem[Model] { 
+final case class SSSplash(initialMessage: String) extends SubSystem[Model]:
   type EventType = GlobalEvent
   type SubSystemModel = String
   type ReferenceData = Unit
@@ -10,22 +10,22 @@ final case class SSSplash(initialMessage: String) extends SubSystem[Model] {
   val id: SubSystemId = SubSystemId("SubSystemSplash")
 
   val eventFilter: GlobalEvent => Option[EventType] =
-    _ =>None
+    _ => None
 
   // Extra line here, as mandated by indigo's SubSystem.scala. Yet it is not in the examples!!!
-  def reference(model: Model): Unit = ()  
-  
+  def reference(model: Model): Unit = ()
+
   def initialModel: Outcome[String] = Outcome(initialMessage)
 
   def update(
       context: SubSystemFrameContext[ReferenceData],
-      message : String
+      message: String
   ): EventType => Outcome[String] =
     _ => Outcome(message)
 
   def present(
       context: SubSystemFrameContext[ReferenceData],
-      message : String
+      message: String
   ): Outcome[SceneUpdateFragment] =
     Outcome(SceneUpdateFragment.empty)
-}
+end SSSplash

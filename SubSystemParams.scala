@@ -2,7 +2,7 @@ package game
 
 import indigo.*
 
-final case class SSParams(initialMessage: String) extends SubSystem[Model] {
+final case class SSParams(initialMessage: String) extends SubSystem[Model]:
   type EventType = GlobalEvent
   type SubSystemModel = String
   type ReferenceData = Unit
@@ -10,7 +10,7 @@ final case class SSParams(initialMessage: String) extends SubSystem[Model] {
   val id: SubSystemId = SubSystemId("SubSystemParams")
 
   val eventFilter: GlobalEvent => Option[EventType] =
-    _ =>None
+    _ => None
 
   def reference(model: Model): Unit = ()
 
@@ -18,13 +18,13 @@ final case class SSParams(initialMessage: String) extends SubSystem[Model] {
 
   def update(
       context: SubSystemFrameContext[ReferenceData],
-      message : String
+      message: String
   ): EventType => Outcome[String] =
     _ => Outcome(message)
 
   def present(
       context: SubSystemFrameContext[ReferenceData],
-      message : String
+      message: String
   ): Outcome[SceneUpdateFragment] =
     Outcome(SceneUpdateFragment.empty)
-}
+end SSParams
