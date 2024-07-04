@@ -53,9 +53,9 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
   ): Outcome[SceneUpdateFragment] =
 
     val textSplash = TextBox("Splash Scene", 400, 40)
-      .withColor(RGBA.Cyan)
+      .withColor(RGBA.Black)
       .withFontSize(Pixels(30))
-      .moveTo(300, 0)
+      .moveTo(20, 0)
 
     val bootData = context.frameContext.startUpData.flicFlacBootData
 
@@ -65,51 +65,52 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
     Outcome {
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
         |+| SceneUpdateFragment(textSplash)
-        |+| SceneUpdateFragment(viewModel.splashButton.draw)
+//        |+| SceneUpdateFragment(viewModel.splashButton.draw)
         |+| SceneUpdateFragment(viewModel.paramsButton.draw)
         |+| SceneUpdateFragment(viewModel.gameButton.draw)
         |+| SceneUpdateFragment(viewModel.resultsButton.draw)
     }
 
 final case class SplashSceneViewModel(
-  splashButton: Button,
+//  splashButton: Button,
   paramsButton: Button,
   gameButton: Button,
   resultsButton: Button 
 ):
   def update(mouse: Mouse): Outcome[SplashSceneViewModel] =
     for {
-      bn1 <- splashButton.update(mouse)
+//      bn1 <- splashButton.update(mouse)
       bn2 <- paramsButton.update(mouse)
       bn3 <- gameButton.update(mouse)
       bn4 <- resultsButton.update(mouse)
-    } yield this.copy( splashButton = bn1, paramsButton = bn2, gameButton = bn3, resultsButton = bn4)
+    } yield this.copy( /*splashButton = bn1,*/ paramsButton = bn2, gameButton = bn3, resultsButton = bn4)
 
 object SplashSceneViewModel:
 
   val initial: SplashSceneViewModel = 
     SplashSceneViewModel(
+/*      
       Button (
         buttonAssets = GameAssets.buttonSplashAssets,
         bounds = Rectangle(20, 20, 240, 80),
         depth = Depth(6)
         ).withUpActions(ButtonSplashEvent),
-
+*/
       Button (
         buttonAssets = GameAssets.buttonParamsAssets,
-        bounds = Rectangle(20, 120, 240, 80),
+        bounds = Rectangle(400, 220, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonParamsEvent),
 
       Button (
         buttonAssets = GameAssets.buttonGameAssets,
-        bounds = Rectangle(20, 220, 240, 80),
+        bounds = Rectangle(400, 320, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonGameEvent),
 
       Button (
         buttonAssets = GameAssets.buttonResultsAssets,
-        bounds = Rectangle(20, 320, 240, 80),
+        bounds = Rectangle(400, 420, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonResultsEvent)
     )

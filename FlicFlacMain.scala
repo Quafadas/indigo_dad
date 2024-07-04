@@ -49,7 +49,7 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
 
   println("@@@ Object HelloIndigo Starts")
 
-
+/*=========================
 // format: off
   val boardCfg = BoardConfig(
     91,                             // GWIDTH pixel width of graphic
@@ -60,6 +60,7 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
     40,                             // half the amount to add to a hex centre y coord to reach the next hexagon below
     10                              // xcoord of halfway along the top left diagonal line of first hex
   )
+// format: on
 
   // FIXME, eventually we will calculate / fix scaleFactor and boardCfg BasePoint ...
   // ... from window dimensions supplied in main
@@ -71,10 +72,10 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
     boardCfg,
     hexBoard
   )
-// format: on
 
 
   val highLighter = HighLighter(boardCfg, hexBoard, scaleFactor)
+  ===================*/
 
   val magnification = 1
 
@@ -158,6 +159,13 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
         kount4 = kount4 - 1
       Outcome(flicFlacViewModel)
 
+    case ViewportResize(gameViewPort) =>
+      val w = gameViewPort.width
+      val h = gameViewPort.height
+      //flicFlacViewModel.gameScene.
+      println("@@@ FlicFlacMain-updateViewModel ViewportResize w:h " + w +":" +h)
+      Outcome(flicFlacViewModel)
+
     case _ =>
       if (kount3 > 0)
         println("@@@ FlicFla cMain-updateViewModel _")
@@ -201,7 +209,7 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
     if (kount1 > 0)
       println("@@@ FlicFlacMain-present")
       kount1 = kount1 - 1
-
+/*
     val fragsCombined = SceneUpdateFragment.empty |+|
       SceneUpdateFragment(
         Shape.Box(Rectangle(0, 0, 3000, 2000), Fill.Color(RGBA.Pink))
@@ -212,8 +220,8 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
       pieces.paint(scaleFactor)
 
     fragsCombined
-
-    // SceneUpdateFragment.empty
+*/
+    SceneUpdateFragment.empty
   }
 
   println("@@@ Object HelloIndigo Finishes")
@@ -246,7 +254,6 @@ final case class FlicFlacViewModel(
       paramsScene.update(mouse).map(info => this.copy(paramsScene = info))
       gameScene.update(mouse).map(info => this.copy(gameScene = info))
       resultsScene.update(mouse).map(info => this.copy(resultsScene = info))
-
 
 case object ButtonSplashEvent extends GlobalEvent
 case object ButtonParamsEvent extends GlobalEvent
