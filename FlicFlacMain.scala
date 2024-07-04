@@ -12,7 +12,7 @@ import scala.math.*
 import org.scalajs.dom
 
 // *******************************************
-// Outstanding issues ...
+// Outstanding issues ...ViewModel.initialViewModel
 // Browser refresh resets game
 // Remove scale factor from Right Mouse Button
 // Support Scenes
@@ -23,6 +23,7 @@ import org.scalajs.dom
 @JSExportTopLevel("IndigoGame")
 object Game:
   def main(args: Array[String]): Unit =
+    println("@@@ Object Game main Launch Start")
     HelloIndigo.launch(
       "indigo-container",
       Map[String, String](
@@ -30,6 +31,7 @@ object Game:
         "height" -> dom.window.innerHeight.toString
       )
     )
+    println("@@@ Object Game main Launch Finish")
 end Game
 
 // gameSize can be one of 2,3,4,5,6 and is the number of major hexagons across one side where ...
@@ -37,13 +39,19 @@ end Game
 //val gameSize = 2 // <<<<<<<<<<<<<<<<<<<<<<<
 //val boardBasePoint : Point = Point(400,50)  // where the (inisible) top left hand corner of the hex grid board is positioned
 
-object HelloIndigo extends IndigoGame[BootData, StartUpData, Model, ViewModel]:
+object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
+
+  var kount1 = 3
+  var kount2 = 3
+  var kount3 = 3
+  var kount4 = 3
+  
+
+  println("@@@ Object HelloIndigo Starts")
+
+
 // format: off
   val boardCfg = BoardConfig(
-    "hex2",                         // hex asset name
-    "assets/Hex2.png",              // path of hex asset
-    "bg",                           // background asset name
-    "assets/BackGroundWhite.png",   // path of background asset
     91,                             // GWIDTH pixel width of graphic
     81,                             // GHEIGHT pixel height of graphic
     Point(100,50),                  // where the (inisible) top left hand corner of the hex grid board is positioned
@@ -60,14 +68,11 @@ object HelloIndigo extends IndigoGame[BootData, StartUpData, Model, ViewModel]:
   val hexBoard = HexBoard(boardCfg, scaleFactor)
   
   val pieces = Pieces(
-    "cylinders",                    // cylinders asset name
-    "assets/Cylinders.png",         // path of cylinders asset
-    "blocks",                       // blocks asset name
-    "assets/Blocks.png",            // path of blocks asset
     boardCfg,
     hexBoard
   )
 // format: on
+
 
   val highLighter = HighLighter(boardCfg, hexBoard, scaleFactor)
 
@@ -76,271 +81,147 @@ object HelloIndigo extends IndigoGame[BootData, StartUpData, Model, ViewModel]:
   val config: GameConfig =
     GameConfig.default.withMagnification(magnification)
 
+
   val assets: Set[AssetType] =
-    Set(AssetType.Image(AssetName("FourButtons"), AssetPath("assets/FourButtons.png")))
-      ++ boardCfg.getAssets()
-      ++ pieces.getAssets()
-
-  val buttonSplashAssets: ButtonAssets =
-    ButtonAssets(
-      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(0, 0, 240, 80),
-      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(0, 80, 240, 80),
-      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(0, 160, 240, 80)
-    )
-
-  val buttonParamsAssets: ButtonAssets =
-    ButtonAssets(
-      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(240, 0, 240, 80),
-      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(240, 80, 240, 80),
-      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(240, 160, 240, 80)
-    )
-
-  val buttonGameAssets: ButtonAssets =
-    ButtonAssets(
-      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(480, 0, 240, 80),
-      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(480, 80, 240, 80),
-      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(480, 160, 240, 80)
-    )
-
-  val buttonResultsAssets: ButtonAssets =
-    ButtonAssets(
-      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(720, 0, 240, 80),
-      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(720, 80, 240, 80),
-      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName("FourButtons"))).withCrop(720, 1200, 240, 80)
-    )
+    GameAssets.get()
 
   val eventFilters: EventFilters =
     EventFilters.Permissive
 
   def setup(
-      bootData: BootData,
+      flicFlacBootData: FlicFlacBootData,
       assetCollection: AssetCollection,
       dice: Dice
-  ): Outcome[Startup[StartUpData]] =
-    Outcome(Startup.Success(StartUpData("StartUp OK")))
+  ): Outcome[Startup[FlicFlacStartupData]] =
+    println("@@@ FlicFlacMain-setup()")
+    val outCome = FlicFlacStartupData.initialise(flicFlacBootData)
+    outCome
 
-  def initialModel(startupData: StartUpData): Outcome[Model] =
-    Outcome(Model())
+  def initialModel(flicFlacStartupData: FlicFlacStartupData): Outcome[FlicFlacGameModel] =
+    println("@@@ FlicFlacMain-initialModel()")
+    Outcome(FlicFlacGameModel())
 
-  def initialScene(bootData: BootData): Option[SceneName] =
+  def initialScene(flicFlacBootData: FlicFlacBootData): Option[SceneName] =
+    println("@@@ FlicFlacMain-initialScene()")
     Some(SceneSplash.name)
+    //None
 
   // JP 30/06/24
   // To get the hexboard back as the main screen, comment out the populated "NonEmptyList" and ...
   // restore the line NonEmptyList(Scene.empty)
 
-  def scenes(bootData: BootData): NonEmptyList[Scene[StartUpData, Model, ViewModel]] =
-    // NonEmptyList(Scene.empty)
+  def scenes(flicFlacBootData: FlicFlacBootData): NonEmptyList[Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]] =
+    println("@@@ FlicFlacMain-scenes()")
     NonEmptyList(SceneSplash, SceneParams, SceneGame, SceneResults)
 
-  def boot(flags: Map[String, String]): Outcome[BootResult[BootData, Model]] =
-    Outcome(
-      BootResult(config, BootData())
-        .withAssets(assets)
-    )
+  def boot(flags: Map[String, String]): Outcome[BootResult[FlicFlacBootData,FlicFlacGameModel]] =
+    println("@@@ FlicFlacMain-boot")
+    println("@@@ BootFlags: " + flags)
+    val width = flags("width").toInt
+    val height = flags("height").toInt
+    Outcome{
+      val flicFlacBootData: FlicFlacBootData =
+        FlicFlacBootData.create(width, height)
+        //ViewConfig.default
 
-  def initialViewModel(startupData: StartUpData, model: Model): Outcome[ViewModel] =
-    Outcome(
-      ViewModel(
-        buttonSplash = Button(
-          buttonAssets = buttonSplashAssets,
-          bounds = Rectangle(20, 20, 240, 80),
-          depth = Depth(6)
-        ).withUpActions(ButtonSplashEvent),
-        buttonParams = Button(
-          buttonAssets = buttonParamsAssets,
-          bounds = Rectangle(20, 120, 240, 80),
-          depth = Depth(6)
-        ).withUpActions(ButtonParamsEvent),
-        buttonGame = Button(
-          buttonAssets = buttonGameAssets,
-          bounds = Rectangle(20, 220, 240, 80),
-          depth = Depth(6)
-        ).withUpActions(ButtonGameEvent),
-        buttonResults = Button(
-          buttonAssets = buttonResultsAssets,
-          bounds = Rectangle(20, 320, 240, 80),
-          depth = Depth(6)
-        ).withUpActions(ButtonResultsEvent)
+      val config = 
+        FlicFlacConfig.config
+          .withViewport(flicFlacBootData.viewport)
+
+      val assetPath: String = 
+        flags.getOrElse("baseUrl","")
+
+      BootResult(config, flicFlacBootData)
+        .withAssets(assets)
+    }
+
+  def initialViewModel(flicFlacStartupData: FlicFlacStartupData, flicFlacGameModel: FlicFlacGameModel): Outcome[FlicFlacViewModel] =
+    println("@@@ FlicFlacMain-initialViewModel()")
+    val staticAssets = flicFlacStartupData.staticAssets
+    Outcome(FlicFlacViewModel(
+      staticAssets,
+      SplashSceneViewModel.initial,
+      ParamsSceneViewModel.initial,
+      GameSceneViewModel.initial,
+      ResultsSceneViewModel.initial
       )
     )
 
   def updateViewModel(
-      context: FrameContext[StartUpData],
-      model: Model,
-      viewModel: ViewModel
-  ): GlobalEvent => Outcome[ViewModel] =
+      context: FrameContext[FlicFlacStartupData],
+      flicFlacGameModel: FlicFlacGameModel,
+      flicFlacViewModel: FlicFlacViewModel
+  ): GlobalEvent => Outcome[FlicFlacViewModel] =
     case FrameTick =>
-      for
-        b1 <- viewModel.buttonSplash.update(context.inputState.mouse)
-        b2 <- viewModel.buttonParams.update(context.inputState.mouse)
-        b3 <- viewModel.buttonGame.update(context.inputState.mouse)
-        b4 <- viewModel.buttonResults.update(context.inputState.mouse)
-      yield viewModel.copy(buttonSplash = b1, buttonParams = b2, buttonGame = b3, buttonResults = b4)
+      if (kount4 > 0)
+        println("@@@ FlicFlacMain-updateViewModel FrameTick")
+        kount4 = kount4 - 1
+      Outcome(flicFlacViewModel)
 
     case _ =>
-      Outcome(viewModel)
+      if (kount3 > 0)
+        println("@@@ FlicFla cMain-updateViewModel _")
+        kount3 = kount3 - 1
+      Outcome(flicFlacViewModel)
   end updateViewModel
 
   def updateModel(
-      context: FrameContext[StartUpData],
-      model: Model
-  ): GlobalEvent => Outcome[Model] = {
-    case e: MouseEvent.Click =>
-      println("Mouse click detected")
-      println(e._8)
-      e.button match
-        case MouseButton.RightMouseButton =>
-          println("right click - dont' fire")
-          // Outcome(model.copy(center = e.position))
-          Outcome(model)
-
-        case MouseButton.LeftMouseButton =>
-          val clickPoint = e.position
-          println("MouseClick @ " + e.position)
-          // val adjustedPosition = clickPoint - model.center
-          Outcome(model)
-        case _ =>
-          println("other detected")
-          Outcome(model)
-      end match
-    //  case MouseEvent.Click(position, buttons) =>
-    //    println("This could fire, if right click skipped the first match, but IDE tells me unreachable.")
-    //    Outcome(model.copy(center = context.mouse.position))
+      context: FrameContext[FlicFlacStartupData],
+      flicFlacGameModel: FlicFlacGameModel
+  ): GlobalEvent => Outcome[FlicFlacGameModel] = 
 
     case ButtonSplashEvent =>
-      println("Main-ButtonSplashEvent")
-      Outcome(model).addGlobalEvents(SceneEvent.JumpTo(SceneSplash.name))
+      println("@@@ Main-ButtonSplashEvent")
+      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneSplash.name))
 
     case ButtonParamsEvent =>
-      println("Main-ButtonParamsEvent")
-      Outcome(model).addGlobalEvents(SceneEvent.JumpTo(SceneParams.name))
+      println("@@@ Main-ButtonParamsEvent")
+      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneParams.name))
 
     case ButtonGameEvent =>
-      println("Main-ButtonGameEvent")
-      Outcome(model).addGlobalEvents(SceneEvent.JumpTo(SceneGame.name))
+      println("@@@ Main-ButtonGameEvent")
+      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneGame.name))
 
     case ButtonResultsEvent =>
-      println("Main-ButtonResultsEvent")
-      Outcome(model).addGlobalEvents(SceneEvent.JumpTo(SceneResults.name))
+      println("@@@ Main-ButtonResultsEvent")
+      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneResults.name))
 
-    case ButtonsTestEvent =>
-      println("Main-ButtonsTestevent")
-      Outcome(model)
-
-    case FrameTick =>
-      Outcome(model)
-
-    case e: MouseEvent.MouseUp =>
-      e._8 match
-        case MouseButton.RightMouseButton =>
-          println("MouseEventRightButtonUp @ " + e.position)
-          scaleFactor = scaleFactor + 0.2
-          if scaleFactor >= 2.1 then scaleFactor = 0.2
-          end if
-          hexBoard.changeScale(scaleFactor)
-          Outcome(model)
-
-        case MouseButton.LeftMouseButton =>
-          println("MouseEventLeftButtonUp @ " + e.position)
-          val clickPoint = e.position
-          val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
-          hexPosn match
-            // Mouse Up ... The position is on the hex grid
-            case Some(pos) =>
-              pieces.findPieceSelected() match
-                // Mouse Up ... piece selected and valid position
-                case Some(piece) =>
-                  piece.setPosition(pos)
-                  if hexBoard.isThisHexBlack(pos) == true then piece.toggleFlip()
-                  end if
-                // Mouse Up ... no piece selected but on the grid
-                case None => ;
-
-            // Mouse Up ... the position is off the hex grid
-            case None =>
-              pieces.findPieceSelected() match
-                // Mouse Up ... we have selected a piece but moved it off the grid
-                case Some(piece) =>
-                  piece.moveToHome()
-
-                // Mouse Up ... no piece selected and also off the grid
-                case None => ;
-          end match
-          // Mouse Up so turn highlighter off
-          highLighter.shine(false)
-          Outcome(model)
-
-        case _ =>
-          Outcome(model)
-      end match
-    // Outcome(model.update(context.delta))
-
-    case e: MouseEvent.MouseDown =>
-      e._8 match
-        case MouseButton.LeftMouseButton =>
-          println("MouseEventLeftButtonDown @ " + e.position)
-          val clickPoint = e.position
-          val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
-          hexPosn match
-            // Mouse Down ... position on the grid
-            case Some(pos) =>
-              highLighter.setPos(pos)
-              highLighter.shine(true)
-              pieces.deselectAllPieces()
-              pieces.findPieceByPos(pos) match
-                // Mouse Down ... piece found and on the grid
-                case Some(piece) => piece.setSelected(true)
-                case None        => ;
-              end match
-            // Mouse Down ... position off the grid
-            case None => ;
-          end match
-
-          Outcome(model)
-
-        case _ =>
-          Outcome(model)
-
-      end match
-    // Outcome(model.update(context.delta))
-
-    case AdjustEvent(sFactor) =>
-      scaleFactor = scaleFactor + sFactor
-      scaleFactor = math.min(scaleFactor, 2.0)
-      scaleFactor = math.max(scaleFactor, 0.2)
-      hexBoard.changeScale(scaleFactor)
-      Outcome(model)
-
-    case _ =>
-      Outcome(model)
-  }
+    case _ => 
+      if (kount2 > 0)
+        println("@@@ FlicFlacMain-updateModel")
+        kount2 = kount2 - 1
+      Outcome(flicFlacGameModel)
 
   def present(
-      context: FrameContext[StartUpData],
-      model: Model,
-      viewModel: ViewModel
+      context: FrameContext[FlicFlacStartupData],
+      flicFlacGameModel: FlicFlacGameModel,
+      flicFlacViewModel: FlicFlacViewModel
   ): Outcome[SceneUpdateFragment] = Outcome {
 
+    if (kount1 > 0)
+      println("@@@ FlicFlacMain-present")
+      kount1 = kount1 - 1
+
     val fragsCombined = SceneUpdateFragment.empty |+|
-      boardCfg.getBackgroundFrag() |+|
+      SceneUpdateFragment(
+        Shape.Box(Rectangle(0, 0, 3000, 2000), Fill.Color(RGBA.Pink))
+      ) |+|
+      //boardCfg.getBackgroundFrag() |+|
       hexBoard.paint(scaleFactor) |+|
       highLighter.paint(scaleFactor) |+|
       pieces.paint(scaleFactor)
-    // SceneUpdateFragment(viewModel.button1.draw) |+|
-    // SceneUpdateFragment(viewModel.button2.draw)
 
     fragsCombined
 
     // SceneUpdateFragment.empty
   }
+
+  println("@@@ Object HelloIndigo Finishes")
+
 end HelloIndigo
 
 // defining a view model that contains UI features for this scene
 //final case class ViewModel(button1: Button, button2: Button)
-
-// defining the global event to adjust scale factor. The two test buttons broadcast this
-final case class AdjustEvent(scaleF: Double) extends GlobalEvent
 
 //final case class Model(center: Point):
 //  def update(timeDelta: Seconds): Model =
@@ -350,15 +231,26 @@ final case class AdjustEvent(scaleF: Double) extends GlobalEvent
 //  def initial(center: Point): Model = Model(center)
 //end Model
 
-final case class BootData()
-final case class StartUpData(messageA: String)
-final case class Model()
-final case class ViewModel(buttonSplash: Button, buttonParams: Button, buttonGame: Button, buttonResults: Button)
-final case class SceneSplashViewModel(buttonSplash: Button)
-final case class SceneParamsViewModel(buttonConfig: Button)
+final case class FlicFlacGameModel()
+
+//final case class ViewModel()
+final case class FlicFlacViewModel(
+    staticAssets: StaticAssets,
+    splashScene: SplashSceneViewModel,
+    paramsScene: ParamsSceneViewModel,
+    gameScene: GameSceneViewModel,
+    resultsScene: ResultsSceneViewModel
+  ):
+    def update(mouse: Mouse): Outcome[FlicFlacViewModel] =
+      splashScene.update(mouse).map(info => this.copy(splashScene = info))
+      paramsScene.update(mouse).map(info => this.copy(paramsScene = info))
+      gameScene.update(mouse).map(info => this.copy(gameScene = info))
+      resultsScene.update(mouse).map(info => this.copy(resultsScene = info))
+
 
 case object ButtonSplashEvent extends GlobalEvent
 case object ButtonParamsEvent extends GlobalEvent
 case object ButtonGameEvent extends GlobalEvent
 case object ButtonResultsEvent extends GlobalEvent
-case object ButtonsTestEvent extends GlobalEvent
+
+

@@ -2,66 +2,115 @@ package game
 
 import indigo.*
 import indigo.scenes.*
+import indigoextras.ui.*
 
-object SceneResults extends Scene[StartUpData, Model, ViewModel]:
+object SceneResults extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
-  type SceneModel = Model
-  type SceneViewModel = ViewModel
+  type SceneModel = FlicFlacGameModel
+  type SceneViewModel = ResultsSceneViewModel
 
-  val name: SceneName = SceneName("SceneResults")
+  val name: SceneName = SceneName("Results")
 
-  val modelLens: Lens[Model, Model] =
+  def modelLens: Lens[FlicFlacGameModel, FlicFlacGameModel] =
     Lens.keepLatest
 
-  val viewModelLens: Lens[ViewModel, SceneViewModel] =
-    Lens.keepLatest
+  def viewModelLens: Lens[FlicFlacViewModel, SceneViewModel] =
+    Lens(
+      _.resultsScene,
+      (m, vm) => m.copy(resultsScene = vm)
+    )
 
-  val eventFilters: EventFilters = EventFilters.Permissive
+  def eventFilters: EventFilters = EventFilters.Permissive
 
-  val subSystems = Set(SSResults("Results"))
+  def subSystems = Set(SSResults("Results"))
 
   def updateModel(
-      context: SceneContext[StartUpData],
-      model: SceneModel
-  ): GlobalEvent => Outcome[SceneModel] =
-    case ButtonsTestEvent =>
-      println("Results-ButtonsTestEvent")
+      context: SceneContext[FlicFlacStartupData],
+      model: FlicFlacGameModel
+  ): GlobalEvent => Outcome[FlicFlacGameModel] =
+    case _ => 
       Outcome(model)
-    case _ => Outcome(model)
   end updateModel
 
   def updateViewModel(
-      context: SceneContext[StartUpData],
-      model: SceneModel,
+      context: SceneContext[FlicFlacStartupData],
+      model: FlicFlacGameModel,
       viewModel: SceneViewModel
-  ): GlobalEvent => Outcome[SceneViewModel] =
-    _ => Outcome(viewModel)
+  ): GlobalEvent => Outcome[SceneViewModel] = 
+    case FrameTick =>
+      viewModel.update(context.mouse)
+
+    case _ => 
+      Outcome(viewModel)
 
   // Show some text
-  // When the user clicks anywhere in the screen, trigger an event to jump to the other scene.
+  // When the user clicks anywhere in the screen, trigger an event to jump to the other scene.    val x = context.
+
   def present(
-      context: SceneContext[StartUpData],
-      model: SceneModel,
+      context: SceneContext[FlicFlacStartupData],
+      model: FlicFlacGameModel,
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
+
+    val textResults = TextBox("Results Scene", 400, 40)
+      .withColor(RGBA.Pink)
+      .withFontSize(Pixels(30))
+      .moveTo(300, 0)
+
+    val bootData = context.frameContext.startUpData.flicFlacBootData
+
+    val width = bootData.pixelWidth
+    val height = bootData.pixelHeight
+
     Outcome {
-
-      val textResults = TextBox("Results Scene", 400, 40)
-        .withColor(RGBA.Cyan)
-        .withFontSize(Pixels(30))
-        .moveTo(300, 0)
-
-      SceneUpdateFragment(
-        Shape
-          .Box(
-            Rectangle(0, 0, 3000, 2000),
-            Fill.LinearGradient(Point(0), RGBA.SlateGray, Point(3000, 2000), RGBA.Magenta)
-          )
-      )
+      SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
         |+| SceneUpdateFragment(textResults)
-        |+| SceneUpdateFragment(viewModel.buttonSplash.draw)
-        |+| SceneUpdateFragment(viewModel.buttonParams.draw)
-        |+| SceneUpdateFragment(viewModel.buttonGame.draw)
-//      |+| SceneUpdateFragment(viewModel.buttonResults.draw)
+        |+| SceneUpdateFragment(viewModel.splashButton.draw)
+        |+| SceneUpdateFragment(viewModel.paramsButton.draw)
+        |+| SceneUpdateFragment(viewModel.gameButton.draw)
+        |+| SceneUpdateFragment(viewModel.resultsButton.draw)
     }
-end SceneResults
+
+final case class ResultsSceneViewModel(
+  splashButton: Button,
+  paramsButton: Button,
+  gameButton: Button,
+  resultsButton: Button 
+):
+  def update(mouse: Mouse): Outcome[ResultsSceneViewModel] =
+    for {
+      bn1 <- splashButton.update(mouse)
+      bn2 <- paramsButton.update(mouse)
+      bn3 <- gameButton.update(mouse)
+      bn4 <- resultsButton.update(mouse)
+    } yield this.copy( splashButton = bn1, paramsButton = bn2, gameButton = bn3, resultsButton = bn4)
+
+object ResultsSceneViewModel:
+
+  val initial: ResultsSceneViewModel = 
+    ResultsSceneViewModel(
+      Button (
+        buttonAssets = GameAssets.buttonSplashAssets,
+        bounds = Rectangle(20, 20, 240, 80),
+        depth = Depth(6)
+        ).withUpActions(ButtonSplashEvent),
+
+      Button (
+        buttonAssets = GameAssets.buttonParamsAssets,
+        bounds = Rectangle(20, 120, 240, 80),
+        depth = Depth(6)
+      ).withUpActions(ButtonParamsEvent),
+
+      Button (
+        buttonAssets = GameAssets.buttonGameAssets,
+        bounds = Rectangle(20, 220, 240, 80),
+        depth = Depth(6)
+      ).withUpActions(ButtonGameEvent),
+
+      Button (
+        buttonAssets = GameAssets.buttonResultsAssets,
+        bounds = Rectangle(20, 320, 240, 80),
+        depth = Depth(6)
+      ).withUpActions(ButtonResultsEvent)
+    )
+    

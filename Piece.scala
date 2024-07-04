@@ -38,8 +38,6 @@ class Piece(
   end getGraphic
 
   def setSelected(b: Boolean): Unit =
-    if b then println(sName + " selected:" + b)
-    end if
     bSelected = b
   end setSelected
 

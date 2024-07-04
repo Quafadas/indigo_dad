@@ -3,11 +3,8 @@ package game
 import indigo.*
 
 class BoardConfig(
+
 // format: off
-    sHexAssetName: String,      // hex asset name
-    sHexAssetPath: String,      // path of hex asset
-    sBgrndAssetName: String,    // background asset name
-    sBgrndAssetPath: String,    // path of background asset
     iHexPixelWidth: Int,        // GWIDTH pixel width of graphic
     iHexPixelHeight: Int,       // GHEIGHT pixel height of graphic
     pBase: Point,               // where the (invisible) top left hand corner of the hex grid board is positioned
@@ -17,12 +14,7 @@ class BoardConfig(
     iHalfway: Int               // xcoord of halfway along the top left diagonal line of first hex
 // format: on
 ):
-
-  val hexAssetName = AssetName(sHexAssetName)
-  val hexAssetPath = AssetPath(sHexAssetPath)
-
-  val bgrndAssetName = AssetName(sBgrndAssetName)
-  val bgrndAssetPath = AssetPath(sBgrndAssetPath)
+  println("@@@ ## Class BoardConfig Start")
 
   val gWidth = iHexPixelWidth - 1 // ..... The graphic will overlap by one pixel because of -1
   val gHeight = iHexPixelHeight - 1 // ... The graphic will overlap by one pixel because of -1
@@ -34,12 +26,6 @@ class BoardConfig(
   val yHeight = iHeight
   val xHalfway = iHalfway
 
-  def getAssets(): Set[AssetType] =
-    Set(
-      AssetType.Image(hexAssetName, hexAssetPath),
-      AssetType.Image(bgrndAssetName, bgrndAssetPath)
-    )
-
   def getSideSize(): Int =
 // format: off
     val sSz = ((sZ - 2) % 5) + 2  // The number of hexagonal rings (ring of 6 with centre) composing one side of the board
@@ -47,19 +33,15 @@ class BoardConfig(
 // format: on
   end getSideSize
 
-  // White background fragment
-  def getBackgroundFrag(): SceneUpdateFragment =
-    val bgGraphic: Graphic[Material.ImageEffects] = Graphic(0, 0, 256, 256, 1, Material.ImageEffects(bgrndAssetName))
-    val bgFrag = SceneUpdateFragment(Layer(bgGraphic.scaleBy(12, 12))) // 12 chosen but needs optimising to scale factor
-    bgFrag
-  end getBackgroundFrag
-
   // Hex for grid on Layer 2
   def getHexGraphic(): Graphic[Material.ImageEffects] =
-    val rHex = Rectangle(0, 0, gWidth + 1, gHeight + 1)
+    println("@@@ ## BoardConfig-getHexGraphic")
     val gHex: Graphic[Material.ImageEffects] =
-      Graphic(rHex, 2, Material.ImageEffects(hexAssetName))
+      GameAssets.gHex
     gHex
   end getHexGraphic
+
+  println("@@@ ## Class BoardConfig Finish")
+
 
 end BoardConfig

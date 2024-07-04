@@ -19,6 +19,8 @@ case class HH(
 
 class HexBoard(boardCfg: BoardConfig, initScale: Double):
 
+  println("@@@ Class HexBoard Start")
+
 // format: off
 
   /** ******************* The Hex Board ***
@@ -47,7 +49,7 @@ class HexBoard(boardCfg: BoardConfig, initScale: Double):
 // format : on
 
 
-  val gHex = boardCfg.getHexGraphic() // The Hex graphic used to paint the grid
+  val gHex = GameAssets.gHex // The Hex graphic used to paint the grid
 
   // The hexagons are aligned such that they have a flat bottom and top
   // The board is aligned such that it has pointy bottom and top, in terms of flat bottom hexagons
@@ -309,7 +311,7 @@ class HexBoard(boardCfg: BoardConfig, initScale: Double):
   by right mouse button
    */
   def changeScale(fS: Double): Unit =
-    println("changeScale to: " + fS)
+    // println("changeScale to: " + fS)
     calculateXpYp(fS)
     hexBoardUpdated = true
   end changeScale
@@ -430,14 +432,14 @@ class HexBoard(boardCfg: BoardConfig, initScale: Double):
       val c = hexArray(x / 2)(y).c
       if (c != CX) then                       // exclude hexes from display if color is CX
         val hexXYCoords = Point(x / 2, y)     // x/2 because hexArray has even/odd columns
-        println("hexXYFromDisplayXY FINISH:" + hexXYCoords)
+        // println("hexXYFromDisplayXY FINISH:" + hexXYCoords)
         Some(hexXYCoords)
       else 
-        println("hexXYFromDisplayXY FINISHES with NONE (non-displayable hex)")    
+        // println("hexXYFromDisplayXY FINISHES with NONE (non-displayable hex)")    
         None
       end if
     else
-      println("hexXYFromDisplayXY FINISHES with NONE (outside detection grid)")    
+      // println("hexXYFromDisplayXY FINISHES with NONE (outside detection grid)")    
       None
     end if
   end hexXYCoordsFromDisplayXY
@@ -468,6 +470,9 @@ class HexBoard(boardCfg: BoardConfig, initScale: Double):
         case CP => p2 + Point(0,1)  // Purple
     end match
   end getBlockHomePos
+
+  println("@@@ Class HexBoard Finish")
+
 
 end HexBoard
 

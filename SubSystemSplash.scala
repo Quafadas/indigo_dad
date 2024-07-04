@@ -2,7 +2,7 @@ package game
 
 import indigo.*
 
-final case class SSSplash(initialMessage: String) extends SubSystem[Model]:
+final case class SSSplash(initialMessage: String) extends SubSystem[FlicFlacGameModel]:
   type EventType = GlobalEvent
   type SubSystemModel = String
   type ReferenceData = Unit
@@ -13,9 +13,10 @@ final case class SSSplash(initialMessage: String) extends SubSystem[Model]:
     _ => None
 
   // Extra line here, as mandated by indigo's SubSystem.scala. Yet it is not in the examples!!!
-  def reference(model: Model): Unit = ()
+  def reference(flicFlacGameModel: FlicFlacGameModel): Unit = ()
 
-  def initialModel: Outcome[String] = Outcome(initialMessage)
+  def initialModel: Outcome[String] =
+    Outcome(initialMessage)
 
   def update(
       context: SubSystemFrameContext[ReferenceData],
@@ -29,3 +30,4 @@ final case class SSSplash(initialMessage: String) extends SubSystem[Model]:
   ): Outcome[SceneUpdateFragment] =
     Outcome(SceneUpdateFragment.empty)
 end SSSplash
+

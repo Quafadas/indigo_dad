@@ -44,43 +44,29 @@ val pieceNames: Array[String] = Array(
 )
 
 class Pieces(
-    sCylindersAssetName: String,
-    sCylindersAssetPath: String,
-    sBlocksAssetName: String,
-    sBlocksAssetPath: String,
     boardCfg: BoardConfig,
     hexBoard: HexBoard
 ):
+  println("@@@ Pieces Start")
 
-  val cylindersAssetName = AssetName(sCylindersAssetName)
-  val cylindersAssetPath = AssetPath(sCylindersAssetPath)
-  val blocksAssetName = AssetName(sBlocksAssetName)
-  val blocksAssetPath = AssetPath(sBlocksAssetPath)
   val pB = boardCfg.pB
   val w = boardCfg.gWidth
   val h = boardCfg.gHeight
 
   val pieces: Vector[Piece] = Vector(
-    Piece(CYLINDER, hexBoard.getCylinderHomePos(CB), CB, w, h, cylindersAssetName),
-    Piece(CYLINDER, hexBoard.getCylinderHomePos(CG), CG, w, h, cylindersAssetName),
-    Piece(CYLINDER, hexBoard.getCylinderHomePos(CY), CY, w, h, cylindersAssetName),
-    Piece(CYLINDER, hexBoard.getCylinderHomePos(CO), CO, w, h, cylindersAssetName),
-    Piece(CYLINDER, hexBoard.getCylinderHomePos(CR), CR, w, h, cylindersAssetName),
-    Piece(CYLINDER, hexBoard.getCylinderHomePos(CP), CP, w, h, cylindersAssetName),
-    Piece(BLOCK, hexBoard.getBlockHomePos(CB), CB, w, h, blocksAssetName),
-    Piece(BLOCK, hexBoard.getBlockHomePos(CG), CG, w, h, blocksAssetName),
-    Piece(BLOCK, hexBoard.getBlockHomePos(CY), CY, w, h, blocksAssetName),
-    Piece(BLOCK, hexBoard.getBlockHomePos(CO), CO, w, h, blocksAssetName),
-    Piece(BLOCK, hexBoard.getBlockHomePos(CR), CR, w, h, blocksAssetName),
-    Piece(BLOCK, hexBoard.getBlockHomePos(CP), CP, w, h, blocksAssetName)
+    Piece(CYLINDER, hexBoard.getCylinderHomePos(CB), CB, w, h, AssetName(GameAssets.cyAssetName)),
+    Piece(CYLINDER, hexBoard.getCylinderHomePos(CG), CG, w, h, AssetName(GameAssets.cyAssetName)),
+    Piece(CYLINDER, hexBoard.getCylinderHomePos(CY), CY, w, h, AssetName(GameAssets.cyAssetName)),
+    Piece(CYLINDER, hexBoard.getCylinderHomePos(CO), CO, w, h, AssetName(GameAssets.cyAssetName)),
+    Piece(CYLINDER, hexBoard.getCylinderHomePos(CR), CR, w, h, AssetName(GameAssets.cyAssetName)),
+    Piece(CYLINDER, hexBoard.getCylinderHomePos(CP), CP, w, h, AssetName(GameAssets.cyAssetName)),
+    Piece(BLOCK, hexBoard.getBlockHomePos(CB), CB, w, h, AssetName(GameAssets.blAssetName)),
+    Piece(BLOCK, hexBoard.getBlockHomePos(CG), CG, w, h, AssetName(GameAssets.blAssetName)),
+    Piece(BLOCK, hexBoard.getBlockHomePos(CY), CY, w, h, AssetName(GameAssets.blAssetName)),
+    Piece(BLOCK, hexBoard.getBlockHomePos(CO), CO, w, h, AssetName(GameAssets.blAssetName)),
+    Piece(BLOCK, hexBoard.getBlockHomePos(CR), CR, w, h, AssetName(GameAssets.blAssetName)),
+    Piece(BLOCK, hexBoard.getBlockHomePos(CP), CP, w, h, AssetName(GameAssets.blAssetName))
   )
-
-  def getAssets(): Set[AssetType] =
-    Set(
-      AssetType.Image(cylindersAssetName, cylindersAssetPath),
-      AssetType.Image(blocksAssetName, blocksAssetPath)
-    )
-  end getAssets
 
   /* paint draws the 12 pieces and the magenta highligter if one piece is selected
    */
@@ -114,5 +100,7 @@ class Pieces(
       p += 1
     end while
   end deselectAllPieces
+
+  println("@@@ Pieces Finish")
 
 end Pieces
