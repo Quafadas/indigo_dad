@@ -447,24 +447,28 @@ class HexBoard(boardCfg: BoardConfig, initScale: Double):
 
   def getCylinderHomePos(id: Int): Point =
     val p1 = Point(0,1)
+    val p2 = Point(arrayWidth-2,1)
     val p3 = Point(0, arrayHeight-1 - ((sZ&1)*2))
+    val p4 = Point(arrayWidth-2, arrayHeight-1-((sZ&1)*2))
     id match
         case CB => p1 + Point(0,0)  // Blue
         case CR => p1 + Point(0,2)  // Red
         case CY => p1 + Point(1,1)  // Yellow
-        case CO => p3 + Point(0,0)  // Orange
-        case CG => p3 + Point(0,-2) // Green
-        case CP => p3 + Point(1,-1) // Purple
+        case CO => p4 + Point(0,0)  // Orange
+        case CG => p4 + Point(0,-2) // Green
+        case CP => p4 + Point(0,-1) // Purple
     end match
   end getCylinderHomePos
 
   def getBlockHomePos(id: Int): Point =
+    val p1 = Point(0,1)
     val p2 = Point(arrayWidth-2,1)
+    val p3 = Point(0, arrayHeight-1 - ((sZ&1)*2))
     val p4 = Point(arrayWidth-2, arrayHeight-1-((sZ&1)*2))
     id match
-        case CB => p4 + Point(0,0)  // Blue
-        case CR => p4 + Point(0,-2) // Red
-        case CY => p4 + Point(0,-1) // Yellow
+        case CB => p3 + Point(0,0)  // Blue
+        case CR => p3 + Point(0,-2) // Red
+        case CY => p3 + Point(1,-1) // Yellow
         case CO => p2 + Point(0,0)  // Orange
         case CG => p2 + Point(0,2)  // Green
         case CP => p2 + Point(0,1)  // Purple
