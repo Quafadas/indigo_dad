@@ -17,7 +17,7 @@ case class HH(
     yP: Int // pixel y offset from base point for origin of png to paint this hex
 )
 
-class HexBoard(boardCfg: BoardConfig, initScale: Double):
+class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
 
   println("@@@ Class HexBoard Start")
 
@@ -69,7 +69,7 @@ class HexBoard(boardCfg: BoardConfig, initScale: Double):
   // println("hexArray size:" + sZ + " w:h" + borderlessArrayWidth +":" + height + " aw:ah" + + arrayWidth +":" + borderlessArrayHeight + " .rowLength:" + hexArray.length)
 
   // start with black board, populates q,r,s (for debugging the helper routine printBoard can follow this line)
-  fillBoard(arrayWidth, arrayHeight, mix(CK), initScale )
+  fillBoard(arrayWidth, arrayHeight, mix(CK), scaleFactor )
 
   // The first two rows are an invisible border
   fillHorizontalBorder(0, 2, arrayWidth, CX ) 
