@@ -49,34 +49,6 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
 
   println("@@@ Object HelloIndigo Starts")
 
-/*=========================
-// format: off
-  val boardCfg = BoardConfig(
-    91,                             // GWIDTH pixel width of graphic
-    81,                             // GHEIGHT pixel height of graphic
-    Point(100,50),                  // where the (inisible) top left hand corner of the hex grid board is positioned
-    2,                              // game size
-    70,                             // amount to add to a hex centre x coord to reach the vertical line of the next column
-    40,                             // half the amount to add to a hex centre y coord to reach the next hexagon below
-    10                              // xcoord of halfway along the top left diagonal line of first hex
-  )
-// format: on
-
-  // FIXME, eventually we will calculate / fix scaleFactor and boardCfg BasePoint ...
-  // ... from window dimensions supplied in main
-  var scaleFactor = 1.0
-
-  val hexBoard = HexBoard(boardCfg, scaleFactor)
-  
-  val pieces = Pieces(
-    boardCfg,
-    hexBoard
-  )
-
-
-  val highLighter = HighLighter(boardCfg, hexBoard, scaleFactor)
-  ===================*/
-
   val magnification = 1
 
   val config: GameConfig =
@@ -209,18 +181,7 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
     if (kount1 > 0)
       println("@@@ FlicFlacMain-present")
       kount1 = kount1 - 1
-/*
-    val fragsCombined = SceneUpdateFragment.empty |+|
-      SceneUpdateFragment(
-        Shape.Box(Rectangle(0, 0, 3000, 2000), Fill.Color(RGBA.Pink))
-      ) |+|
-      //boardCfg.getBackgroundFrag() |+|
-      hexBoard.paint(scaleFactor) |+|
-      highLighter.paint(scaleFactor) |+|
-      pieces.paint(scaleFactor)
-
-    fragsCombined
-*/
+      
     SceneUpdateFragment.empty
   }
 
@@ -259,5 +220,7 @@ case object ButtonSplashEvent extends GlobalEvent
 case object ButtonParamsEvent extends GlobalEvent
 case object ButtonGameEvent extends GlobalEvent
 case object ButtonResultsEvent extends GlobalEvent
+
+
 
 

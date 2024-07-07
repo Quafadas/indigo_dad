@@ -52,7 +52,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-    val textSplash = TextBox("Splash Scene", 400, 40)
+    val textSplash = TextBox("Splash Scene 5", 400, 40)
       .withColor(RGBA.Black)
       .withFontSize(Pixels(30))
       .moveTo(20, 0)
@@ -62,8 +62,17 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
     val width = bootData.pixelWidth
     val height = bootData.pixelHeight
 
+    // SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
     Outcome {
-      SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
+      val layerBg = (GameAssets.splashBg)
+      val dWidth: Double = width
+      val dHeight: Double = height
+      val dsfx : Double = dWidth/1920
+      val dsfy : Double = dHeight/1080
+      val sf : Double = if ( width * 1080 > height *1920 ) then dsfy else dsfx
+
+      SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Black)))
+        |+| SceneUpdateFragment(Layer(layerBg.scaleBy(sf, sf)))
         |+| SceneUpdateFragment(textSplash)
 //        |+| SceneUpdateFragment(viewModel.splashButton.draw)
         |+| SceneUpdateFragment(viewModel.paramsButton.draw)
@@ -98,19 +107,19 @@ object SplashSceneViewModel:
 */
       Button (
         buttonAssets = GameAssets.buttonParamsAssets,
-        bounds = Rectangle(400, 220, 240, 80),
+        bounds = Rectangle(50, 50, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonParamsEvent),
 
       Button (
         buttonAssets = GameAssets.buttonGameAssets,
-        bounds = Rectangle(400, 320, 240, 80),
+        bounds = Rectangle(50, 150, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonGameEvent),
 
       Button (
         buttonAssets = GameAssets.buttonResultsAssets,
-        bounds = Rectangle(400, 420, 240, 80),
+        bounds = Rectangle(50, 250, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonResultsEvent)
     )

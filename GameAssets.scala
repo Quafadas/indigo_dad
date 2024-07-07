@@ -5,8 +5,6 @@ import indigoextras.ui.*
 
 object GameAssets: 
 
-  val bgAssetName = "bg"
-  val bgAssetPath = "assets/BackGroundWhite.png"
   val hxAssetName = "hex2"
   val hxAssetPath = "assets/Hex2.png"
   val fbAssetName = "fourButtons"
@@ -15,20 +13,20 @@ object GameAssets:
   val cyAssetPath = "assets/Cylinders.png"
   val blAssetName = "blocks"
   val blAssetPath = "assets/Blocks.png"
+  val spAssetName = "splashBg"
+  val spAssetPath = "assets/FlicFlacV1.png"
 
   println("@@@ Object GameAssets START")
     
   def get(): Set[AssetType] =
     Set(
-//      AssetType.Image(AssetName(bgAssetName), AssetPath(bgAssetPath)),
       AssetType.Image(AssetName(hxAssetName), AssetPath(hxAssetPath)),
       AssetType.Image(AssetName(fbAssetName), AssetPath(fbAssetPath)),
       AssetType.Image(AssetName(cyAssetName), AssetPath(cyAssetPath)),
-      AssetType.Image(AssetName(blAssetName), AssetPath(blAssetPath))
+      AssetType.Image(AssetName(blAssetName), AssetPath(blAssetPath)),
+      AssetType.Image(AssetName(spAssetName), AssetPath(spAssetPath))
+      
     )
-
-//  def bgGraphic: Graphic[Material.ImageEffects] =                               // FIXME we should not need this !!!
-//    Graphic(0, 0, 256, 256, 1, Material.ImageEffects(AssetName(bgAssetName)))
 
   def gHex: Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName)))
@@ -61,7 +59,14 @@ object GameAssets:
       over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(720, 80, 240, 80),
       down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(720, 1200, 240, 80)
     )
+
+  def splashBg: Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(0, 0, 1920, 1080), 2, Material.ImageEffects(AssetName(spAssetName)))
+
+
   println("@@@ Object GameAssets FINISH")
+
+
 
 
 

@@ -165,7 +165,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
     val width = bootData.pixelWidth
     val height = bootData.pixelHeight
-    val scaleFactor = 1.0         // FIXME
 
     Outcome {
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
