@@ -6,7 +6,7 @@ setup-ide:
   scala-cli setup-ide .
 
 dev:
-  cs launch io.github.quafadas:live-server-scala-cli-js_3:0.1.1 -- --path-to-index-html {{invocation_directory()}}/static
+  cs launch io.github.quafadas:live-server-scala-cli-js_3:0.1.3 -- --path-to-index-html {{invocation_directory()}}/static
 
 copyAssets:
   cp -r {{justfile_directory()}}/static/. {{outDir}}
