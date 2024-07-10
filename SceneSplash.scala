@@ -3,6 +3,9 @@ package game
 import indigo.*
 import indigo.scenes.*
 import indigoextras.ui.*
+import scala.collection.View.Empty
+import indigo.shared.materials.Material.ImageEffects
+import indigo.shared.events.PointerEvent.PointerDown
 
 object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
@@ -10,6 +13,12 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
   type SceneViewModel = SplashSceneViewModel
 
   val name: SceneName = SceneName("Splash")
+  var k0 = 0
+  var k1 = 0
+  var k2 = 0
+  var k3 = 0
+  var k4 = 0
+  var k5 = 0
 
   def modelLens: Lens[FlicFlacGameModel, FlicFlacGameModel] =
     Lens.keepLatest
@@ -27,9 +36,36 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
   def updateModel(
       context: SceneContext[FlicFlacStartupData],
       model: FlicFlacGameModel
-  ): GlobalEvent => Outcome[FlicFlacGameModel] =
+  ): GlobalEvent => Outcome[FlicFlacGameModel] = {
+    case e: PointerEvent.PointerDown => 
+      val mouseDown =  MouseEvent.MouseDown( e.position.x, e.position.y )
+      println("@@@ PointerEventDown:" + e)
+      k0 += 1
+      k2 += 1
+      Outcome(model).addGlobalEvents(mouseDown)
+
+    case e: MouseEvent.MouseDown =>
+      println("@@@ MouseEventDown:" + e)
+      k1 += 1
+      k2 += 1
+      Outcome(model)
+    
+    case e: PointerEvent.PointerUp => 
+      val mouseUp =  MouseEvent.MouseUp( e.position.x, e.position.y )
+      println("@@@ PointerEventUp:" + e)
+      k3 += 1
+      k5 += 1
+      Outcome(model).addGlobalEvents(mouseUp)
+
+    case e: MouseEvent.MouseUp =>
+      println("@@@ MouseEventUp:" + e)
+      k4 += 1
+      k5 += 1
+      Outcome(model)
+
     case _ => 
       Outcome(model)
+  }
   end updateModel
 
   def updateViewModel(
@@ -52,27 +88,28 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-    val textSplash = TextBox("Splash Scene 5", 400, 40)
-      .withColor(RGBA.Black)
-      .withFontSize(Pixels(30))
-      .moveTo(20, 0)
+    val textSplash = TextBox("Splash Scene V14 " +k0+":"+k1+":"+k2+":"+k3+":"+k4+":"+k5, 400, 40)
+      .withColor(RGBA.Yellow)
+      .withFontSize(Pixels(20))
+      .moveTo(30, 0)
 
     val bootData = context.frameContext.startUpData.flicFlacBootData
 
     val width = bootData.pixelWidth
     val height = bootData.pixelHeight
 
-    // SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
     Outcome {
       val layerBg = (GameAssets.splashBg)
       val dWidth: Double = width
       val dHeight: Double = height
       val dsfx : Double = dWidth/1920
       val dsfy : Double = dHeight/1080
-      val sf : Double = if ( width * 1080 > height *1920 ) then dsfy else dsfx
+      //val sf : Double = if ( width * 1080 > height *1920 ) then dsfy else dsfx
+      val sf = 1.0  //FIXME no scaling for the moment and perhaps this is a permanent decision !!!    
 
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Black)))
         |+| SceneUpdateFragment(Layer(layerBg.scaleBy(sf, sf)))
+        |+| SceneUpdateFragment(GameAssets.cornerLayers(1920,1080,sf,RGBA.Yellow))  // Splash Scene is 1920x1080
         |+| SceneUpdateFragment(textSplash)
 //        |+| SceneUpdateFragment(viewModel.splashButton.draw)
         |+| SceneUpdateFragment(viewModel.paramsButton.draw)
@@ -93,6 +130,7 @@ final case class SplashSceneViewModel(
       bn3 <- gameButton.update(mouse)
       bn4 <- resultsButton.update(mouse)
     } yield this.copy( /*splashButton = bn1,*/ paramsButton = bn2, gameButton = bn3, resultsButton = bn4)
+
 
 object SplashSceneViewModel:
 
