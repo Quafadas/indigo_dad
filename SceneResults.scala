@@ -38,7 +38,7 @@ object SceneResults extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFl
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] = 
     case FrameTick =>
-      viewModel.update(context.mouse)
+      viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case _ => 
       Outcome(viewModel)
@@ -77,12 +77,12 @@ final case class ResultsSceneViewModel(
   gameButton: Button
 //  resultsButton: Button 
 ):
-  def update(mouse: Mouse): Outcome[ResultsSceneViewModel] =
+  def update(mouse: Mouse, pointers: Pointers): Outcome[ResultsSceneViewModel] =
     for {
-      bn1 <- splashButton.update(mouse)
-      bn2 <- paramsButton.update(mouse)
-      bn3 <- gameButton.update(mouse)
-//      bn4 <- resultsButton.update(mouse)
+      bn1 <- splashButton.updateFromPointers(pointers)
+      bn2 <- paramsButton.updateFromPointers(pointers)
+      bn3 <- gameButton.updateFromPointers(pointers)
+//      bn4 <- resultsButton.updateFromPointers(pointers)
     } yield this.copy( splashButton = bn1, paramsButton = bn2, gameButton = bn3 /*, resultsButton = bn4*/)
 
 object ResultsSceneViewModel:

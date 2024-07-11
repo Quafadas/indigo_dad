@@ -209,12 +209,7 @@ final case class FlicFlacViewModel(
     paramsScene: ParamsSceneViewModel,
     gameScene: GameSceneViewModel,
     resultsScene: ResultsSceneViewModel
-  ):
-    def update(mouse: Mouse): Outcome[FlicFlacViewModel] =
-      //splashScene.update(mouse).map(info => this.copy(splashScene = info))
-      paramsScene.update(mouse).map(info => this.copy(paramsScene = info))
-      gameScene.update(mouse).map(info => this.copy(gameScene = info))
-      resultsScene.update(mouse).map(info => this.copy(resultsScene = info))
+  )
 
 case object ButtonSplashEvent extends GlobalEvent
 case object ButtonParamsEvent extends GlobalEvent

@@ -142,7 +142,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] = 
     case FrameTick =>
-      viewModel.update(context.mouse)
+      viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case _ => 
       Outcome(viewModel)
@@ -184,12 +184,12 @@ final case class GameSceneViewModel(
 //  gameButton: Button,
   resultsButton: Button 
 ):
-  def update(mouse: Mouse): Outcome[GameSceneViewModel] =
+  def update(mouse: Mouse, pointers: Pointers): Outcome[GameSceneViewModel] =
     for {
-      bn1 <- splashButton.update(mouse)
-      bn2 <- paramsButton.update(mouse)
-//      bn3 <- gameButton.update(mouse)
-      bn4 <- resultsButton.update(mouse)
+      bn1 <- splashButton.updateFromPointers(pointers)
+      bn2 <- paramsButton.updateFromPointers(pointers)
+//      bn3 <- gameButton.updateFromPointers(pointers)
+      bn4 <- resultsButton.updateFromPointers(pointers)
     } yield this.copy( splashButton = bn1, paramsButton = bn2, /*gameButton = bn3,*/ resultsButton = bn4)
 
 object GameSceneViewModel:
@@ -224,7 +224,7 @@ object GameSceneViewModel:
 /* Adjusting buttons requires the following...
 1) Add/Remove Button from Object GameSceneViewModel
 2) Adjust positions of buttons in Object GameSceneViewModel
-3) Add/Remove mouse handling in case class GameSceneViewModel / update
+3) Add/Remove pointer handling in case class GameSceneViewModel / update
 4) Add/Remove appropriate SceneUpdateFragment in present / outcome
 
  */    

@@ -7,19 +7,14 @@ import scala.collection.View.Empty
 import indigo.shared.materials.Material.ImageEffects
 import indigo.shared.events.PointerEvent.PointerDown
 
+
 object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
   type SceneModel = FlicFlacGameModel
   type SceneViewModel = SplashSceneViewModel
 
   val name: SceneName = SceneName("Splash")
-  var k0 = 0
-  var k1 = 0
-  var k2 = 0
-  var k3 = 0
-  var k4 = 0
-  var k5 = 0
-
+  
   def modelLens: Lens[FlicFlacGameModel, FlicFlacGameModel] =
     Lens.keepLatest
 
@@ -37,32 +32,6 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       context: SceneContext[FlicFlacStartupData],
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] = {
-    case e: PointerEvent.PointerDown => 
-      val mouseDown =  MouseEvent.MouseDown( e.position.x, e.position.y )
-      println("@@@ PointerEventDown:" + e)
-      k0 += 1
-      k2 += 1
-      Outcome(model).addGlobalEvents(mouseDown)
-
-    case e: MouseEvent.MouseDown =>
-      println("@@@ MouseEventDown:" + e)
-      k1 += 1
-      k2 += 1
-      Outcome(model)
-    
-    case e: PointerEvent.PointerUp => 
-      val mouseUp =  MouseEvent.MouseUp( e.position.x, e.position.y )
-      println("@@@ PointerEventUp:" + e)
-      k3 += 1
-      k5 += 1
-      Outcome(model).addGlobalEvents(mouseUp)
-
-    case e: MouseEvent.MouseUp =>
-      println("@@@ MouseEventUp:" + e)
-      k4 += 1
-      k5 += 1
-      Outcome(model)
-
     case _ => 
       Outcome(model)
   }
@@ -88,7 +57,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-    val textSplash = TextBox("Splash Scene V16 " +k0+":"+k1+":"+k2+":"+k3+":"+k4+":"+k5, 400, 40)
+    val textSplash = TextBox("Splash Scene V20")
       .withColor(RGBA.Yellow)
       .withFontSize(Pixels(20))
       .moveTo(30, 0)
@@ -125,7 +94,7 @@ final case class SplashSceneViewModel(
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[SplashSceneViewModel] =
     for {
-//      bn1 <- splashButton.update(mouse)
+//      bn1 <- splashButton.updateFrom(pointers)
       bn2 <- paramsButton.updateFromPointers(pointers)
       bn3 <- gameButton.updateFromPointers(pointers)
       bn4 <- resultsButton.updateFromPointers(pointers)
@@ -143,6 +112,7 @@ object SplashSceneViewModel:
         depth = Depth(6)
         ).withUpActions(ButtonSplashEvent),
 */
+
       Button (
         buttonAssets = GameAssets.buttonParamsAssets,
         bounds = Rectangle(50, 50, 240, 80),
@@ -162,57 +132,3 @@ object SplashSceneViewModel:
       ).withUpActions(ButtonResultsEvent)
     )      
 
-
-/** This is a workaround to show a way to make buttons support simple pointer events. It is a simplified version of the
-  * standard Button update function.
-  */
-extension (b: Button)
-  def updateFromPointers(p: Pointers): Outcome[Button] =
-    val inBounds = b.bounds.isPointWithin(p.position)
-
-    val upEvents: Batch[GlobalEvent] =
-      if inBounds && p.released then b.onUp()
-      else Batch.empty
-
-    val downEvents: Batch[GlobalEvent] =
-      if inBounds && p.pressed then b.onDown()
-      else Batch.empty
-
-    val pointerEvents: Batch[GlobalEvent] =
-      downEvents ++ upEvents
-
-    b.state match
-      // Stay in Down state
-      case ButtonState.Down if inBounds && p.pressed =>
-        Outcome(b).addGlobalEvents(b.onHoldDown() ++ pointerEvents)
-
-      // Move to Down state
-      case ButtonState.Up if inBounds && p.pressed =>
-        Outcome(b.toDownState).addGlobalEvents(b.onHoverOver() ++ pointerEvents)
-
-      // Out of Down state
-      case ButtonState.Down if !inBounds && (p.pressed || p.released) =>
-        Outcome(b.toUpState).addGlobalEvents(b.onHoverOut() ++ pointerEvents)
-
-      case ButtonState.Down if inBounds && p.released =>
-        Outcome(b.toUpState).addGlobalEvents(pointerEvents)
-
-      // Unaccounted for states.
-      case _ =>
-        Outcome(b).addGlobalEvents(pointerEvents)
-
-/** This is a workaround to make up for Pointer not exposing any convenience methods.
-  */
-extension (p: Pointers)
-
-  def pressed: Boolean =
-    p.pointerEvents.exists {
-      case _: PointerEvent.PointerDown => true
-      case _                           => false
-    }
-
-  def released: Boolean =
-    p.pointerEvents.exists {
-      case _: PointerEvent.PointerUp => true
-      case _                         => false
-    }
