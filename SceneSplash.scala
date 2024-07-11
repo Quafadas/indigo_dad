@@ -74,7 +74,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] = 
     case FrameTick =>
-      viewModel.update(context.mouse)
+      viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case _ => 
       Outcome(viewModel)
@@ -88,7 +88,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-    val textSplash = TextBox("Splash Scene V14 " +k0+":"+k1+":"+k2+":"+k3+":"+k4+":"+k5, 400, 40)
+    val textSplash = TextBox("Splash Scene V16 " +k0+":"+k1+":"+k2+":"+k3+":"+k4+":"+k5, 400, 40)
       .withColor(RGBA.Yellow)
       .withFontSize(Pixels(20))
       .moveTo(30, 0)
@@ -123,12 +123,12 @@ final case class SplashSceneViewModel(
   gameButton: Button,
   resultsButton: Button 
 ):
-  def update(mouse: Mouse): Outcome[SplashSceneViewModel] =
+  def update(mouse: Mouse, pointers: Pointers): Outcome[SplashSceneViewModel] =
     for {
 //      bn1 <- splashButton.update(mouse)
-      bn2 <- paramsButton.update(mouse)
-      bn3 <- gameButton.update(mouse)
-      bn4 <- resultsButton.update(mouse)
+      bn2 <- paramsButton.updateFromPointers(pointers)
+      bn3 <- gameButton.updateFromPointers(pointers)
+      bn4 <- resultsButton.updateFromPointers(pointers)
     } yield this.copy( /*splashButton = bn1,*/ paramsButton = bn2, gameButton = bn3, resultsButton = bn4)
 
 
@@ -160,5 +160,59 @@ object SplashSceneViewModel:
         bounds = Rectangle(50, 250, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonResultsEvent)
-    )
-    
+    )      
+
+
+/** This is a workaround to show a way to make buttons support simple pointer events. It is a simplified version of the
+  * standard Button update function.
+  */
+extension (b: Button)
+  def updateFromPointers(p: Pointers): Outcome[Button] =
+    val inBounds = b.bounds.isPointWithin(p.position)
+
+    val upEvents: Batch[GlobalEvent] =
+      if inBounds && p.released then b.onUp()
+      else Batch.empty
+
+    val downEvents: Batch[GlobalEvent] =
+      if inBounds && p.pressed then b.onDown()
+      else Batch.empty
+
+    val pointerEvents: Batch[GlobalEvent] =
+      downEvents ++ upEvents
+
+    b.state match
+      // Stay in Down state
+      case ButtonState.Down if inBounds && p.pressed =>
+        Outcome(b).addGlobalEvents(b.onHoldDown() ++ pointerEvents)
+
+      // Move to Down state
+      case ButtonState.Up if inBounds && p.pressed =>
+        Outcome(b.toDownState).addGlobalEvents(b.onHoverOver() ++ pointerEvents)
+
+      // Out of Down state
+      case ButtonState.Down if !inBounds && (p.pressed || p.released) =>
+        Outcome(b.toUpState).addGlobalEvents(b.onHoverOut() ++ pointerEvents)
+
+      case ButtonState.Down if inBounds && p.released =>
+        Outcome(b.toUpState).addGlobalEvents(pointerEvents)
+
+      // Unaccounted for states.
+      case _ =>
+        Outcome(b).addGlobalEvents(pointerEvents)
+
+/** This is a workaround to make up for Pointer not exposing any convenience methods.
+  */
+extension (p: Pointers)
+
+  def pressed: Boolean =
+    p.pointerEvents.exists {
+      case _: PointerEvent.PointerDown => true
+      case _                           => false
+    }
+
+  def released: Boolean =
+    p.pointerEvents.exists {
+      case _: PointerEvent.PointerUp => true
+      case _                         => false
+    }
