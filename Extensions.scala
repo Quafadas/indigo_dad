@@ -1,7 +1,7 @@
 package game
 
 import indigo.*
-import indigoextras.ui.* 
+import indigoextras.ui.*
 
 // the original extensions to Button and Pointers was kindly provided by Dave Smith
 
@@ -15,7 +15,7 @@ extension (b: Button)
     val hoverEvents: Batch[GlobalEvent] =
       if inBounds && p.moved then b.onHoverOver()
       else Batch.empty
-    
+
     val upEvents: Batch[GlobalEvent] =
       if inBounds && p.released then b.onUp()
       else Batch.empty
@@ -25,43 +25,36 @@ extension (b: Button)
       else Batch.empty
 
     val pointerEvents: Batch[GlobalEvent] =
-      downEvents ++ upEvents ++ hoverEvents
+      hoverEvents ++ downEvents ++ upEvents
 
     b.state match
-      // Stay in Up state if OUT OF BOUNDS and pointer released, pressed or moved
-      case ButtonState.Up if !inBounds && (p.pressed || p.released || p.moved) =>
-        Outcome(b.toUpState).addGlobalEvents(b.onHoverOut() ++ pointerEvents)
+      
+      // Stay in Down state
+      case ButtonState.Down if inBounds && p.pressed =>
+        Outcome(b).addGlobalEvents(b.onHoldDown() ++ pointerEvents)
 
-      // Move from Up to Down state when pointer within bounds and pressed
+      // Move from Up to Down state on button/pointer press
       case ButtonState.Up if inBounds && p.pressed =>
-        Outcome(b.toDownState).addGlobalEvents(b.onHoldDown() ++ pointerEvents)
+        Outcome(b.toDownState).addGlobalEvents(b.onHoverOver() ++ pointerEvents)
 
-      // Move from Up to Over state when pointer within bounds and released
-      case ButtonState.Up if inBounds && p.released =>
-        Outcome(b.toOverState).addGlobalEvents(b.onHoverOver() ++ pointerEvents)
-
-      // Move from Up to Over state when pointer moves within bounds
-      case ButtonState.Up if inBounds && p.moved =>
-        Outcome(b.toOverState).addGlobalEvents(b.onHoverOver() ++ pointerEvents)
-
-      // Move from Down to Up state if OUT OF BOUNDS and pointer released, pressed or moved
+      // Move from Down to Up state (out of bounds)
       case ButtonState.Down if !inBounds && (p.pressed || p.released || p.moved) =>
         Outcome(b.toUpState).addGlobalEvents(b.onHoverOut() ++ pointerEvents)
 
-      // Stay in Down state if double button press
-      case ButtonState.Down if inBounds && p.pressed =>
-        Outcome(b).addGlobalEvents(b.onHoldDown() ++ pointerEvents)     
-        
-      // Move from Down to Up (or should this be "Over") state if pointer within bounds and released
+      // Move from Down to Up state (mouse/pointer released)
       case ButtonState.Down if inBounds && p.released =>
         Outcome(b.toUpState).addGlobalEvents(pointerEvents)
 
-      // Move from Over to Up state if OUT OF BOUNDS and pointer released, pressed or moved
+      // Move from Over to Up state (out of bounds)
       case ButtonState.Over if !inBounds && (p.pressed || p.released || p.moved) =>
-        Outcome(b.toUpState).addGlobalEvents(b.onHoverOut() ++ pointerEvents)
+        Outcome(b.toUpState).addGlobalEvents(b.onHoverOut() ++ pointerEvents)   
 
-      // Stay in Over state if pointer within bounds and released
-      case ButtonState.Over if inBounds && p.released =>
+      // Move from Over to Down state (mouse/pointer press)
+      case ButtonState.Over if inBounds && p.pressed  =>
+        Outcome(b.toDownState).addGlobalEvents(b.onDown() ++ pointerEvents)
+
+      // Move from Up to Over (mouse/pointer moved within bounds)
+      case ButtonState.Up if inBounds && p.moved =>
         Outcome(b.toOverState).addGlobalEvents(b.onHoverOver() ++ pointerEvents)
 
       // Unaccounted for states.

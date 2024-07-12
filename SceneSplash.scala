@@ -32,7 +32,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       context: SceneContext[FlicFlacStartupData],
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] = {
-    case _ => 
+    case _ =>       
       Outcome(model)
   }
   end updateModel
@@ -42,7 +42,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       model: FlicFlacGameModel,
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] = 
-    case FrameTick =>
+    case FrameTick =>  
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case _ => 
@@ -57,7 +57,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-    val textSplash = TextBox("Splash Scene V20")
+    val textSplash = TextBox("Splash Scene V24")
       .withColor(RGBA.Yellow)
       .withFontSize(Pixels(20))
       .moveTo(30, 0)
