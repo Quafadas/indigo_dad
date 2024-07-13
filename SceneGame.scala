@@ -44,6 +44,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   var dMsg3 = "3"
   var dMsg4 = "4"
   var dMsg5 = "5"
+
+  var throttle = SceneUpdateFragment.empty
   
   // FIXME, eventually we will calculate / fix scaleFactor and boardCfg BasePoint ...
   // ... from window dimensions supplied in main
@@ -191,17 +193,18 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val width = bootData.pixelWidth
     val height = bootData.pixelHeight
 
-    Outcome {
-      SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
-        |+| SceneUpdateFragment(textGame)
-        |+| SceneUpdateFragment(viewModel.splashButton.draw)
-        |+| SceneUpdateFragment(viewModel.paramsButton.draw)
-//        |+| SceneUpdateFragment(viewModel.gameButton.draw)
-        |+| SceneUpdateFragment(viewModel.resultsButton.draw)
-        |+| hexBoard.paint(scaleFactor)
-        |+| highLighter.paint(scaleFactor)
-        |+| pieces.paint(scaleFactor, viewModel.optDragPos)
-    }
+    if (iTick % 5 == 0) then 
+      throttle = SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
+                    |+| SceneUpdateFragment(textGame)
+                    |+| SceneUpdateFragment(viewModel.splashButton.draw)
+                    |+| SceneUpdateFragment(viewModel.paramsButton.draw)
+//                  |+| SceneUpdateFragment(viewModel.gameButton.draw)
+                    |+| SceneUpdateFragment(viewModel.resultsButton.draw)
+                    |+| hexBoard.paint(scaleFactor)
+                    |+| highLighter.paint(scaleFactor)
+                    |+| pieces.paint(scaleFactor, viewModel.optDragPos)
+    Outcome(throttle)
+    
 
 final case class GameSceneViewModel(
   var optDragPos : Option[Point],
