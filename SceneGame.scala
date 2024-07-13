@@ -189,11 +189,11 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-//    val textGame = TextBox("Game Scene")
-    val textGame = TextBox(dMsg1+":"+dMsg2+":"+dMsg3+":"+dMsg4+":"+dMsg5+":"+iTick+":"+iMove, 1000, 40)
-      .withColor(RGBA.Black)
-      .withFontSize(Pixels(30))
-      .moveTo(20, 0)
+    val textGame = TextBox("Game Scene")
+//    val textGame = TextBox(dMsg1+":"+dMsg2+":"+dMsg3+":"+dMsg4+":"+dMsg5+":"+iTick+":"+iMove, 1000, 40)
+//      .withColor(RGBA.Black)
+//      .withFontSize(Pixels(30))
+//      .moveTo(20, 0)
     val dragState = if (viewModel.dragOn) then "Drag:ON" else "DRAG:OFF"
     val textDrag = TextBox(dragState, 200, 40)
       .withColor(RGBA.Black)
@@ -206,8 +206,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val width = bootData.pixelWidth
     val height = bootData.pixelHeight
 
-    if (iTick % 2 == 0) then 
-      throttle = SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
+    Outcome(SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
                     |+| SceneUpdateFragment(textGame)
                     |+| SceneUpdateFragment(viewModel.dragButton.draw)
                     |+| SceneUpdateFragment(textDrag)
@@ -218,7 +217,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                     |+| hexBoard.paint(scaleFactor)
                     |+| highLighter.paint(scaleFactor)
                     |+| pieces.paint(scaleFactor, viewModel.optDragPos)
-    Outcome(throttle)
+    )
     
 
 final case class GameSceneViewModel(
