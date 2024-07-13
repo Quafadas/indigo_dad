@@ -158,16 +158,23 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case e: PointerEvent.PointerMove =>
-      pieces.findPieceSelected() match
-        case Some(p) =>
-          dMsg5 = "Moving"
-          println("@@@ PointerEventMove @ " + e.position)
-          viewModel.optDragPos = Some(e.position)
+      if (viewModel.dragOn) then 
+        pieces.findPieceSelected() match
+          case Some(p) =>
+            dMsg5 = "Moving"
+            println("@@@ PointerEventMove @ " + e.position)
+            viewModel.optDragPos = Some(e.position)
 
-        case None =>
-          dMsg5 = "None"
-          viewModel.optDragPos = None
+          case None =>
+            dMsg5 = "None"
+            viewModel.optDragPos = None
+      end if
       iMove += 1
+      Outcome(viewModel)
+
+    case ButtonRoundEvent =>
+      if (viewModel.dragOn) then viewModel.dragOn = false
+      else viewModel.dragOn = true
       Outcome(viewModel)
 
     case _ => 
@@ -187,15 +194,23 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       .withColor(RGBA.Black)
       .withFontSize(Pixels(30))
       .moveTo(20, 0)
+    val dragState = if (viewModel.dragOn) then "Drag:ON" else "DRAG:OFF"
+    val textDrag = TextBox(dragState, 200, 40)
+      .withColor(RGBA.Black)
+      .withFontSize(Pixels(30))
+      .moveTo(110, 60)
+
 
     val bootData = context.frameContext.startUpData.flicFlacBootData
 
     val width = bootData.pixelWidth
     val height = bootData.pixelHeight
 
-    if (iTick % 5 == 0) then 
+    if (iTick % 2 == 0) then 
       throttle = SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
                     |+| SceneUpdateFragment(textGame)
+                    |+| SceneUpdateFragment(viewModel.dragButton.draw)
+                    |+| SceneUpdateFragment(textDrag)
                     |+| SceneUpdateFragment(viewModel.splashButton.draw)
                     |+| SceneUpdateFragment(viewModel.paramsButton.draw)
 //                  |+| SceneUpdateFragment(viewModel.gameButton.draw)
@@ -208,6 +223,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
 final case class GameSceneViewModel(
   var optDragPos : Option[Point],
+  var dragOn : Boolean,
+  dragButton: Button,
   splashButton: Button,
   paramsButton: Button,
 //  gameButton: Button,
@@ -215,11 +232,12 @@ final case class GameSceneViewModel(
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[GameSceneViewModel] =
     for {
+      bn0 <- dragButton.updateFromPointers(pointers)
       bn1 <- splashButton.updateFromPointers(pointers)
       bn2 <- paramsButton.updateFromPointers(pointers)
 //      bn3 <- gameButton.updateFromPointers(pointers)
       bn4 <- resultsButton.updateFromPointers(pointers)
-    } yield this.copy( splashButton = bn1, paramsButton = bn2, /*gameButton = bn3,*/ resultsButton = bn4)
+    } yield this.copy( dragButton = bn0, splashButton = bn1, paramsButton = bn2, /*gameButton = bn3,*/ resultsButton = bn4)
 
 object GameSceneViewModel:
 
@@ -227,7 +245,15 @@ object GameSceneViewModel:
 
     GameSceneViewModel(
 
-      None,
+      None,   // we have no last position of the pointer recorded
+
+      false,  // the drag option is not switched on
+
+      Button (
+        buttonAssets = GameAssets.buttonRoundAssets,
+        bounds = Rectangle(20, 40, 90, 80),
+        depth = Depth(6),
+      ).withUpActions(ButtonRoundEvent),
 
       Button (
         buttonAssets = GameAssets.buttonSplashAssets,

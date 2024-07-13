@@ -215,6 +215,8 @@ case object ButtonSplashEvent extends GlobalEvent
 case object ButtonParamsEvent extends GlobalEvent
 case object ButtonGameEvent extends GlobalEvent
 case object ButtonResultsEvent extends GlobalEvent
+case object ButtonRoundEvent extends GlobalEvent
+
 
 
 

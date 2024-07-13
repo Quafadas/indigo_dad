@@ -64,8 +64,14 @@ object GameAssets:
       over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(720, 80, 240, 80),
       down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(720, 160, 240, 80)
     )
-  def buttonResultsDown: Graphic[Material.ImageEffects] =
-    Graphic(Rectangle(0, 0, 240, 80), 6, Material.ImageEffects(AssetName(fbAssetName))).withCrop(720, 160, 240, 80)
+
+  def buttonRoundAssets: ButtonAssets =
+    ButtonAssets(
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(960, 0, 90, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(960, 80, 90, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(960, 160, 90, 80)
+    )
+
 
   def splashBg: Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 1920, 1080), 2, Material.ImageEffects(AssetName(spAssetName)))
