@@ -37,6 +37,12 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   )
 // format: on
 
+  var dMsg1 = "1"
+  var dMsg2 = "2"
+  var dMsg3 = "3"
+  var dMsg4 = "4"
+  var dMsg5 = "5"
+  
   // FIXME, eventually we will calculate / fix scaleFactor and boardCfg BasePoint ...
   // ... from window dimensions supplied in main
   var scaleFactor = 1.0
@@ -57,53 +63,75 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] = {
     case e: PointerEvent.PointerDown =>
+      dMsg1 = "PoDown"
       val clickPoint = e.position
       val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
       hexPosn match
         // Pointer Down ... position on the grid
         case Some(pos) =>
+          dMsg2 = "GridTrue"
           highLighter.setPos(pos)
           highLighter.shine(true)
           pieces.deselectAllPieces()
+          dMsg4 = "SelFalse"
           pieces.findPieceByPos(pos) match
             // Pointer Down ... piece found and on the grid
-            case Some(piece) => piece.setSelected(true)
-            case None        => ;
+            case Some(piece) => 
+              dMsg3 = "PieceFound"
+              piece.setSelected(true)
+              dMsg4 = "SelTrue"
+            case None        => 
+              dMsg3 = "PieceNotFound"
+              ;
           end match
 
         // Pointer Down ... position off the grid
-        case None => ;
+        case None =>
+          dMsg2 = "GridFalse"
+          ;
       end match
       Outcome(model)
 
     case e: PointerEvent.PointerUp =>
+      dMsg1 = "PoUp"
       val clickPoint = e.position
       val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
       hexPosn match
         // Pointer Up ... The position is on the hex grid
         case Some(pos) =>
+          dMsg2 = "GridTrue"
           pieces.findPieceSelected() match
             // Pointer Up ... piece selected and valid position
             case Some(piece) =>
+              dMsg3 = "PieceFound"
               if (piece.pCurPos != pos) && (hexBoard.isThisHexBlack(pos) == true) then 
                 piece.toggleFlip()
               end if
               piece.setPosition(pos)
               piece.setSelected(false)
+              dMsg4 = "SelFalse"
+
             // Pointer Up ... no piece selected but on the grid
-            case None => ;
+            case None => 
+              dMsg3 = "PieceNotFound"
+              ;
 
 
         // Pointer Up ... the position is off the hex grid
         case None =>
+          dMsg2 = "GridFalse"
           pieces.findPieceSelected() match
             // Pointer Up ... we have selected a piece but moved it off the grid
             case Some(piece) =>
+              dMsg3 = "PieceFound"
               piece.moveToHome()
               piece.setSelected(false)
+              dMsg4 = "SelFalse"
 
             // Pointer Up ... no piece selected and also off the grid
-            case None => ;
+            case None => 
+              dMsg3 = "PieceNotFound"
+              ;
           end match
 
       end match
@@ -127,10 +155,12 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     case e: PointerEvent.PointerMove =>
       pieces.findPieceSelected() match
         case Some(p) =>
+          dMsg5 = "Moving"
           println("@@@ PointerEventMove @ " + e.position)
           viewModel.optDragPos = Some(e.position)
 
         case None =>
+          dMsg5 = "None"
           viewModel.optDragPos = None
 
       Outcome(viewModel)
@@ -147,7 +177,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-    val textGame = TextBox("Game Scene", 400, 40)
+//    val textGame = TextBox("Game Scene")
+    val textGame = TextBox(dMsg1+":"+dMsg2+":"+dMsg3+":"+dMsg4+":"+dMsg5, 1000, 40)
       .withColor(RGBA.Black)
       .withFontSize(Pixels(30))
       .moveTo(20, 0)
