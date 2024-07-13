@@ -189,11 +189,11 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-    val textGame = TextBox("Game Scene")
-//    val textGame = TextBox(dMsg1+":"+dMsg2+":"+dMsg3+":"+dMsg4+":"+dMsg5+":"+iTick+":"+iMove, 1000, 40)
-//      .withColor(RGBA.Black)
-//      .withFontSize(Pixels(30))
-//      .moveTo(20, 0)
+//    val textGame = TextBox("Game Scene")
+    val textGame = TextBox(dMsg1+":"+dMsg2+":"+dMsg3+":"+dMsg4+":"+dMsg5+":"+iTick+":"+iMove, 1000, 40)
+      .withColor(RGBA.Black)
+      .withFontSize(Pixels(30))
+      .moveTo(20, 0)
     val dragState = if (viewModel.dragOn) then "Drag:ON" else "DRAG:OFF"
     val textDrag = TextBox(dragState, 200, 40)
       .withColor(RGBA.Black)
