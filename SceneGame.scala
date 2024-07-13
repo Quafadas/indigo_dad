@@ -156,7 +156,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     case FrameTick =>
       iTick += 1
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
-
+/*
     case e: PointerEvent.PointerMove =>
       if (viewModel.dragOn) then 
         pieces.findPieceSelected() match
@@ -171,7 +171,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       end if
       iMove += 1
       Outcome(viewModel)
-
+*/
     case ButtonRoundEvent =>
       if (viewModel.dragOn) then viewModel.dragOn = false
       else viewModel.dragOn = true
