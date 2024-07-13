@@ -68,20 +68,44 @@ class Pieces(
     Piece(BLOCK, hexBoard.getBlockHomePos(CP), CP, w, h, AssetName(GameAssets.blAssetName))
   )
 
-  /* paint draws the 12 pieces and the magenta highligter if one piece is selected
+  /* paint draws the 12 pieces
    */
-  def paint(fS: Double): SceneUpdateFragment =
+  def paint(fS: Double, optDragPos: Option[Point]): SceneUpdateFragment =
     var frag = SceneUpdateFragment.empty
-    // traverse the pieces in reverse order, so that last displayed matches first found
-    var p = pieces.length - 1
-    while p >= 0 do
-      val pSrc = pieces(p).pCurPos
-      val pPos = hexBoard.getXpYp(pSrc)
-      val layer = pieces(p).getGraphic()
-      val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB.x + pPos.x, pB.y + pPos.y).scaleBy(fS, fS)))
-      frag = frag |+| newFrag
-      p -= 1
-    end while
+
+    // first draw all the unselected pieces ...
+
+    for ( p <- pieces )
+      val layer = p.getGraphic()
+      val pSrc = p.pCurPos
+
+      if (p.selected() == false) then 
+        val pPos = hexBoard.getXpYp(pSrc)
+        val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS)))
+        frag = frag |+| newFrag
+    end for
+
+    // second draw the selected piece if it exists
+    // ... (only expecting one for now, but perhaps game might allow more in future)   
+
+    for ( p <- pieces )
+      val layer = p.getGraphic()
+      val pSrc = p.pCurPos
+
+      if (p.selected() == true) then 
+        optDragPos match 
+          case Some(pos) => 
+            val pC = Point(p.gWidth/2, p.gHeight/2 )
+            val pPos = pos - pC
+            val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pPos).scaleBy(fS, fS)))
+            frag = frag |+| newFrag
+          case None => 
+            val pPos = hexBoard.getXpYp(pSrc)
+            val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS)))
+            frag = frag |+| newFrag
+        end match
+    end for
+
     frag
   end paint
 

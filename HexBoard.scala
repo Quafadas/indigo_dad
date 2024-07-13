@@ -324,7 +324,7 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
     val xWidth = boardCfg.xWidth    // amount to add to a hex centre x coord to reach the vertical line of the next column
     val yHeight = boardCfg.yHeight  // half the amount to add to a hex centre y coord to reach the next hexagon below
     val xMultiplier = xWidth * fS   // predetermine multiplier to speed things up
-    val yMultiplier = yHeight * fS  // predetermine width/1920multiplier to speed things up
+    val yMultiplier = yHeight * fS  // predetermine multiplier to speed things up
 
     var y = 0
     while y < arrayHeight do

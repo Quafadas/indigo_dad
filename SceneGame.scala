@@ -52,84 +52,64 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
 // --- End of hex game intrusion
 
-
   def updateModel(
       context: SceneContext[FlicFlacStartupData],
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] = {
-    case e: MouseEvent.MouseDown =>
-      e._8 match
-        case MouseButton.LeftMouseButton =>
-          println("MouseEventLeftButtonDown @ " + e.position)
-          val clickPoint = e.position
-          val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
-          hexPosn match
-            // Mouse Down ... position on the grid
-            case Some(pos) =>
-              highLighter.setPos(pos)
-              highLighter.shine(true)
-              pieces.deselectAllPieces()
-              pieces.findPieceByPos(pos) match
-                // Mouse Down ... piece found and on the grid
-                case Some(piece) => piece.setSelected(true)
-                case None        => ;
-              end match
-            // Mouse Down ... position off the grid
+    case e: PointerEvent.PointerDown =>
+      val clickPoint = e.position
+      val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
+      hexPosn match
+        // Pointer Down ... position on the grid
+        case Some(pos) =>
+          highLighter.setPos(pos)
+          highLighter.shine(true)
+          pieces.deselectAllPieces()
+          pieces.findPieceByPos(pos) match
+            // Pointer Down ... piece found and on the grid
+            case Some(piece) => piece.setSelected(true)
+            case None        => ;
+          end match
+
+        // Pointer Down ... position off the grid
+        case None => ;
+      end match
+      Outcome(model)
+
+    case e: PointerEvent.PointerUp =>
+      val clickPoint = e.position
+      val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
+      hexPosn match
+        // Pointer Up ... The position is on the hex grid
+        case Some(pos) =>
+          pieces.findPieceSelected() match
+            // Pointer Up ... piece selected and valid position
+            case Some(piece) =>
+              if (piece.pCurPos != pos) && (hexBoard.isThisHexBlack(pos) == true) then 
+                piece.toggleFlip()
+              end if
+              piece.setPosition(pos)
+              piece.setSelected(false)
+            // Pointer Up ... no piece selected but on the grid
+            case None => ;
+
+
+        // Pointer Up ... the position is off the hex grid
+        case None =>
+          pieces.findPieceSelected() match
+            // Pointer Up ... we have selected a piece but moved it off the grid
+            case Some(piece) =>
+              piece.moveToHome()
+              piece.setSelected(false)
+
+            // Pointer Up ... no piece selected and also off the grid
             case None => ;
           end match
 
-          Outcome(model)
-
-        case _ =>
-          Outcome(model)
-
       end match
-    // Outcome(model.update(context.delta))
-
-    case e: MouseEvent.MouseUp =>
-      e._8 match
-        case MouseButton.RightMouseButton =>
-          println("@@@ MouseEventRightButtonUp @ " + e.position)
-          scaleFactor = scaleFactor + 0.2
-          if scaleFactor >= 2.1 then scaleFactor = 0.2
-          end if
-          hexBoard.changeScale(scaleFactor)
-          Outcome(model)
-
-        case MouseButton.LeftMouseButton =>
-          println("@@@ MouseEventLeftButtonUp @ " + e.position)
-          val clickPoint = e.position
-          val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
-          hexPosn match
-            // Mouse Up ... The position is on the hex grid
-            case Some(pos) =>
-              pieces.findPieceSelected() match
-                // Mouse Up ... piece selected and valid position
-                case Some(piece) =>
-                  piece.setPosition(pos)
-                  if hexBoard.isThisHexBlack(pos) == true then piece.toggleFlip()
-                  end if
-                // Mouse Up ... no piece selected but on the grid
-                case None => ;
-
-            // Mouse Up ... the position is off the hex grid
-            case None =>
-              pieces.findPieceSelected() match
-                // Mouse Up ... we have selected a piece but moved it off the grid
-                case Some(piece) =>
-                  piece.moveToHome()
-
-                // Mouse Up ... no piece selected and also off the grid
-                case None => ;
-          end match
-          // Mouse Up so turn highlighter off
-          highLighter.shine(false)
-          Outcome(model)
-
-        case _ =>
-          Outcome(model)
-      end match
-    // Outcome(model.update(context.delta))
+      // Pointer Up so turn highlighter off
+      highLighter.shine(false)
+      Outcome(model)
 
     case _ => 
       Outcome(model)
@@ -143,6 +123,17 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   ): GlobalEvent => Outcome[SceneViewModel] = 
     case FrameTick =>
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
+
+    case e: PointerEvent.PointerMove =>
+      pieces.findPieceSelected() match
+        case Some(p) =>
+          println("@@@ PointerEventMove @ " + e.position)
+          viewModel.optDragPos = Some(e.position)
+
+        case None =>
+          viewModel.optDragPos = None
+
+      Outcome(viewModel)
 
     case _ => 
       Outcome(viewModel)
@@ -175,10 +166,11 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(viewModel.resultsButton.draw)
         |+| hexBoard.paint(scaleFactor)
         |+| highLighter.paint(scaleFactor)
-        |+| pieces.paint(scaleFactor)
+        |+| pieces.paint(scaleFactor, viewModel.optDragPos)
     }
 
 final case class GameSceneViewModel(
+  var optDragPos : Option[Point],
   splashButton: Button,
   paramsButton: Button,
 //  gameButton: Button,
@@ -195,7 +187,11 @@ final case class GameSceneViewModel(
 object GameSceneViewModel:
 
   val initial: GameSceneViewModel = 
+
     GameSceneViewModel(
+
+      None,
+
       Button (
         buttonAssets = GameAssets.buttonSplashAssets,
         bounds = Rectangle(20, 120, 240, 80),
