@@ -37,6 +37,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   )
 // format: on
 
+  var iTick = 0
+  var iMove = 0
   var dMsg1 = "1"
   var dMsg2 = "2"
   var dMsg3 = "3"
@@ -150,6 +152,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] = 
     case FrameTick =>
+      iTick += 1
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case e: PointerEvent.PointerMove =>
@@ -162,7 +165,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         case None =>
           dMsg5 = "None"
           viewModel.optDragPos = None
-
+      iMove += 1
       Outcome(viewModel)
 
     case _ => 
@@ -178,7 +181,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   ): Outcome[SceneUpdateFragment] =
 
 //    val textGame = TextBox("Game Scene")
-    val textGame = TextBox(dMsg1+":"+dMsg2+":"+dMsg3+":"+dMsg4+":"+dMsg5, 1000, 40)
+    val textGame = TextBox(dMsg1+":"+dMsg2+":"+dMsg3+":"+dMsg4+":"+dMsg5+":"+iTick+":"+iMove, 1000, 40)
       .withColor(RGBA.Black)
       .withFontSize(Pixels(30))
       .moveTo(20, 0)
