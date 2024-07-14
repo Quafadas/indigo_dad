@@ -37,16 +37,14 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   )
 // format: on
 
-  var iTick = 0
-  var iMove = 0
-  var dMsg1 = "1"
-  var dMsg2 = "2"
-  var dMsg3 = "3"
-  var dMsg4 = "4"
-  var dMsg5 = "5"
+  var iFrameTick = 0
+  var iDragTick = 0
+  var dMsg1 = "-"
+  var dMsg2 = "-"
+  var dMsg3 = "-"
+  var dMsg4 = "-"
+  var dMsg5 = "-"
 
-  var throttle = SceneUpdateFragment.empty
-  
   // FIXME, eventually we will calculate / fix scaleFactor and boardCfg BasePoint ...
   // ... from window dimensions supplied in main
   var scaleFactor = 1.0
@@ -66,81 +64,123 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       context: SceneContext[FlicFlacStartupData],
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] = {
+
     case e: PointerEvent.PointerDown =>
       dMsg1 = "PoDown"
       val clickPoint = e.position
       val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
       hexPosn match
-        // Pointer Down ... position on the grid
         case Some(pos) =>
+          // Pointer Down, Pos on Grid
           dMsg2 = "GridTrue"
-          highLighter.setPos(pos)
-          highLighter.shine(true)
-          pieces.deselectAllPieces()
-          dMsg4 = "SelFalse"
-          pieces.findPieceByPos(pos) match
-            // Pointer Down ... piece found and on the grid
+          pieces.findPieceSelected() match
             case Some(piece) => 
+              // Pointer Down, Pos on Grid, Piece Selected
               dMsg3 = "PieceFound"
-              piece.setSelected(true)
-              dMsg4 = "SelTrue"
-            case None        => 
-              dMsg3 = "PieceNotFound"
-              ;
-          end match
+              if (piece.pCurPos == pos) then
+                // Pointer Down, Pos on Grid, Piece Selected, PiecePos=PointerPos
+                highLighter.setPos(pos)
+                highLighter.shine(true)
+                pieces.deselectAllPieces()
+                piece.setSelected(true)
+                dMsg4 = "SelTrue"
+              else 
+                // Pointer Down, Pos on Grid, Piece Selected, PiecePos!=PointerPos
+                if (hexBoard.isThisHexBlack(pos) == true) then 
+                  piece.toggleFlip()
+                end if
+                piece.setSelected(false)
+                highLighter.shine(false)
+                piece.setPosition(pos)
+                dMsg4 = "SelFalse"
+              end if
 
-        // Pointer Down ... position off the grid
+            case None =>
+              // Pointer Down, Pos on Grid, No Piece Selected
+              pieces.findPieceByPos(pos) match
+                case Some(piece) =>
+                  // Pointer Down, Pos on Grid, No Piece Selected, PiecePos=PointerPos
+                  dMsg3 = "PieceFound"
+                  highLighter.setPos(pos)
+                  highLighter.shine(true)
+                  pieces.deselectAllPieces()
+                  piece.setSelected(true)
+                  dMsg4 = "SelTrue"
+                case None => 
+                  // Pointer Down, Pos on Grid, No Piece Selected, No Piece Found
+                  dMsg3 = "PieceNotFound"
+                  highLighter.setPos(pos)
+                  highLighter.shine(true)
+                  pieces.deselectAllPieces()
+                  dMsg4 = "SelFalse"
+              end match // findPieceByPos
+          end match // findPieceSelected
         case None =>
+          // Pointer Down, Pos off Grid
           dMsg2 = "GridFalse"
-          ;
-      end match
+          pieces.findPieceSelected() match
+            case Some(piece) =>
+              // Pointer Down, Pos off Grid, Piece Selected
+              dMsg3 = "PieceFound"
+              piece.moveToHome()
+              piece.setSelected(false)
+              highLighter.shine(false)              
+              dMsg4 = "SelFalse"
+            case None =>
+              // Pointer Down, Pos off Grid, No Piece Selected
+              dMsg3 = "PieceNotFound"
+              highLighter.shine(false)
+              pieces.deselectAllPieces()
+              dMsg4 = "SelFalse"
+      end match // hexXYCoordsFromDisplayXY
       Outcome(model)
 
-    case e: PointerEvent.PointerUp =>
+    case e: PointerEvent.PointerUp =>    
       dMsg1 = "PoUp"
       val clickPoint = e.position
       val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
       hexPosn match
-        // Pointer Up ... The position is on the hex grid
         case Some(pos) =>
-          dMsg2 = "GridTrue"
+          // Pointer Up, Pos on Grid
           pieces.findPieceSelected() match
-            // Pointer Up ... piece selected and valid position
             case Some(piece) =>
-              dMsg3 = "PieceFound"
-              if (piece.pCurPos != pos) && (hexBoard.isThisHexBlack(pos) == true) then 
-                piece.toggleFlip()
-              end if
-              piece.setPosition(pos)
-              piece.setSelected(false)
-              dMsg4 = "SelFalse"
+              // Pointer Up, Pos on Grid, Piece Selected
+              if (piece.pCurPos == pos) then
+                // Pointer Up, Pos on Grid, Piece Selected, PiecePos==PointerPos
+                ;
+              else 
+                // Pointer Up, Pos on Grid, Piece Selected, PiecePos!=PointerPos
+                if (hexBoard.isThisHexBlack(pos) == true) then 
+                  piece.toggleFlip()
+                end if
+                piece.setSelected(false)
+                highLighter.shine(false)
+                piece.setPosition(pos)                
+                dMsg4 = "SelFalse"
+                dMsg5 = "Still"
 
-            // Pointer Up ... no piece selected but on the grid
-            case None => 
-              dMsg3 = "PieceNotFound"
+            case None =>
+              // Pointer Up, Pos on Grid, No piece selected
               ;
-
-
-        // Pointer Up ... the position is off the hex grid
+          end match // finPieceSelected
+          
         case None =>
-          dMsg2 = "GridFalse"
+          // Pointer Up, Pos off Grid
           pieces.findPieceSelected() match
-            // Pointer Up ... we have selected a piece but moved it off the grid
             case Some(piece) =>
-              dMsg3 = "PieceFound"
+              // Pointer Up, Pos off Grid, Piece Selected
               piece.moveToHome()
               piece.setSelected(false)
+              highLighter.shine(false)              
               dMsg4 = "SelFalse"
-
-            // Pointer Up ... no piece selected and also off the grid
+              dMsg5 = "Still"
             case None => 
-              dMsg3 = "PieceNotFound"
-              ;
-          end match
+              // Pointer Up, Pos off Grid, No piece selected
+              highLighter.shine(false)
+          end match // findPieceSelected
 
-      end match
-      // Pointer Up so turn highlighter off
-      highLighter.shine(false)
+          
+      end match // hexXYCoordsFromDisplayXY      
       Outcome(model)
 
     case _ => 
@@ -154,9 +194,9 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] = 
     case FrameTick =>
-      iTick += 1
+      iFrameTick += 1
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
-/*
+
     case e: PointerEvent.PointerMove =>
       if (viewModel.dragOn) then 
         pieces.findPieceSelected() match
@@ -166,12 +206,12 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
             viewModel.optDragPos = Some(e.position)
 
           case None =>
-            dMsg5 = "None"
+            dMsg5 = "Still"
             viewModel.optDragPos = None
       end if
-      iMove += 1
+      iDragTick += 1
       Outcome(viewModel)
-*/
+
     case ButtonRoundEvent =>
       if (viewModel.dragOn) then viewModel.dragOn = false
       else viewModel.dragOn = true
@@ -190,16 +230,18 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   ): Outcome[SceneUpdateFragment] =
 
 //    val textGame = TextBox("Game Scene")
-    val textGame = TextBox(dMsg1+":"+dMsg2+":"+dMsg3+":"+dMsg4+":"+dMsg5+":"+iTick+":"+iMove, 1000, 40)
+    val textGame = TextBox(dMsg1+":"+dMsg2+":"+dMsg3+":"+dMsg4+":"+dMsg5+":"+iFrameTick+":"+iDragTick, 1000, 40)
       .withColor(RGBA.Black)
       .withFontSize(Pixels(30))
       .moveTo(20, 0)
-    val dragState = if (viewModel.dragOn) then "Drag:ON" else "DRAG:OFF"
+
+    val dragState = if (viewModel.dragOn) then "Drag:ON" 
+                    else "DRAG:OFF"
+    
     val textDrag = TextBox(dragState, 200, 40)
       .withColor(RGBA.Black)
       .withFontSize(Pixels(30))
       .moveTo(110, 60)
-
 
     val bootData = context.frameContext.startUpData.flicFlacBootData
 
