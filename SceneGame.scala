@@ -234,7 +234,10 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       .withColor(RGBA.Black)
       .withFontSize(Pixels(30))
       .moveTo(20, 0)
-    val dragState = if (viewModel.dragOn) then "Drag:ON" else "DRAG:OFF"
+
+    val dragState = if (viewModel.dragOn) then "Drag:ON" 
+                    else "DRAG:OFF"
+    
     val textDrag = TextBox(dragState, 200, 40)
       .withColor(RGBA.Black)
       .withFontSize(Pixels(30))
