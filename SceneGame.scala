@@ -253,7 +253,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                     |+| SceneUpdateFragment(viewModel.dragButton.draw)
                     |+| SceneUpdateFragment(textDrag)
                     |+| SceneUpdateFragment(viewModel.splashButton.draw)
-                    |+| SceneUpdateFragment(viewModel.paramsButton.draw)
+                    |+| SceneUpdateFragment(viewModel.rulesButton.draw)
 //                  |+| SceneUpdateFragment(viewModel.gameButton.draw)
                     |+| SceneUpdateFragment(viewModel.resultsButton.draw)
                     |+| hexBoard.paint(scaleFactor)
@@ -267,7 +267,7 @@ final case class GameSceneViewModel(
   var dragOn : Boolean,
   dragButton: Button,
   splashButton: Button,
-  paramsButton: Button,
+  rulesButton: Button,
 //  gameButton: Button,
   resultsButton: Button 
 ):
@@ -275,10 +275,10 @@ final case class GameSceneViewModel(
     for {
       bn0 <- dragButton.updateFromPointers(pointers)
       bn1 <- splashButton.updateFromPointers(pointers)
-      bn2 <- paramsButton.updateFromPointers(pointers)
+      bn2 <- rulesButton.updateFromPointers(pointers)
 //      bn3 <- gameButton.updateFromPointers(pointers)
       bn4 <- resultsButton.updateFromPointers(pointers)
-    } yield this.copy( dragButton = bn0, splashButton = bn1, paramsButton = bn2, /*gameButton = bn3,*/ resultsButton = bn4)
+    } yield this.copy( dragButton = bn0, splashButton = bn1, rulesButton = bn2, /*gameButton = bn3,*/ resultsButton = bn4)
 
 object GameSceneViewModel:
 
@@ -303,10 +303,10 @@ object GameSceneViewModel:
         ).withUpActions(ButtonSplashEvent),
 
       Button (
-        buttonAssets = GameAssets.buttonParamsAssets,
+        buttonAssets = GameAssets.buttonRulesAssets,
         bounds = Rectangle(20, 220, 240, 80),
         depth = Depth(6)
-      ).withUpActions(ButtonParamsEvent),
+      ).withUpActions(ButtonRulesEvent),
 /*-
       Button (
         buttonAssets = GameAssets.buttonGameAssets,

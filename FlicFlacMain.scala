@@ -85,7 +85,7 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
 
   def scenes(flicFlacBootData: FlicFlacBootData): NonEmptyList[Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]] =
     println("@@@ FlicFlacMain-scenes()")
-    NonEmptyList(SceneSplash, SceneParams, SceneGame, SceneResults)
+    NonEmptyList(SceneSplash, SceneRules, SceneGame, SceneResults)
 
   def boot(flags: Map[String, String]): Outcome[BootResult[FlicFlacBootData,FlicFlacGameModel]] =
     println("@@@ FlicFlacMain-boot")
@@ -114,9 +114,10 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
     Outcome(FlicFlacViewModel(
       staticAssets,
       SplashSceneViewModel.initial,
-      ParamsSceneViewModel.initial,
+      RulesSceneViewModel.initial,
       GameSceneViewModel.initial,
-      ResultsSceneViewModel.initial
+      ResultsSceneViewModel.initial,
+      ParamsSceneViewModel.initial
       )
     )
 
@@ -154,9 +155,13 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
       println("@@@ Main-ButtonSplashEvent")
       Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneSplash.name))
 
-    case ButtonParamsEvent =>
-      println("@@@ Main-ButtonParamsEvent")
-      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneParams.name))
+    case ButtonRulesEvent =>
+      println("@@@ Main-ButtonRulesEvent")
+      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneRules.name))
+
+//    case ButtonParamsEvent =>
+//      println("@@@ Main-ButtonParamsEvent")
+//      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneParams.name))
 
     case ButtonGameEvent =>
       println("@@@ Main-ButtonGameEvent")
@@ -206,15 +211,17 @@ final case class FlicFlacGameModel()
 final case class FlicFlacViewModel(
     staticAssets: StaticAssets,
     splashScene: SplashSceneViewModel,
-    paramsScene: ParamsSceneViewModel,
+    rulesScene:RulesSceneViewModel,
     gameScene: GameSceneViewModel,
-    resultsScene: ResultsSceneViewModel
+    resultsScene: ResultsSceneViewModel,
+    paramsScene: ParamsSceneViewModel
   )
 
 case object ButtonSplashEvent extends GlobalEvent
-case object ButtonParamsEvent extends GlobalEvent
+case object ButtonRulesEvent extends GlobalEvent
 case object ButtonGameEvent extends GlobalEvent
 case object ButtonResultsEvent extends GlobalEvent
+case object ButtonParamsEvent extends GlobalEvent
 case object ButtonRoundEvent extends GlobalEvent
 
 

@@ -9,8 +9,8 @@ object GameAssets:
 
   val hxAssetName = "hex2"
   val hxAssetPath = "assets/Hex2.png"
-  val fbAssetName = "fourButtons"
-  val fbAssetPath = "assets/FourButtons.png"
+  val bnAssetName = "buttons"
+  val bnAssetPath = "assets/ButtonGraphics.png"
   val cyAssetName = "cylinders"
   val cyAssetPath = "assets/Cylinders.png"
   val blAssetName = "blocks"
@@ -26,7 +26,7 @@ object GameAssets:
   def get(): Set[AssetType] =
     Set(
       AssetType.Image(AssetName(hxAssetName), AssetPath(hxAssetPath)),
-      AssetType.Image(AssetName(fbAssetName), AssetPath(fbAssetPath)),
+      AssetType.Image(AssetName(bnAssetName), AssetPath(bnAssetPath)),
       AssetType.Image(AssetName(cyAssetName), AssetPath(cyAssetPath)),
       AssetType.Image(AssetName(blAssetName), AssetPath(blAssetPath)),
       AssetType.Image(AssetName(spAssetName), AssetPath(spAssetPath)),
@@ -36,40 +36,48 @@ object GameAssets:
   def gHex: Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName)))
 
+  // Check FlacFont.txt for details
 
   def buttonSplashAssets: ButtonAssets =
     ButtonAssets(
-      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(0, 0, 240, 80),
-      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(0, 80, 240, 80),
-      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(0, 160, 240, 80)
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(0, 0, 240, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(0, 80, 240, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(0, 160, 240, 80)
     )
 
   def buttonParamsAssets: ButtonAssets =
     ButtonAssets(
-      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(240, 0, 240, 80),
-      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(240, 80, 240, 80),
-      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(240, 160, 240, 80)
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(240, 0, 240, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(240, 80, 240, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(240, 160, 240, 80)
     )
 
   def buttonGameAssets: ButtonAssets =
     ButtonAssets(
-      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(480, 0, 240, 80),
-      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(480, 80, 240, 80),
-      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(480, 160, 240, 80)
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(480, 0, 240, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(480, 80, 240, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(480, 160, 240, 80)
     )
 
   def buttonResultsAssets: ButtonAssets =
     ButtonAssets(
-      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(720, 0, 240, 80),
-      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(720, 80, 240, 80),
-      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(720, 160, 240, 80)
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(720, 0, 240, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(720, 80, 240, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(720, 160, 240, 80)
+    )
+
+  def buttonRulesAssets: ButtonAssets = 
+    ButtonAssets(
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(0, 240, 240, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(0, 320, 240, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(0, 400, 240, 80)
     )
 
   def buttonRoundAssets: ButtonAssets =
     ButtonAssets(
-      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(960, 0, 90, 80),
-      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(960, 80, 90, 80),
-      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(fbAssetName))).withCrop(960, 160, 90, 80)
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 0, 90, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 80, 90, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 160, 90, 80)
     )
 
 
