@@ -66,24 +66,24 @@ object SceneResults extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFl
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
         |+| SceneUpdateFragment(textResults)
         |+| SceneUpdateFragment(viewModel.splashButton.draw)
-        |+| SceneUpdateFragment(viewModel.paramsButton.draw)
+        |+| SceneUpdateFragment(viewModel.rulesButton.draw)
         |+| SceneUpdateFragment(viewModel.gameButton.draw)
 //        |+| SceneUpdateFragment(viewModel.resultsButton.draw)
     }
 
 final case class ResultsSceneViewModel(
   splashButton: Button,
-  paramsButton: Button,
+  rulesButton: Button,
   gameButton: Button
 //  resultsButton: Button 
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[ResultsSceneViewModel] =
     for {
       bn1 <- splashButton.updateFromPointers(pointers)
-      bn2 <- paramsButton.updateFromPointers(pointers)
+      bn2 <- rulesButton.updateFromPointers(pointers)
       bn3 <- gameButton.updateFromPointers(pointers)
 //      bn4 <- resultsButton.updateFromPointers(pointers)
-    } yield this.copy( splashButton = bn1, paramsButton = bn2, gameButton = bn3 /*, resultsButton = bn4*/)
+    } yield this.copy( splashButton = bn1, rulesButton = bn2, gameButton = bn3 /*, resultsButton = bn4*/)
 
 object ResultsSceneViewModel:
 
@@ -96,10 +96,10 @@ object ResultsSceneViewModel:
         ).withUpActions(ButtonSplashEvent),
 
       Button (
-        buttonAssets = GameAssets.buttonParamsAssets,
+        buttonAssets = GameAssets.buttonRulesAssets,
         bounds = Rectangle(20, 160, 240, 80),
         depth = Depth(6)
-      ).withUpActions(ButtonParamsEvent),
+      ).withUpActions(ButtonRulesEvent),
 
       Button (
         buttonAssets = GameAssets.buttonGameAssets,
