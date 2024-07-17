@@ -43,5 +43,4 @@ class BoardConfig(
 
   println("@@@ ## Class BoardConfig Finish")
 
-
 end BoardConfig
