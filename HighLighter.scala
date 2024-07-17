@@ -7,9 +7,8 @@ class HighLighter(boardCfg: BoardConfig, hexBoard: HexBoard, fS: Double):
   println("@@@ HighLighter Start")
 
   var displayOn = false
-  //val gHex = boardCfg.getHexGraphic() // The Hex graphic used to paint the grid
+  // val gHex = boardCfg.getHexGraphic() // The Hex graphic used to paint the grid
   val gHex = GameAssets.gHex // The Hex graphic used to paint the grid
-
 
   var currentPos: Point = Point(0, 0) // testPoint is a simple coordinate inside hexArray
 
