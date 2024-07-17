@@ -28,7 +28,7 @@ extension (b: Button)
       hoverEvents ++ downEvents ++ upEvents
 
     b.state match
-      
+
       // Stay in Down state
       case ButtonState.Down if inBounds && p.pressed =>
         Outcome(b).addGlobalEvents(b.onHoldDown() ++ pointerEvents)
@@ -47,10 +47,10 @@ extension (b: Button)
 
       // Move from Over to Up state (out of bounds)
       case ButtonState.Over if !inBounds && (p.pressed || p.released || p.moved) =>
-        Outcome(b.toUpState).addGlobalEvents(b.onHoverOut() ++ pointerEvents)   
+        Outcome(b.toUpState).addGlobalEvents(b.onHoverOut() ++ pointerEvents)
 
       // Move from Over to Down state (mouse/pointer press)
-      case ButtonState.Over if inBounds && p.pressed  =>
+      case ButtonState.Over if inBounds && p.pressed =>
         Outcome(b.toDownState).addGlobalEvents(b.onDown() ++ pointerEvents)
 
       // Move from Up to Over (mouse/pointer moved within bounds)
@@ -60,6 +60,8 @@ extension (b: Button)
       // Unaccounted for states.
       case _ =>
         Outcome(b).addGlobalEvents(pointerEvents)
+    end match
+end extension
 
 /** This is a workaround to make up for Pointer not exposing any convenience methods.
   */
@@ -77,8 +79,9 @@ extension (p: Pointers)
       case _                         => false
     }
 
-  def moved: Boolean = 
+  def moved: Boolean =
     p.pointerEvents.exists {
       case _: PointerEvent.PointerMove => true
       case _                           => false
     }
+end extension
