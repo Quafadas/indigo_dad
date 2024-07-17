@@ -27,8 +27,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 // --- Here we have the intrusion of the hex game objects ...
 // format: off
   val boardCfg = BoardConfig(
-    90,                             // GWIDTH pixel width of graphic
-    80,                             // GHEIGHT pixel height of graphic
+    91,                             // GWIDTH pixel width of graphic
+    81,                             // GHEIGHT pixel height of graphic
     Point(260,30),                  // where the (inisible) top left hand corner of the hex grid board is positioned
     3,                              // game size
     70,                             // amount to add to a hex centre x coord to reach the vertical line of the next column
