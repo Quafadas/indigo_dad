@@ -30,4 +30,3 @@ final case class SSSplash(initialMessage: String) extends SubSystem[FlicFlacGame
   ): Outcome[SceneUpdateFragment] =
     Outcome(SceneUpdateFragment.empty)
 end SSSplash
-

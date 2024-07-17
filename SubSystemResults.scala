@@ -29,4 +29,3 @@ final case class SSResults(initialMessage: String) extends SubSystem[FlicFlacGam
   ): Outcome[SceneUpdateFragment] =
     Outcome(SceneUpdateFragment.empty)
 end SSResults
-

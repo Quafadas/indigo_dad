@@ -30,4 +30,3 @@ final case class SSParams(initialMessage: String) extends SubSystem[FlicFlacGame
   ): Outcome[SceneUpdateFragment] =
     Outcome(SceneUpdateFragment.empty)
 end SSParams
-
