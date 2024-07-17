@@ -46,9 +46,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   var scaleFactor = 1.0
 
   val hexBoard = HexBoard(boardCfg, scaleFactor)
-  
+
   val pieces = Pieces(
-    //boardCfg,
     hexBoard
   )
 
@@ -68,22 +67,22 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         case Some(pos) =>
           // Pointer Down, Pos on Grid
           FlicFlacGameModel.findPieceSelected(model) match
-            case Some(piece) => 
+            case Some(piece) =>
               // Pointer Down, Pos on Grid, Piece Selected
-              if (piece.pCurPos == pos) then
+              if piece.pCurPos == pos then
                 // Pointer Down, Pos on Grid, Piece Selected, PiecePos=PointerPos <<##A##>>
                 dMsg = "##AA## Down|Grid|Sel|=="
                 println("@@@ PointerEvent " + dMsg)
                 highLighter.setPos(pos)
                 highLighter.shine(true)
-                val updatedPiece = Piece.setSelected(piece,true)  // FIXME need to record immutability
+                val updatedPiece = Piece.setSelected(piece, true) // FIXME need to record immutability
                 Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece)))
-              else 
+              else
                 // Pointer Down, Pos on Grid, Piece Selected, PiecePos!=PointerPos <<##B##>>
                 dMsg = "##B## Down|Grid|Sel|!="
                 println("@@@ PointerEvent " + dMsg)
                 highLighter.shine(false)
-                if (hexBoard.isThisHexBlack(pos) == true) then 
+                if hexBoard.isThisHexBlack(pos) == true then
                   val updatedPiece = Piece.setPosFlipDeselect(piece, pos)
                   Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece)))
                 else
@@ -101,12 +100,12 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                   println("@@@ PointerEvent " + dMsg)
                   highLighter.setPos(pos)
                   highLighter.shine(true)
-                  val updatedPiece = Piece.setSelected(piece,true)
+                  val updatedPiece = Piece.setSelected(piece, true)
                   println("@@@ updatePiece Select is ... " + updatedPiece.bSelected)
                   val outcome = FlicFlacGameModel.modify(model, Some(updatedPiece))
                   Outcome(outcome)
 
-                case None => 
+                case None =>
                   // Pointer Down, Pos on Grid, No Piece Selected, No Piece Found <<##D##>>
                   dMsg = "##D## Down|Grid|Non|!="
                   println("@@@ PointerEvent " + dMsg)
@@ -124,19 +123,19 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               // Pointer Down, Pos off Grid, Piece Selected <<##E##>>
               dMsg = "##E## Down|Void|Sel"
               println("@@@ PointerEvent " + dMsg)
-              highLighter.shine(false)              
+              highLighter.shine(false)
               val updatedPiece = Piece.setPosDeselect(piece, piece.pHomePos)
               Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece)))
 
             case None =>
               // Pointer Down, Pos off Grid, No Piece Selected <<##F>>
-              dMsg ="##F## Down|Void|Non"
+              dMsg = "##F## Down|Void|Non"
               println("@@@ PointerEvent " + dMsg)
               highLighter.shine(false)
               Outcome(FlicFlacGameModel.modify(model, None))
       end match // hexXYCoordsFromDisplayXY
 
-    case e: PointerEvent.PointerUp =>    
+    case e: PointerEvent.PointerUp =>
       val clickPoint = e.position
       val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
       hexPosn match
@@ -145,17 +144,17 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
           FlicFlacGameModel.findPieceSelected(model) match
             case Some(piece) =>
               // Pointer Up, Pos on Grid, Piece Selected
-              if (piece.pCurPos == pos) then
+              if piece.pCurPos == pos then
                 // Pointer Up, Pos on Grid, Piece Selected, PiecePos==PointerPos <<##G##>>
                 dMsg = "##G## Up|Grid|Sel|=="
                 println("@@@ PointerEvent " + dMsg)
                 Outcome(FlicFlacGameModel.modify(model, None))
-              else 
+              else
                 // Pointer Up, Pos on Grid, Piece Selected, PiecePos!=PointerPos <<##H##>>
                 dMsg = "##H## Up|Grid|Sel|!="
                 println("@@@ PointerEvent " + dMsg)
                 highLighter.shine(false)
-                if (hexBoard.isThisHexBlack(pos) == true) then 
+                if hexBoard.isThisHexBlack(pos) == true then
                   val updatedPiece = Piece.setPosFlipDeselect(piece, pos)
                   Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece)))
                 else
@@ -169,7 +168,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               println("@@@ PointerEvent " + dMsg)
               Outcome(FlicFlacGameModel.modify(model, None))
           end match // findPieceSelected
-          
+
         case None =>
           // Pointer Up, Pos off Grid
           FlicFlacGameModel.findPieceSelected(model) match
@@ -177,11 +176,11 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               // Pointer Up, Pos off Grid, Piece Selected <<##J##>>
               dMsg = "##J## Up|Void|Sel"
               println("@@@ PointerEvent " + dMsg)
-              highLighter.shine(false)              
+              highLighter.shine(false)
               val updatedPiece = Piece.setPosDeselect(piece, piece.pHomePos)
               Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece)))
 
-            case None => 
+            case None =>
               // Pointer Up, Pos off Grid, No piece selected <<##K##>>
               dMsg = "##K## Up|Void|Non"
               println("@@@ PointerEvent " + dMsg)
@@ -189,10 +188,9 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               Outcome(FlicFlacGameModel.modify(model, None))
           end match // findPieceSelected
 
-          
-      end match // hexXYCoordsFromDisplayXY      
+      end match // hexXYCoordsFromDisplayXY
 
-    case _ => 
+    case _ =>
       Outcome(FlicFlacGameModel.modify(model, None))
   }
   end updateModel
@@ -201,13 +199,13 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       context: SceneContext[FlicFlacStartupData],
       model: FlicFlacGameModel,
       viewModel: SceneViewModel
-  ): GlobalEvent => Outcome[SceneViewModel] = 
+  ): GlobalEvent => Outcome[SceneViewModel] =
     case FrameTick =>
       iFrameTick += 1
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case e: PointerEvent.PointerMove =>
-      if (viewModel.dragOn) then 
+      if viewModel.dragOn then
         FlicFlacGameModel.findPieceSelected(model) match
           case Some(p) =>
             println("@@@ PointerEventMove @ " + e.position)
@@ -220,12 +218,14 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       Outcome(viewModel)
 
     case ButtonRoundEvent =>
-      if (viewModel.dragOn) then viewModel.dragOn = false
+      if viewModel.dragOn then viewModel.dragOn = false
       else viewModel.dragOn = true
+      end if
       Outcome(viewModel)
 
-    case _ => 
+    case _ =>
       Outcome(viewModel)
+  end updateViewModel
 
   // Show some text
   // When the user clicks anywhere in the screen, trigger an event to jump to the other scene.    val x = context.
@@ -237,14 +237,15 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   ): Outcome[SceneUpdateFragment] =
 
 //    val textGame = TextBox("Game Scene")
-    val textGame = TextBox(dMsg +" "+iFrameTick+":"+iDragTick, 1000, 40)
+    val textGame = TextBox(dMsg + " " + iFrameTick + ":" + iDragTick, 1000, 40)
       .withColor(RGBA.Black)
       .withFontSize(Pixels(30))
       .moveTo(20, 0)
 
-    val dragState = if (viewModel.dragOn) then "Drag:ON" 
-                    else "DRAG:OFF"
-    
+    val dragState =
+      if viewModel.dragOn then "Drag:ON"
+      else "DRAG:OFF"
+
     val textDrag = TextBox(dragState, 200, 40)
       .withColor(RGBA.Black)
       .withFontSize(Pixels(30))
@@ -255,78 +256,78 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val width = bootData.pixelWidth
     val height = bootData.pixelHeight
 
-    Outcome(SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
-                    |+| SceneUpdateFragment(textGame)
-                    |+| SceneUpdateFragment(viewModel.dragButton.draw)
-                    |+| SceneUpdateFragment(textDrag)
-                    |+| SceneUpdateFragment(viewModel.splashButton.draw)
-                    |+| SceneUpdateFragment(viewModel.rulesButton.draw)
+    Outcome(
+      SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
+        |+| SceneUpdateFragment(textGame)
+        |+| SceneUpdateFragment(viewModel.dragButton.draw)
+        |+| SceneUpdateFragment(textDrag)
+        |+| SceneUpdateFragment(viewModel.splashButton.draw)
+        |+| SceneUpdateFragment(viewModel.rulesButton.draw)
 //                  |+| SceneUpdateFragment(viewModel.gameButton.draw)
-                    |+| SceneUpdateFragment(viewModel.resultsButton.draw)
-                    |+| hexBoard.paint(scaleFactor)
-                    |+| highLighter.paint(scaleFactor)
-                    |+| pieces.paint(model, scaleFactor, viewModel.optDragPos)
+        |+| SceneUpdateFragment(viewModel.resultsButton.draw)
+        |+| hexBoard.paint(scaleFactor)
+        |+| highLighter.paint(scaleFactor)
+        |+| pieces.paint(model, scaleFactor, viewModel.optDragPos)
     )
-    
+  end present
+end SceneGame
 
 final case class GameSceneViewModel(
-  var optDragPos : Option[Point],
-  var dragOn : Boolean,
-  dragButton: Button,
-  splashButton: Button,
-  rulesButton: Button,
+    var optDragPos: Option[Point],
+    var dragOn: Boolean,
+    dragButton: Button,
+    splashButton: Button,
+    rulesButton: Button,
 //  gameButton: Button,
-  resultsButton: Button 
+    resultsButton: Button
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[GameSceneViewModel] =
-    for {
+    for
       bn0 <- dragButton.updateFromPointers(pointers)
       bn1 <- splashButton.updateFromPointers(pointers)
       bn2 <- rulesButton.updateFromPointers(pointers)
 //      bn3 <- gameButton.updateFromPointers(pointers)
       bn4 <- resultsButton.updateFromPointers(pointers)
-    } yield this.copy( dragButton = bn0, splashButton = bn1, rulesButton = bn2, /*gameButton = bn3,*/ resultsButton = bn4)
+    yield this.copy(dragButton = bn0, splashButton = bn1, rulesButton = bn2, /*gameButton = bn3,*/ resultsButton = bn4)
+end GameSceneViewModel
 
 object GameSceneViewModel:
 
-  val initial: GameSceneViewModel = 
-
+  val initial: GameSceneViewModel =
     GameSceneViewModel(
+      None, // we have no last position of the pointer recorded
 
-      None,   // we have no last position of the pointer recorded
+      false, // the drag option is not switched on
 
-      false,  // the drag option is not switched on
-
-      Button (
+      Button(
         buttonAssets = GameAssets.buttonRoundAssets,
         bounds = Rectangle(20, 40, 90, 80),
-        depth = Depth(6),
+        depth = Depth(6)
       ).withUpActions(ButtonRoundEvent),
-
-      Button (
+      Button(
         buttonAssets = GameAssets.buttonSplashAssets,
         bounds = Rectangle(20, 120, 240, 80),
         depth = Depth(6)
-        ).withUpActions(ButtonSplashEvent),
-
-      Button (
+      ).withUpActions(ButtonSplashEvent),
+      Button(
         buttonAssets = GameAssets.buttonRulesAssets,
         bounds = Rectangle(20, 220, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonRulesEvent),
-/*-
+      /*-
       Button (
         buttonAssets = GameAssets.buttonGameAssets,
         bounds = Rectangle(20, 220, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonGameEvent),
-*/
-      Button (
+       */
+      Button(
         buttonAssets = GameAssets.buttonResultsAssets,
         bounds = Rectangle(20, 320, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonResultsEvent)
     )
+end GameSceneViewModel
 
 /* Adjusting buttons requires the following...
 1) Add/Remove Button from Object GameSceneViewModel
@@ -334,5 +335,4 @@ object GameSceneViewModel:
 3) Add/Remove pointer handling in case class GameSceneViewModel / update
 4) Add/Remove appropriate SceneUpdateFragment in present / outcome
 
- */    
-    
+ */
