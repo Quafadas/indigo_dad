@@ -35,62 +35,42 @@ def mix(i: Int): RGBA =
     case _  => RGBA.fromHexString("#FF00FFFF") // Magenta
 
 class Pieces(
-    //boardCfg: BoardConfig,
     hexBoard: HexBoard
 ):
   println("@@@ Pieces Start")
-/*
-  val pB = boardCfg.pB
-  val w = boardCfg.gWidth
-  val h = boardCfg.gHeight
 
-  val pieces: Vector[Piece] = Vector(
-    Piece(CYLINDER, CB, hexBoard.getCylinderHomePos(CB), hexBoard.getCylinderHomePos(CB)),
-    Piece(CYLINDER, CG, hexBoard.getCylinderHomePos(CG), hexBoard.getCylinderHomePos(CG)),
-    Piece(CYLINDER, CY, hexBoard.getCylinderHomePos(CY), hexBoard.getCylinderHomePos(CY)),
-    Piece(CYLINDER, CO, hexBoard.getCylinderHomePos(CO), hexBoard.getCylinderHomePos(CO)),
-    Piece(CYLINDER, CR, hexBoard.getCylinderHomePos(CR), hexBoard.getCylinderHomePos(CR)),
-    Piece(CYLINDER, CP, hexBoard.getCylinderHomePos(CP), hexBoard.getCylinderHomePos(CP)),
-    Piece(BLOCK, CB, hexBoard.getBlockHomePos(CB), hexBoard.getBlockHomePos(CB)),
-    Piece(BLOCK, CG, hexBoard.getBlockHomePos(CG), hexBoard.getBlockHomePos(CG)),
-    Piece(BLOCK, CY, hexBoard.getBlockHomePos(CY), hexBoard.getBlockHomePos(CY)),
-    Piece(BLOCK, CO, hexBoard.getBlockHomePos(CO), hexBoard.getBlockHomePos(CO)),
-    Piece(BLOCK, CR, hexBoard.getBlockHomePos(CR), hexBoard.getBlockHomePos(CR)),
-    Piece(BLOCK, CP, hexBoard.getBlockHomePos(CP), hexBoard.getBlockHomePos(CP))
-  )
-*/
   /* paint draws the 12 pieces
    */
   def paint(model: FlicFlacGameModel, fS: Double, optDragPos: Option[Point]): SceneUpdateFragment =
     var frag = SceneUpdateFragment.empty
-    val pB = model.boardConfig.pB // extract GridBasePoint for later 
+    val pB = model.boardConfig.pB // extract GridBasePoint for later
 
     // first draw all the unselected pieces ...
 
-    for ( p <- model.modelPieces )
+    for p <- model.modelPieces do
       val layer = PieceAssets.getGraphic(p.pieceShape, p.pieceIdentity, p.bFlipped)
       val pSrc = p.pCurPos
 
-      if (Piece.selected(p) == false) then
+      if Piece.selected(p) == false then
         val pPos = hexBoard.getXpYp(pSrc)
         val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS)))
         frag = frag |+| newFrag
+      end if
     end for
-
     // second draw the selected piece if it exists
-    // ... (only expecting one for now, but perhaps game might allow more in future)   
+    // ... (only expecting one for now, but perhaps game might allow more in future)
 
-    for ( p <- model.modelPieces )
-      if (Piece.selected(p) == true) then 
+    for p <- model.modelPieces do
+      if Piece.selected(p) == true then
         val layer = PieceAssets.getGraphic(p.pieceShape, p.pieceIdentity, p.bFlipped)
         val pSrc = p.pCurPos
-        optDragPos match 
-          case Some(pos) => 
-            val pC = Point(PieceAssets.gWidth/2, PieceAssets.gHeight/2 )
+        optDragPos match
+          case Some(pos) =>
+            val pC = Point(PieceAssets.gWidth / 2, PieceAssets.gHeight / 2)
             val pPos = pos - pC
             val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pPos).scaleBy(fS, fS)))
             frag = frag |+| newFrag
-          case None => 
+          case None =>
             val pPos = hexBoard.getXpYp(pSrc)
             val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS)))
             frag = frag |+| newFrag
@@ -99,21 +79,7 @@ class Pieces(
 
     frag
   end paint
-/*
-  def findPieceByPos(pos: Point): Option[Piece] =
-    pieces.find(Piece.position(_) == pos)
-  end findPieceByPos
 
-  def findPieceSelected(): Option[Piece] =
-    pieces.find(Piece.selected(_) == true)
-  end findPieceSelected
-
-  def deselectAllPieces(): Unit =
-  for (p <- pieces)
-    if Piece.selected(p) then
-      Piece.setSelected(p,false)    // FIXME this now needs to record the new piece
-  end deselectAllPieces
-*/
   println("@@@ Pieces Finish")
 
 end Pieces
