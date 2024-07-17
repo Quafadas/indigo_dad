@@ -6,6 +6,8 @@ import indigoextras.ui.*
 
 object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
+  var kount2 = 300
+
   type SceneModel = FlicFlacGameModel
   type SceneViewModel = RulesSceneViewModel
 
@@ -29,6 +31,9 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] =
     case _ => 
+      if (kount2 > 0)
+        println("@@@ SceneRules-updateModel")
+        kount2 = kount2 - 1    
       Outcome(model)
   end updateModel
 

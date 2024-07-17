@@ -1,95 +1,120 @@
 package game
 
 import indigo.*
+import indigoextras.ui.*
 
-class Piece(
-    pieceShape: Boolean,
-    pieceHome: Point,
-    pieceIdentity: Int,
-    iHexPixelWidth: Int, // ............ GWIDTH pixel height of graphic
-    iHexPixelHeight: Int, // ........... GHEIGHT pixel height of graphic
-    assetName: AssetName // ............ asset name of the graphic containing the images for the pieces
-):
+final case class Piece(
+    pieceShape: Boolean, // ............ true=block, false=cylinder
+    pieceIdentity: Int, // ............. 0,1,2,3,4,5 for Blue/Green/Yellow/Orange/Red/Purple             
+    pCurPos: Point, // ................. current position (in hexArrayCoords)
+    pHomePos: Point, // ................ starting/home position (in hexArrayCoords)
 
-  val bType = pieceShape // ............ true=block, false=cylinder
-  val homePos: Point = pieceHome // .... home position (in hexArray coords)
-  val id: Int = pieceIdentity % 6 // ... piece Id (modulo 6 ... 0,1,2,3,4,5)
-  val gWidth = iHexPixelWidth
-  val gHeight = iHexPixelHeight
+    // parameters below required for model, but not for creation
 
-  var bFlipped = false // .............. piece normal is 0, piece flipped is 1
-  var bSelected = false // ............. piece is selected
-  var bCaptured = false // ............. piece is captured (or not)
-  var pCurPos: Point = pieceHome // .... current position (in hexArrayCoords)
+    bFlipped: Boolean = false, // ...... piece normal is f, piece flipped is 1 
+    bSelected: Boolean = false, // ..... piece is selected
+    bCaptured: Boolean = false, // ..... piece is captured (or not)
+    bMoved: Boolean = false // ......... piece has moved this turn
+)
+object Piece :
 
-  val sName = pieceNames(pieceIdentity % 6)
+  // --------------------------------------------------
+  // Inspecting this piece ...
 
-  val rNormal = Rectangle(gWidth * id, 0, gWidth + 1, gHeight + 1)
-  val gNormal = Graphic(rNormal, 4, Material.ImageEffects(assetName)) // Pieces on Layer 4
-
-  val rFlipped = Rectangle(gWidth * id, gHeight, gWidth + 1, gHeight + 1)
-  val gFlipped = Graphic(rFlipped, 4, Material.ImageEffects(assetName)) // Pieces on Layer 4
-
-  def getGraphic(): Graphic[Material.ImageEffects] =
-    var graphic = gNormal
-    if bFlipped then graphic = gFlipped
-    end if
-    graphic
-  end getGraphic
-
-  def setSelected(b: Boolean): Unit =
-    bSelected = b
-  end setSelected
-
-  def selected(): Boolean =
-    bSelected
-  end selected
-
-  def setFlipped(b: Boolean): Unit =
-    bFlipped = b
-  end setFlipped
-
-  def toggleFlip(): Unit =
-    if bFlipped then bFlipped = false
-    else bFlipped = true
-    end if
-  end toggleFlip
-
-  def flipped(): Boolean =
-    bFlipped
+  def flipped(p:Piece): Boolean =
+    p.bFlipped
   end flipped
 
-  def setCaptured(b: Boolean): Unit =
-    bCaptured = b
-  end setCaptured
+  def selected(p: Piece): Boolean =
+    p.bSelected
+  end selected
 
-  def captured(): Boolean =
-    bCaptured
+  def captured(p:Piece): Boolean =
+    p.bCaptured
   end captured
 
-  def setPosition(pPos: Point): Unit =
-    pCurPos = pPos
-  end setPosition
+  def moved(p:Piece): Boolean = 
+    p.bMoved
+  end moved
 
-  def position(): Point =
-    pCurPos
+  def position(p:Piece): Point =
+    p.pCurPos
   end position
 
-  def pieceType(): Boolean =
-    bType
-  end pieceType
+  // --------------------------------------------------
+  // Manipulating this piece ...
 
-  def pieceId(): Int =
-    id
-  end pieceId
+  def setFlip(p:Piece, b: Boolean): Piece =
+    p.copy(bFlipped = b)
+  end setFlip
 
-  def pieceName(): String =
-    sName
-  end pieceName
+  def setSelected(p: Piece, b: Boolean): Piece =
+    p.copy(bSelected = b)
+  end setSelected
 
-  def moveToHome(): Point =
-    pCurPos = homePos
-    pCurPos
+  def setToggleFlip(p:Piece): Piece =
+    p.copy(bFlipped = (if p.bFlipped then false else true))
+  end setToggleFlip
+
+  def setCaptured(p:Piece, b: Boolean): Piece =
+    p.copy(bCaptured = b)
+  end setCaptured
+
+  def setPosition(p:Piece, pPos: Point): Piece =
+    p.copy(pCurPos = pPos)
+  end setPosition
+
+  def moveToHome(p: Piece): Piece =
+    p.copy(pCurPos = p.pHomePos)
   end moveToHome
 
+  def setPosDeselect(p: Piece, pPos: Point): Piece = 
+    val p1 = setPosition(p, pPos)
+    val p2 = setSelected(p1, false)
+    p2
+  end setPosDeselect
+
+  def setPosFlipDeselect(p: Piece, pPos: Point): Piece = 
+    val p1 = setPosition(p, pPos)
+    val p2 = setToggleFlip(p1)
+    val p3 = setSelected(p2, false)
+    p3
+  end setPosFlipDeselect
+
+  // --------------------------------------------------
+  // Identifying this piece ...
+
+  def pieceShape(p:Piece): Boolean =
+    p.pieceShape
+  end pieceShape
+
+  def pieceId(p:Piece): Int =
+    p.pieceIdentity
+  end pieceId
+
+  def pieceName(p: Piece): String =
+    PieceAssets.pieceNames(p.pieceIdentity)
+  end pieceName
+
 end Piece
+
+// Common Assets needed to build each piece
+object PieceAssets :
+  val gWidth = 90   // ......... GWIDTH pixel height of graphic (also known as iHexPixelWidth)
+  val gHeight = 80  // ......... GHEIGHT pixel height of graphic (also known as iHexPixelHeight)
+  val blocksAssetName = AssetName(GameAssets.blAssetName)
+  val cylindersAssetName = AssetName(GameAssets.cyAssetName)
+
+  val pieceNames:Vector[String] = // Piece Names %6
+    Vector( "Blue", "Green", "Yellow", "Orange", "Red", "Purple")
+
+
+  def getGraphic(shape: Boolean, id: Int, flipped: Boolean) : Graphic[Material.ImageEffects] =
+    val safeId = id % 6
+    val pieceAssetName = if (shape) then blocksAssetName else cylindersAssetName
+    val verticalOffset = if (flipped) then gHeight else 0
+    val pieceRect = Rectangle(gWidth * safeId, 0+verticalOffset, gWidth + 1, gHeight + 1)
+    val pieceGraphic = Graphic(pieceRect, 4, Material.ImageEffects(pieceAssetName)) // Pieces on Layer 4
+    pieceGraphic
+
+end PieceAssets

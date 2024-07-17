@@ -10,6 +10,8 @@ import indigo.shared.events.PointerEvent.PointerDown
 
 object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
+  var kount2 = 300
+
   type SceneModel = FlicFlacGameModel
   type SceneViewModel = SplashSceneViewModel
 
@@ -32,7 +34,10 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       context: SceneContext[FlicFlacStartupData],
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] = {
-    case _ =>       
+    case _ => 
+      if (kount2 > 0)
+        println("@@@ SceneSplash-updateModel")
+        kount2 = kount2 - 1    
       Outcome(model)
   }
   end updateModel
@@ -57,7 +62,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-    val textSplash = TextBox("Splash Scene V24")
+    val textSplash = TextBox("Splash Scene V25")
       .withColor(RGBA.Yellow)
       .withFontSize(Pixels(20))
       .moveTo(30, 0)

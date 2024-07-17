@@ -42,7 +42,7 @@ end Game
 object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
   var kount1 = 3
-  var kount2 = 3
+  var kount2 = 1000
   var kount3 = 3
   var kount4 = 3
   
@@ -72,7 +72,7 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
 
   def initialModel(flicFlacStartupData: FlicFlacStartupData): Outcome[FlicFlacGameModel] =
     println("@@@ FlicFlacMain-initialModel()")
-    Outcome(FlicFlacGameModel())
+    Outcome(FlicFlacGameModel.creation(Point(0,0)))
 
   def initialScene(flicFlacBootData: FlicFlacBootData): Option[SceneName] =
     println("@@@ FlicFlacMain-initialScene()")
@@ -141,7 +141,7 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
 
     case _ =>
       if (kount3 > 0)
-        println("@@@ FlicFla cMain-updateViewModel _")
+        println("@@@ FlicFlac Main-updateViewModel _")
         kount3 = kount3 - 1
       Outcome(flicFlacViewModel)
   end updateViewModel
@@ -193,19 +193,6 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
   println("@@@ Object HelloIndigo Finishes")
 
 end HelloIndigo
-
-// defining a view model that contains UI features for this scene
-//final case class ViewModel(button1: Button, button2: Button)
-
-//final case class Model(center: Point):
-//  def update(timeDelta: Seconds): Model =
-//    this.copy()
-//end Model
-//object Model:
-//  def initial(center: Point): Model = Model(center)
-//end Model
-
-final case class FlicFlacGameModel()
 
 //final case class ViewModel()
 final case class FlicFlacViewModel(

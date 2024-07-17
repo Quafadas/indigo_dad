@@ -27,8 +27,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 // --- Here we have the intrusion of the hex game objects ...
 // format: off
   val boardCfg = BoardConfig(
-    91,                             // GWIDTH pixel width of graphic
-    81,                             // GHEIGHT pixel height of graphic
+    90,                             // GWIDTH pixel width of graphic
+    80,                             // GHEIGHT pixel height of graphic
     Point(260,30),                  // where the (inisible) top left hand corner of the hex grid board is positioned
     3,                              // game size
     70,                             // amount to add to a hex centre x coord to reach the vertical line of the next column
@@ -39,11 +39,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
   var iFrameTick = 0
   var iDragTick = 0
-  var dMsg1 = "-"
-  var dMsg2 = "-"
-  var dMsg3 = "-"
-  var dMsg4 = "-"
-  var dMsg5 = "-"
+  var dMsg = "-----"
 
   // FIXME, eventually we will calculate / fix scaleFactor and boardCfg BasePoint ...
   // ... from window dimensions supplied in main
@@ -52,7 +48,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   val hexBoard = HexBoard(boardCfg, scaleFactor)
   
   val pieces = Pieces(
-    boardCfg,
+    //boardCfg,
     hexBoard
   )
 
@@ -66,125 +62,138 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   ): GlobalEvent => Outcome[FlicFlacGameModel] = {
 
     case e: PointerEvent.PointerDown =>
-      dMsg1 = "PoDown"
       val clickPoint = e.position
       val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
       hexPosn match
         case Some(pos) =>
           // Pointer Down, Pos on Grid
-          dMsg2 = "GridTrue"
-          pieces.findPieceSelected() match
+          FlicFlacGameModel.findPieceSelected(model) match
             case Some(piece) => 
               // Pointer Down, Pos on Grid, Piece Selected
-              dMsg3 = "PieceFound"
               if (piece.pCurPos == pos) then
-                // Pointer Down, Pos on Grid, Piece Selected, PiecePos=PointerPos
+                // Pointer Down, Pos on Grid, Piece Selected, PiecePos=PointerPos <<##A##>>
+                dMsg = "##AA## Down|Grid|Sel|=="
+                println("@@@ PointerEvent " + dMsg)
                 highLighter.setPos(pos)
                 highLighter.shine(true)
-                pieces.deselectAllPieces()
-                piece.setSelected(true)
-                dMsg4 = "SelTrue"
+                val updatedPiece = Piece.setSelected(piece,true)  // FIXME need to record immutability
+                Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece)))
               else 
-                // Pointer Down, Pos on Grid, Piece Selected, PiecePos!=PointerPos
-                if (hexBoard.isThisHexBlack(pos) == true) then 
-                  piece.toggleFlip()
-                end if
-                piece.setSelected(false)
+                // Pointer Down, Pos on Grid, Piece Selected, PiecePos!=PointerPos <<##B##>>
+                dMsg = "##B## Down|Grid|Sel|!="
+                println("@@@ PointerEvent " + dMsg)
                 highLighter.shine(false)
-                piece.setPosition(pos)
-                dMsg4 = "SelFalse"
+                if (hexBoard.isThisHexBlack(pos) == true) then 
+                  val updatedPiece = Piece.setPosFlipDeselect(piece, pos)
+                  Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece)))
+                else
+                  val updatedPiece = Piece.setPosDeselect(piece, pos)
+                  Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece)))
+                end if
               end if
 
             case None =>
               // Pointer Down, Pos on Grid, No Piece Selected
-              pieces.findPieceByPos(pos) match
+              FlicFlacGameModel.findPieceByPos(model, pos) match
                 case Some(piece) =>
-                  // Pointer Down, Pos on Grid, No Piece Selected, PiecePos=PointerPos
-                  dMsg3 = "PieceFound"
+                  // Pointer Down, Pos on Grid, No Piece Selected, PiecePos=PointerPos <<##C##>>
+                  dMsg = "##C## Down|Grid|Non|=="
+                  println("@@@ PointerEvent " + dMsg)
                   highLighter.setPos(pos)
                   highLighter.shine(true)
-                  pieces.deselectAllPieces()
-                  piece.setSelected(true)
-                  dMsg4 = "SelTrue"
+                  val updatedPiece = Piece.setSelected(piece,true)
+                  println("@@@ updatePiece Select is ... " + updatedPiece.bSelected)
+                  val outcome = FlicFlacGameModel.modify(model, Some(updatedPiece))
+                  Outcome(outcome)
+
                 case None => 
-                  // Pointer Down, Pos on Grid, No Piece Selected, No Piece Found
-                  dMsg3 = "PieceNotFound"
+                  // Pointer Down, Pos on Grid, No Piece Selected, No Piece Found <<##D##>>
+                  dMsg = "##D## Down|Grid|Non|!="
+                  println("@@@ PointerEvent " + dMsg)
                   highLighter.setPos(pos)
                   highLighter.shine(true)
-                  pieces.deselectAllPieces()
-                  dMsg4 = "SelFalse"
+                  Outcome(FlicFlacGameModel.modify(model, None))
+
               end match // findPieceByPos
           end match // findPieceSelected
+
         case None =>
           // Pointer Down, Pos off Grid
-          dMsg2 = "GridFalse"
-          pieces.findPieceSelected() match
+          FlicFlacGameModel.findPieceSelected(model) match
             case Some(piece) =>
-              // Pointer Down, Pos off Grid, Piece Selected
-              dMsg3 = "PieceFound"
-              piece.moveToHome()
-              piece.setSelected(false)
+              // Pointer Down, Pos off Grid, Piece Selected <<##E##>>
+              dMsg = "##E## Down|Void|Sel"
+              println("@@@ PointerEvent " + dMsg)
               highLighter.shine(false)              
-              dMsg4 = "SelFalse"
+              val updatedPiece = Piece.setPosDeselect(piece, piece.pHomePos)
+              Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece)))
+
             case None =>
-              // Pointer Down, Pos off Grid, No Piece Selected
-              dMsg3 = "PieceNotFound"
+              // Pointer Down, Pos off Grid, No Piece Selected <<##F>>
+              dMsg ="##F## Down|Void|Non"
+              println("@@@ PointerEvent " + dMsg)
               highLighter.shine(false)
-              pieces.deselectAllPieces()
-              dMsg4 = "SelFalse"
+              Outcome(FlicFlacGameModel.modify(model, None))
       end match // hexXYCoordsFromDisplayXY
-      Outcome(model)
 
     case e: PointerEvent.PointerUp =>    
-      dMsg1 = "PoUp"
       val clickPoint = e.position
       val hexPosn = hexBoard.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
       hexPosn match
         case Some(pos) =>
           // Pointer Up, Pos on Grid
-          pieces.findPieceSelected() match
+          FlicFlacGameModel.findPieceSelected(model) match
             case Some(piece) =>
               // Pointer Up, Pos on Grid, Piece Selected
               if (piece.pCurPos == pos) then
-                // Pointer Up, Pos on Grid, Piece Selected, PiecePos==PointerPos
-                ;
+                // Pointer Up, Pos on Grid, Piece Selected, PiecePos==PointerPos <<##G##>>
+                dMsg = "##G## Up|Grid|Sel|=="
+                println("@@@ PointerEvent " + dMsg)
+                Outcome(FlicFlacGameModel.modify(model, None))
               else 
-                // Pointer Up, Pos on Grid, Piece Selected, PiecePos!=PointerPos
-                if (hexBoard.isThisHexBlack(pos) == true) then 
-                  piece.toggleFlip()
-                end if
-                piece.setSelected(false)
+                // Pointer Up, Pos on Grid, Piece Selected, PiecePos!=PointerPos <<##H##>>
+                dMsg = "##H## Up|Grid|Sel|!="
+                println("@@@ PointerEvent " + dMsg)
                 highLighter.shine(false)
-                piece.setPosition(pos)                
-                dMsg4 = "SelFalse"
-                dMsg5 = "Still"
+                if (hexBoard.isThisHexBlack(pos) == true) then 
+                  val updatedPiece = Piece.setPosFlipDeselect(piece, pos)
+                  Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece)))
+                else
+                  val updatedPiece = Piece.setPosDeselect(piece, pos)
+                  Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece)))
+                end if
 
             case None =>
-              // Pointer Up, Pos on Grid, No piece selected
-              ;
-          end match // finPieceSelected
+              // Pointer Up, Pos on Grid, No piece selected <<##I##>>
+              dMsg = "##I## Up|Grid|Non"
+              println("@@@ PointerEvent " + dMsg)
+              Outcome(FlicFlacGameModel.modify(model, None))
+          end match // findPieceSelected
           
         case None =>
           // Pointer Up, Pos off Grid
-          pieces.findPieceSelected() match
+          FlicFlacGameModel.findPieceSelected(model) match
             case Some(piece) =>
-              // Pointer Up, Pos off Grid, Piece Selected
-              piece.moveToHome()
-              piece.setSelected(false)
+              // Pointer Up, Pos off Grid, Piece Selected <<##J##>>
+              dMsg = "##J## Up|Void|Sel"
+              println("@@@ PointerEvent " + dMsg)
               highLighter.shine(false)              
-              dMsg4 = "SelFalse"
-              dMsg5 = "Still"
+              val updatedPiece = Piece.setPosDeselect(piece, piece.pHomePos)
+              Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece)))
+
             case None => 
-              // Pointer Up, Pos off Grid, No piece selected
+              // Pointer Up, Pos off Grid, No piece selected <<##K##>>
+              dMsg = "##K## Up|Void|Non"
+              println("@@@ PointerEvent " + dMsg)
               highLighter.shine(false)
+              Outcome(FlicFlacGameModel.modify(model, None))
           end match // findPieceSelected
 
           
       end match // hexXYCoordsFromDisplayXY      
-      Outcome(model)
 
     case _ => 
-      Outcome(model)
+      Outcome(FlicFlacGameModel.modify(model, None))
   }
   end updateModel
 
@@ -199,14 +208,12 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
     case e: PointerEvent.PointerMove =>
       if (viewModel.dragOn) then 
-        pieces.findPieceSelected() match
+        FlicFlacGameModel.findPieceSelected(model) match
           case Some(p) =>
-            dMsg5 = "Moving"
             println("@@@ PointerEventMove @ " + e.position)
             viewModel.optDragPos = Some(e.position)
 
           case None =>
-            dMsg5 = "Still"
             viewModel.optDragPos = None
       end if
       iDragTick += 1
@@ -230,7 +237,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   ): Outcome[SceneUpdateFragment] =
 
 //    val textGame = TextBox("Game Scene")
-    val textGame = TextBox(dMsg1+":"+dMsg2+":"+dMsg3+":"+dMsg4+":"+dMsg5+":"+iFrameTick+":"+iDragTick, 1000, 40)
+    val textGame = TextBox(dMsg +" "+iFrameTick+":"+iDragTick, 1000, 40)
       .withColor(RGBA.Black)
       .withFontSize(Pixels(30))
       .moveTo(20, 0)
@@ -258,7 +265,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                     |+| SceneUpdateFragment(viewModel.resultsButton.draw)
                     |+| hexBoard.paint(scaleFactor)
                     |+| highLighter.paint(scaleFactor)
-                    |+| pieces.paint(scaleFactor, viewModel.optDragPos)
+                    |+| pieces.paint(model, scaleFactor, viewModel.optDragPos)
     )
     
 
