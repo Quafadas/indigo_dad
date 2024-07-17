@@ -65,7 +65,6 @@ object FlicFlacGameModel:
         var resultingPieces: Vector[Piece] = Vector.empty
         for (oldPiece <- previousModel.modelPieces)
           if ((oldPiece.pieceShape == newPiece.pieceShape) && (oldPiece.pieceIdentity == newPiece.pieceIdentity))
-            println("@@@ Model modifying piece Shape:" + newPiece.pieceShape + " Id:" + newPiece.pieceIdentity + " Sel:" + newPiece.bSelected)
             resultingPieces = resultingPieces :+ newPiece
           else 
             resultingPieces = resultingPieces :+ oldPiece
