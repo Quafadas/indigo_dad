@@ -32,6 +32,7 @@ object Game:
       )
     )
     println("@@@ Object Game main Launch Finish")
+  end main
 end Game
 
 // gameSize can be one of 2,3,4,5,6 and is the number of major hexagons across one side where ...
@@ -45,7 +46,6 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
   var kount2 = 1000
   var kount3 = 3
   var kount4 = 3
-  
 
   println("@@@ Object HelloIndigo Starts")
 
@@ -53,7 +53,6 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
 
   val config: GameConfig =
     GameConfig.default.withMagnification(magnification)
-
 
   val assets: Set[AssetType] =
     GameAssets.get()
@@ -69,57 +68,68 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
     println("@@@ FlicFlacMain-setup()")
     val outCome = FlicFlacStartupData.initialise(flicFlacBootData)
     outCome
+  end setup
 
   def initialModel(flicFlacStartupData: FlicFlacStartupData): Outcome[FlicFlacGameModel] =
     println("@@@ FlicFlacMain-initialModel()")
-    Outcome(FlicFlacGameModel.creation(Point(0,0)))
+    Outcome(FlicFlacGameModel.creation(Point(0, 0)))
+  end initialModel
 
   def initialScene(flicFlacBootData: FlicFlacBootData): Option[SceneName] =
     println("@@@ FlicFlacMain-initialScene()")
     Some(SceneSplash.name)
-    //None
+  end initialScene
 
   // JP 30/06/24
   // To get the hexboard back as the main screen, comment out the populated "NonEmptyList" and ...
   // restore the line NonEmptyList(Scene.empty)
 
-  def scenes(flicFlacBootData: FlicFlacBootData): NonEmptyList[Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]] =
+  def scenes(
+      flicFlacBootData: FlicFlacBootData
+  ): NonEmptyList[Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]] =
     println("@@@ FlicFlacMain-scenes()")
     NonEmptyList(SceneSplash, SceneRules, SceneGame, SceneResults)
+  end scenes
 
-  def boot(flags: Map[String, String]): Outcome[BootResult[FlicFlacBootData,FlicFlacGameModel]] =
+  def boot(flags: Map[String, String]): Outcome[BootResult[FlicFlacBootData, FlicFlacGameModel]] =
     println("@@@ FlicFlacMain-boot")
     println("@@@ BootFlags: " + flags)
     val width = flags("width").toInt
     val height = flags("height").toInt
-    Outcome{
+    Outcome {
       val flicFlacBootData: FlicFlacBootData =
         FlicFlacBootData.create(width, height)
-        //ViewConfig.default
+        // ViewConfig.default
 
-      val config = 
+      val config =
         FlicFlacConfig.config
           .withViewport(flicFlacBootData.viewport)
 
-      val assetPath: String = 
-        flags.getOrElse("baseUrl","")
+      val assetPath: String =
+        flags.getOrElse("baseUrl", "")
 
       BootResult(config, flicFlacBootData)
         .withAssets(assets)
     }
+  end boot
 
-  def initialViewModel(flicFlacStartupData: FlicFlacStartupData, flicFlacGameModel: FlicFlacGameModel): Outcome[FlicFlacViewModel] =
+  def initialViewModel(
+      flicFlacStartupData: FlicFlacStartupData,
+      flicFlacGameModel: FlicFlacGameModel
+  ): Outcome[FlicFlacViewModel] =
     println("@@@ FlicFlacMain-initialViewModel()")
     val staticAssets = flicFlacStartupData.staticAssets
-    Outcome(FlicFlacViewModel(
-      staticAssets,
-      SplashSceneViewModel.initial,
-      RulesSceneViewModel.initial,
-      GameSceneViewModel.initial,
-      ResultsSceneViewModel.initial,
-      ParamsSceneViewModel.initial
+    Outcome(
+      FlicFlacViewModel(
+        staticAssets,
+        SplashSceneViewModel.initial,
+        RulesSceneViewModel.initial,
+        GameSceneViewModel.initial,
+        ResultsSceneViewModel.initial,
+        ParamsSceneViewModel.initial
       )
     )
+  end initialViewModel
 
   def updateViewModel(
       context: FrameContext[FlicFlacStartupData],
@@ -127,29 +137,31 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
       flicFlacViewModel: FlicFlacViewModel
   ): GlobalEvent => Outcome[FlicFlacViewModel] =
     case FrameTick =>
-      if (kount4 > 0)
+      if kount4 > 0 then
         println("@@@ FlicFlacMain-updateViewModel FrameTick")
         kount4 = kount4 - 1
+      end if
       Outcome(flicFlacViewModel)
 
     case ViewportResize(gameViewPort) =>
       val w = gameViewPort.width
       val h = gameViewPort.height
-      //flicFlacViewModel.gameScene.
-      println("@@@ FlicFlacMain-updateViewModel ViewportResize w:h " + w +":" +h)
+      // flicFlacViewModel.gameScene.
+      println("@@@ FlicFlacMain-updateViewModel ViewportResize w:h " + w + ":" + h)
       Outcome(flicFlacViewModel)
 
     case _ =>
-      if (kount3 > 0)
+      if kount3 > 0 then
         println("@@@ FlicFlac Main-updateViewModel _")
         kount3 = kount3 - 1
+      end if
       Outcome(flicFlacViewModel)
   end updateViewModel
 
   def updateModel(
       context: FrameContext[FlicFlacStartupData],
       flicFlacGameModel: FlicFlacGameModel
-  ): GlobalEvent => Outcome[FlicFlacGameModel] = 
+  ): GlobalEvent => Outcome[FlicFlacGameModel] =
 
     case ButtonSplashEvent =>
       println("@@@ Main-ButtonSplashEvent")
@@ -171,11 +183,13 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
       println("@@@ Main-ButtonResultsEvent")
       Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneResults.name))
 
-    case _ => 
-      if (kount2 > 0)
+    case _ =>
+      if kount2 > 0 then
         println("@@@ FlicFlacMain-updateModel")
         kount2 = kount2 - 1
+      end if
       Outcome(flicFlacGameModel)
+  end updateModel
 
   def present(
       context: FrameContext[FlicFlacStartupData],
@@ -183,10 +197,11 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
       flicFlacViewModel: FlicFlacViewModel
   ): Outcome[SceneUpdateFragment] = Outcome {
 
-    if (kount1 > 0)
+    if kount1 > 0 then
       println("@@@ FlicFlacMain-present")
       kount1 = kount1 - 1
-      
+    end if
+
     SceneUpdateFragment.empty
   }
 
@@ -198,11 +213,11 @@ end HelloIndigo
 final case class FlicFlacViewModel(
     staticAssets: StaticAssets,
     splashScene: SplashSceneViewModel,
-    rulesScene:RulesSceneViewModel,
+    rulesScene: RulesSceneViewModel,
     gameScene: GameSceneViewModel,
     resultsScene: ResultsSceneViewModel,
     paramsScene: ParamsSceneViewModel
-  )
+)
 
 case object ButtonSplashEvent extends GlobalEvent
 case object ButtonRulesEvent extends GlobalEvent
@@ -210,8 +225,3 @@ case object ButtonGameEvent extends GlobalEvent
 case object ButtonResultsEvent extends GlobalEvent
 case object ButtonParamsEvent extends GlobalEvent
 case object ButtonRoundEvent extends GlobalEvent
-
-
-
-
-
