@@ -62,7 +62,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-    val textSplash = TextBox("Splash Scene V25")
+    val textSplash = TextBox("Splash Scene V26")
       .withColor(RGBA.Yellow)
       .withFontSize(Pixels(20))
       .moveTo(30, 0)
