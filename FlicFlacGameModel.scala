@@ -3,28 +3,28 @@ package game
 import indigo.*
 
 final case class FlicFlacGameModel(
-  boardConfig : BoardConfig,
-  modelPieces : Vector[Piece]
+    boardConfig: BoardConfig,
+    modelPieces: Vector[Piece]
 )
 
 object FlicFlacGameModel:
   println("@@@ Object FlicFlacGameModel Start")
   var iTick = 0
 
-  def creation(center: Point): FlicFlacGameModel = 
+  def creation(center: Point): FlicFlacGameModel =
     println("@@@ FlicFlacGameModel creation")
-    val skaleFaktor = 1.0                           // FIXME when scale strategy decided
-    val bCfg = establishBoardConfig()              // FIXME drop the 2 when immutability finished
-    val hexBoard = HexBoard(bCfg, skaleFaktor)    // FIXME drop the 2 when immutability finished
-  
-    
-    FlicFlacGameModel(bCfg, summonPieces(hexBoard))
+    val skaleFaktor = 1.0 // FIXME when scale strategy decided
+    val bCfg = establishBoardConfig() // FIXME drop the 2 when immutability finished
+    val hexBoard = HexBoard(bCfg, skaleFaktor) // FIXME drop the 2 when immutability finished
 
-  def establishBoardConfig() : BoardConfig = 
+    FlicFlacGameModel(bCfg, summonPieces(hexBoard))
+  end creation
+
+  def establishBoardConfig(): BoardConfig =
     val boardCfg = BoardConfig(
       91, // .......................... GWIDTH pixel width of graphic
       81, // .......................... GHEIGHT pixel height of graphic
-      Point(260,30), // ............... where the (inisible) top left hand corner of the hex grid board is positioned
+      Point(260, 30), // ............... where the (inisible) top left hand corner of the hex grid board is positioned
       3, // ........................... game size
       70, // .......................... amount to add to a hex centre x coord to reach the vertical line of the next column
       40, // .......................... half the amount to add to a hex centre y coord to reach the next hexagon below
@@ -33,7 +33,7 @@ object FlicFlacGameModel:
     boardCfg
   end establishBoardConfig
 
-  def summonPieces(hexBoard: HexBoard) : Vector[Piece] = 
+  def summonPieces(hexBoard: HexBoard): Vector[Piece] =
     val startingModelPieces: Vector[Piece] = Vector(
       Piece(CYLINDER, CB, hexBoard.getCylinderHomePos(CB), hexBoard.getCylinderHomePos(CB)),
       Piece(CYLINDER, CG, hexBoard.getCylinderHomePos(CG), hexBoard.getCylinderHomePos(CG)),
@@ -59,33 +59,32 @@ object FlicFlacGameModel:
     model.modelPieces.find(Piece.selected(_) == true)
   end findPieceSelected
 
-  def modify(previousModel: FlicFlacGameModel, possiblePiece: Option[Piece]) : FlicFlacGameModel =    
+  def modify(previousModel: FlicFlacGameModel, possiblePiece: Option[Piece]): FlicFlacGameModel =
     possiblePiece match
       case Some(newPiece) =>
         var resultingPieces: Vector[Piece] = Vector.empty
-        for (oldPiece <- previousModel.modelPieces)
-          if ((oldPiece.pieceShape == newPiece.pieceShape) && (oldPiece.pieceIdentity == newPiece.pieceIdentity))
+        for oldPiece <- previousModel.modelPieces do
+          if (oldPiece.pieceShape == newPiece.pieceShape) && (oldPiece.pieceIdentity == newPiece.pieceIdentity) then
             resultingPieces = resultingPieces :+ newPiece
-          else 
-            resultingPieces = resultingPieces :+ oldPiece
-        val ffgm = FlicFlacGameModel(previousModel.boardConfig, resultingPieces)
-        ffgm
-        
+          else resultingPieces = resultingPieces :+ oldPiece
+        end for
+        FlicFlacGameModel(previousModel.boardConfig, resultingPieces)
 
       case None =>
         previousModel
-      end match
-      
+    end match
+
   end modify
 
-  
-  def debugJP(id:String, iTickStart:Int, model:FlicFlacGameModel) : Unit = 
-    if (iTickStart > 0)
-      iTick = iTickStart
-    if (iTick > 0) then 
+  def debugJP(id: String, iTickStart: Int, model: FlicFlacGameModel): Unit =
+    if iTickStart > 0 then iTick = iTickStart
+    end if
+    if iTick > 0 then
       println("@@@ $$ " + id)
       println("@@@ " + model.modelPieces.head)
       iTick = iTick - 1
-    end if 
+    end if
+  end debugJP
 
   println("@@@ Object FlicFlacGameModel Finish")
+end FlicFlacGameModel
