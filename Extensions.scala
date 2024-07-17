@@ -61,6 +61,7 @@ extension (b: Button)
       case _ =>
         Outcome(b).addGlobalEvents(pointerEvents)
     end match
+  ; // dummy statement here helps scalafmt to format correctly
 end extension
 
 /** This is a workaround to make up for Pointer not exposing any convenience methods.
