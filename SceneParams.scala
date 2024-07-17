@@ -28,7 +28,7 @@ object SceneParams extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       context: SceneContext[FlicFlacStartupData],
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] =
-    case _ => 
+    case _ =>
       Outcome(model)
   end updateModel
 
@@ -36,12 +36,13 @@ object SceneParams extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       context: SceneContext[FlicFlacStartupData],
       model: FlicFlacGameModel,
       viewModel: SceneViewModel
-  ): GlobalEvent => Outcome[SceneViewModel] = 
+  ): GlobalEvent => Outcome[SceneViewModel] =
     case FrameTick =>
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
-    case _ => 
+    case _ =>
       Outcome(viewModel)
+  end updateViewModel
 
   // Show some text
   // When the user clicks anywhere in the screen, trigger an event to jump to the other scene.    val x = context.
@@ -70,48 +71,51 @@ object SceneParams extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
         |+| SceneUpdateFragment(viewModel.gameButton.draw)
 //        |+| SceneUpdateFragment(viewModel.resultsButton.draw)
     }
+  end present
+end SceneParams
 
 final case class ParamsSceneViewModel(
-  splashButton: Button,
+    splashButton: Button,
 //  paramsButton: Button,
-  gameButton: Button
-//  resultsButton: Button 
+    gameButton: Button
+//  resultsButton: Button
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[ParamsSceneViewModel] =
-    for {
+    for
       bn1 <- splashButton.updateFromPointers(pointers)
 //      bn2 <- paramsButton.update(pointers)
       bn3 <- gameButton.updateFromPointers(pointers)
 //      bn4 <- resultsButton.update(pointers)
-    } yield this.copy( splashButton = bn1, /*paramsButton = bn2,*/ gameButton = bn3 /*, resultsButton = bn4*/)
+    yield this.copy(splashButton = bn1, /*paramsButton = bn2,*/ gameButton = bn3 /*, resultsButton = bn4*/ )
+end ParamsSceneViewModel
 
 object ParamsSceneViewModel:
 
-  val initial: ParamsSceneViewModel = 
+  val initial: ParamsSceneViewModel =
     ParamsSceneViewModel(
-      Button (
+      Button(
         buttonAssets = GameAssets.buttonSplashAssets,
         bounds = Rectangle(240, 220, 240, 80),
         depth = Depth(6)
-        ).withUpActions(ButtonSplashEvent),
-/*
+      ).withUpActions(ButtonSplashEvent),
+      /*
       Button (
         buttonAssets = GameAssets.buttonParamsAssets,
         bounds = Rectangle(20, 120, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonParamsEvent),
-*/
-      Button (
+       */
+      Button(
         buttonAssets = GameAssets.buttonGameAssets,
         bounds = Rectangle(500, 220, 240, 80),
         depth = Depth(6)
-      ).withUpActions(ButtonGameEvent),
-/*
+      ).withUpActions(ButtonGameEvent)
+      /*
       Button (
         buttonAssets = GameAssets.buttonResultsAssets,
         bounds = Rectangle(20, 320, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonResultsEvent)
-*/    
+       */
     )
-    
+end ParamsSceneViewModel
