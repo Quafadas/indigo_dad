@@ -28,7 +28,7 @@ object SceneResults extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFl
       context: SceneContext[FlicFlacStartupData],
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] =
-    case _ => 
+    case _ =>
       Outcome(model)
   end updateModel
 
@@ -36,12 +36,13 @@ object SceneResults extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFl
       context: SceneContext[FlicFlacStartupData],
       model: FlicFlacGameModel,
       viewModel: SceneViewModel
-  ): GlobalEvent => Outcome[SceneViewModel] = 
+  ): GlobalEvent => Outcome[SceneViewModel] =
     case FrameTick =>
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
-    case _ => 
+    case _ =>
       Outcome(viewModel)
+  end updateViewModel
 
   // Show some text
   // When the user clicks anywhere in the screen, trigger an event to jump to the other scene.    val x = context.
@@ -70,48 +71,49 @@ object SceneResults extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFl
         |+| SceneUpdateFragment(viewModel.gameButton.draw)
 //        |+| SceneUpdateFragment(viewModel.resultsButton.draw)
     }
+  end present
+end SceneResults
 
 final case class ResultsSceneViewModel(
-  splashButton: Button,
-  rulesButton: Button,
-  gameButton: Button
-//  resultsButton: Button 
+    splashButton: Button,
+    rulesButton: Button,
+    gameButton: Button
+//  resultsButton: Button
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[ResultsSceneViewModel] =
-    for {
+    for
       bn1 <- splashButton.updateFromPointers(pointers)
       bn2 <- rulesButton.updateFromPointers(pointers)
       bn3 <- gameButton.updateFromPointers(pointers)
 //      bn4 <- resultsButton.updateFromPointers(pointers)
-    } yield this.copy( splashButton = bn1, rulesButton = bn2, gameButton = bn3 /*, resultsButton = bn4*/)
+    yield this.copy(splashButton = bn1, rulesButton = bn2, gameButton = bn3 /*, resultsButton = bn4*/ )
+end ResultsSceneViewModel
 
 object ResultsSceneViewModel:
 
-  val initial: ResultsSceneViewModel = 
+  val initial: ResultsSceneViewModel =
     ResultsSceneViewModel(
-      Button (
+      Button(
         buttonAssets = GameAssets.buttonSplashAssets,
         bounds = Rectangle(20, 60, 240, 80),
         depth = Depth(6)
-        ).withUpActions(ButtonSplashEvent),
-
-      Button (
+      ).withUpActions(ButtonSplashEvent),
+      Button(
         buttonAssets = GameAssets.buttonRulesAssets,
         bounds = Rectangle(20, 160, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonRulesEvent),
-
-      Button (
+      Button(
         buttonAssets = GameAssets.buttonGameAssets,
         bounds = Rectangle(20, 260, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonGameEvent)
-/*
+      /*
       Button (
         buttonAssets = GameAssets.buttonResultsAssets,
         bounds = Rectangle(20, 320, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonResultsEvent)
-*/      
+       */
     )
-    
+end ResultsSceneViewModel
