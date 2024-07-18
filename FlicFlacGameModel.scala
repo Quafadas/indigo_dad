@@ -85,7 +85,7 @@ object FlicFlacGameModel:
     end match
   end modify
 
-  def reset(previousModel: FlicFlacGameModel) : FlicFlacGameModel = 
+  def reset(previousModel: FlicFlacGameModel): FlicFlacGameModel =
     println("@@@ Reset model")
     val skaleFaktor = 1.0 // FIXME when scale strategy decided
     val previousBoardCfg = previousModel.boardConfig
@@ -104,26 +104,26 @@ object FlicFlacGameModel:
     cacheOrNew
   end retrieve
 
-  def printPieces( model: FlicFlacGameModel) : Unit = 
-    for (p <- model.modelPieces) do 
+  def printPieces(model: FlicFlacGameModel): Unit =
+    for p <- model.modelPieces do
 
-      val sSelected =if Piece.selected(p) then "S" else "-" 
+      val sSelected = if Piece.selected(p) then "S" else "-"
       val sFlipped = if Piece.flipped(p) then "F" else "-"
       val sCaptured = if Piece.captured(p) then "C" else "-"
       val sMoved = if Piece.moved(p) then "M" else "-"
-      
+
       val s = "@@@ " + PieceAssets.pieceTypes(p.pieceShape)
-            + " " + PieceAssets.pieceNames(p.pieceIdentity%6)
-            + ": " 
-            + "CurPos(" + p.pCurPos.x + "," + p.pCurPos.y + ") "
-            + "HomePos(" + p.pHomePos.x + "," + p.pHomePos.y + ") "
-            + sSelected
-            + sFlipped
-            + sCaptured
-            + sMoved
+        + " " + PieceAssets.pieceNames(p.pieceIdentity % 6)
+        + ": "
+        + "CurPos(" + p.pCurPos.x + "," + p.pCurPos.y + ") "
+        + "HomePos(" + p.pHomePos.x + "," + p.pHomePos.y + ") "
+        + sSelected
+        + sFlipped
+        + sCaptured
+        + sMoved
       println(s)
     end for
-
+  end printPieces
   /*
     pCurPos: Point, // ................. current position (in hexArrayCoords)
     pHomePos: Point, // ................ starting/home position (in hexArrayCoords)
@@ -134,9 +134,7 @@ object FlicFlacGameModel:
     bSelected: Boolean = false, // ..... piece is selected
     bCaptured: Boolean = false, // ..... piece is captured (or not)
     bMoved: Boolean = false // ......... piece has moved this turn
-*/
-
-
+   */
 
   def debugJP(id: String, iTickStart: Int, model: FlicFlacGameModel): Unit =
     if iTickStart > 0 then iTick = iTickStart

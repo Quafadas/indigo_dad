@@ -73,20 +73,18 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
 
   def initialModel(flicFlacStartupData: FlicFlacStartupData): Outcome[FlicFlacGameModel] =
     println("@@@ FlicFlacMain-initialModel()")
-    
-    val cacheOrNew = decode[FlicFlacGameModel]
-      (org.scalajs.dom.window.localStorage.getItem("FlicFlac"))
-        match
-          case Right(model:FlicFlacGameModel) => 
-            println("@@@ Restored model")
-            model
-          case Left(_) => 
-            println("@@@ Created model")
-            FlicFlacGameModel.creation(Point(0,0))
 
-/*
+    val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlac")) match
+      case Right(model: FlicFlacGameModel) =>
+        println("@@@ Restored model")
+        model
+      case Left(_) =>
+        println("@@@ Created model")
+        FlicFlacGameModel.creation(Point(0, 0))
+
+    /*
     val cacheOrNew = FlicFlacGameModel.creation(Point(0, 0))
-*/
+     */
     Outcome(cacheOrNew)
   end initialModel
 

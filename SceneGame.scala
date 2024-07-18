@@ -217,6 +217,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
         case None =>
           viewModel.optDragPos = None
+      end match
 
       iDragTick += 1
       Outcome(viewModel)
@@ -286,7 +287,7 @@ object GameSceneViewModel:
         bounds = Rectangle(20, 40, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonRulesEvent),
-      Button (
+      Button(
         buttonAssets = GameAssets.buttonNewGameAssets,
         bounds = Rectangle(20, 140, 240, 80),
         depth = Depth(6)
@@ -301,7 +302,6 @@ object GameSceneViewModel:
         bounds = Rectangle(20, 340, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonSplashEvent)
-
     )
 end GameSceneViewModel
 
