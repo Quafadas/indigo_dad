@@ -1,11 +1,17 @@
 package game
 
 import indigo.*
+import io.circe.Encoder
+import io.circe.Decoder
+import io.circe.syntax.*
+import io.circe.parser.decode
+import game.Piece.pieceShape
 
 final case class FlicFlacGameModel(
     boardConfig: BoardConfig,
     modelPieces: Vector[Piece]
-)
+) derives Encoder.AsObject,
+      Decoder
 
 object FlicFlacGameModel:
   println("@@@ Object FlicFlacGameModel Start")
@@ -14,8 +20,8 @@ object FlicFlacGameModel:
   def creation(center: Point): FlicFlacGameModel =
     println("@@@ FlicFlacGameModel creation")
     val skaleFaktor = 1.0 // FIXME when scale strategy decided
-    val bCfg = establishBoardConfig() // FIXME drop the 2 when immutability finished
-    val hexBoard = HexBoard(bCfg, skaleFaktor) // FIXME drop the 2 when immutability finished
+    val bCfg = establishBoardConfig()
+    val hexBoard = HexBoard(bCfg, skaleFaktor)
 
     FlicFlacGameModel(bCfg, summonPieces(hexBoard))
   end creation
@@ -68,13 +74,69 @@ object FlicFlacGameModel:
             resultingPieces = resultingPieces :+ newPiece
           else resultingPieces = resultingPieces :+ oldPiece
         end for
-        FlicFlacGameModel(previousModel.boardConfig, resultingPieces)
+        val newModel = FlicFlacGameModel(previousModel.boardConfig, resultingPieces)
+        val asJson = newModel.asJson.noSpaces
+        org.scalajs.dom.window.localStorage.setItem("FlicFlac", asJson)
+        printPieces(newModel)
+        newModel
 
       case None =>
         previousModel
     end match
-
   end modify
+
+  def reset(previousModel: FlicFlacGameModel) : FlicFlacGameModel = 
+    println("@@@ Reset model")
+    val skaleFaktor = 1.0 // FIXME when scale strategy decided
+    val previousBoardCfg = previousModel.boardConfig
+    val hexBoard = HexBoard(previousBoardCfg, skaleFaktor)
+    FlicFlacGameModel(previousBoardCfg, summonPieces(hexBoard))
+  end reset
+
+  def retrieve(): FlicFlacGameModel =
+    val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlac")) match
+      case Right(model: FlicFlacGameModel) =>
+        println("@@@ Restored model")
+        model
+      case Left(_) =>
+        println("@@@ Created model")
+        FlicFlacGameModel.creation(Point(0, 0))
+    cacheOrNew
+  end retrieve
+
+  def printPieces( model: FlicFlacGameModel) : Unit = 
+    for (p <- model.modelPieces) do 
+
+      val sSelected =if Piece.selected(p) then "S" else "-" 
+      val sFlipped = if Piece.flipped(p) then "F" else "-"
+      val sCaptured = if Piece.captured(p) then "C" else "-"
+      val sMoved = if Piece.moved(p) then "M" else "-"
+      
+      val s = "@@@ " + PieceAssets.pieceTypes(p.pieceShape)
+            + " " + PieceAssets.pieceNames(p.pieceIdentity%6)
+            + ": " 
+            + "CurPos(" + p.pCurPos.x + "," + p.pCurPos.y + ") "
+            + "HomePos(" + p.pHomePos.x + "," + p.pHomePos.y + ") "
+            + sSelected
+            + sFlipped
+            + sCaptured
+            + sMoved
+      println(s)
+    end for
+
+  /*
+    pCurPos: Point, // ................. current position (in hexArrayCoords)
+    pHomePos: Point, // ................ starting/home position (in hexArrayCoords)
+
+    // parameters below required for model, but not for creation
+
+    bFlipped: Boolean = false, // ...... piece normal is f, piece flipped is 1
+    bSelected: Boolean = false, // ..... piece is selected
+    bCaptured: Boolean = false, // ..... piece is captured (or not)
+    bMoved: Boolean = false // ......... piece has moved this turn
+*/
+
+
 
   def debugJP(id: String, iTickStart: Int, model: FlicFlacGameModel): Unit =
     if iTickStart > 0 then iTick = iTickStart

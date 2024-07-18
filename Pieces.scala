@@ -2,8 +2,8 @@ package game
 
 import indigo.*
 
-val CYLINDER = false
-val BLOCK = true
+val CYLINDER = 0
+val BLOCK = 1
 
 // First 6 colors are used in modulo 6 fashion for pieces
 val CB = 0 // CB for Blue

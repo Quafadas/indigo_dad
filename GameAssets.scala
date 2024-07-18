@@ -72,6 +72,13 @@ object GameAssets:
       down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(0, 400, 240, 80)
     )
 
+  def buttonNewGameAssets: ButtonAssets = 
+    ButtonAssets(
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(240, 240, 240, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(240, 320, 240, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(240, 400, 240, 80)
+    )
+
   def buttonRoundAssets: ButtonAssets =
     ButtonAssets(
       up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 0, 90, 80),

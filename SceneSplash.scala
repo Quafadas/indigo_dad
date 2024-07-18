@@ -9,7 +9,7 @@ import indigo.shared.events.PointerEvent.PointerDown
 
 object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
-  var kount2 = 300
+  var kount2 = 3
 
   type SceneModel = FlicFlacGameModel
   type SceneViewModel = SplashSceneViewModel

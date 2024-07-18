@@ -3,6 +3,8 @@ package game
 import indigo.*
 import indigo.scenes.*
 import indigoextras.ui.*
+import io.circe.syntax.*
+import io.circe.parser.decode
 
 object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
@@ -190,6 +192,9 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
       end match // hexXYCoordsFromDisplayXY
 
+    case ButtonNewGameEvent =>
+      Outcome(FlicFlacGameModel.reset(model))
+
     case _ =>
       Outcome(FlicFlacGameModel.modify(model, None))
   }
@@ -205,22 +210,15 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case e: PointerEvent.PointerMove =>
-      if viewModel.dragOn then
-        FlicFlacGameModel.findPieceSelected(model) match
-          case Some(p) =>
-            println("@@@ PointerEventMove @ " + e.position)
-            viewModel.optDragPos = Some(e.position)
+      FlicFlacGameModel.findPieceSelected(model) match
+        case Some(p) =>
+          println("@@@ PointerEventMove @ " + e.position)
+          viewModel.optDragPos = Some(e.position)
 
-          case None =>
-            viewModel.optDragPos = None
-      end if
+        case None =>
+          viewModel.optDragPos = None
+
       iDragTick += 1
-      Outcome(viewModel)
-
-    case ButtonRoundEvent =>
-      if viewModel.dragOn then viewModel.dragOn = false
-      else viewModel.dragOn = true
-      end if
       Outcome(viewModel)
 
     case _ =>
@@ -242,15 +240,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       .withFontSize(Pixels(30))
       .moveTo(20, 0)
 
-    val dragState =
-      if viewModel.dragOn then "Drag:ON"
-      else "DRAG:OFF"
-
-    val textDrag = TextBox(dragState, 200, 40)
-      .withColor(RGBA.Black)
-      .withFontSize(Pixels(30))
-      .moveTo(110, 60)
-
     val bootData = context.frameContext.startUpData.flicFlacBootData
 
     val width = bootData.pixelWidth
@@ -259,12 +248,10 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     Outcome(
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
         |+| SceneUpdateFragment(textGame)
-        |+| SceneUpdateFragment(viewModel.dragButton.draw)
-        |+| SceneUpdateFragment(textDrag)
-        |+| SceneUpdateFragment(viewModel.splashButton.draw)
         |+| SceneUpdateFragment(viewModel.rulesButton.draw)
-//                  |+| SceneUpdateFragment(viewModel.gameButton.draw)
+        |+| SceneUpdateFragment(viewModel.newGameButton.draw)
         |+| SceneUpdateFragment(viewModel.resultsButton.draw)
+        |+| SceneUpdateFragment(viewModel.splashButton.draw)
         |+| hexBoard.paint(scaleFactor)
         |+| highLighter.paint(scaleFactor)
         |+| pieces.paint(model, scaleFactor, viewModel.optDragPos)
@@ -274,21 +261,18 @@ end SceneGame
 
 final case class GameSceneViewModel(
     var optDragPos: Option[Point],
-    var dragOn: Boolean,
-    dragButton: Button,
-    splashButton: Button,
     rulesButton: Button,
-//  gameButton: Button,
-    resultsButton: Button
+    newGameButton: Button,
+    resultsButton: Button,
+    splashButton: Button
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[GameSceneViewModel] =
     for
-      bn0 <- dragButton.updateFromPointers(pointers)
-      bn1 <- splashButton.updateFromPointers(pointers)
-      bn2 <- rulesButton.updateFromPointers(pointers)
-//      bn3 <- gameButton.updateFromPointers(pointers)
-      bn4 <- resultsButton.updateFromPointers(pointers)
-    yield this.copy(dragButton = bn0, splashButton = bn1, rulesButton = bn2, /*gameButton = bn3,*/ resultsButton = bn4)
+      bn1 <- rulesButton.updateFromPointers(pointers)
+      bn2 <- newGameButton.updateFromPointers(pointers)
+      bn3 <- resultsButton.updateFromPointers(pointers)
+      bn4 <- splashButton.updateFromPointers(pointers)
+    yield this.copy(rulesButton = bn1, newGameButton = bn2, resultsButton = bn3, splashButton = bn4)
 end GameSceneViewModel
 
 object GameSceneViewModel:
@@ -297,35 +281,27 @@ object GameSceneViewModel:
     GameSceneViewModel(
       None, // we have no last position of the pointer recorded
 
-      false, // the drag option is not switched on
-
-      Button(
-        buttonAssets = GameAssets.buttonRoundAssets,
-        bounds = Rectangle(20, 40, 90, 80),
-        depth = Depth(6)
-      ).withUpActions(ButtonRoundEvent),
-      Button(
-        buttonAssets = GameAssets.buttonSplashAssets,
-        bounds = Rectangle(20, 120, 240, 80),
-        depth = Depth(6)
-      ).withUpActions(ButtonSplashEvent),
       Button(
         buttonAssets = GameAssets.buttonRulesAssets,
-        bounds = Rectangle(20, 220, 240, 80),
+        bounds = Rectangle(20, 40, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonRulesEvent),
-      /*-
       Button (
-        buttonAssets = GameAssets.buttonGameAssets,
-        bounds = Rectangle(20, 220, 240, 80),
+        buttonAssets = GameAssets.buttonNewGameAssets,
+        bounds = Rectangle(20, 140, 240, 80),
         depth = Depth(6)
-      ).withUpActions(ButtonGameEvent),
-       */
+      ).withUpActions(ButtonNewGameEvent),
       Button(
         buttonAssets = GameAssets.buttonResultsAssets,
-        bounds = Rectangle(20, 320, 240, 80),
+        bounds = Rectangle(20, 240, 240, 80),
         depth = Depth(6)
-      ).withUpActions(ButtonResultsEvent)
+      ).withUpActions(ButtonResultsEvent),
+      Button(
+        buttonAssets = GameAssets.buttonSplashAssets,
+        bounds = Rectangle(20, 340, 240, 80),
+        depth = Depth(6)
+      ).withUpActions(ButtonSplashEvent)
+
     )
 end GameSceneViewModel
 
