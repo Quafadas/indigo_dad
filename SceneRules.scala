@@ -6,7 +6,7 @@ import indigoextras.ui.*
 
 object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
-  var kount2 = 300
+  var kount2 = 5
 
   type SceneModel = FlicFlacGameModel
   type SceneViewModel = RulesSceneViewModel
@@ -44,7 +44,16 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] =
     case FrameTick =>
-      viewModel.update(context.mouse, context.frameContext.inputState.pointers)
+      println("@@@ SceneRules - FrameTick TP1")
+      val v = viewModel.update(context.mouse, context.frameContext.inputState.pointers)
+      println("@@@ SceneRules - FrameTick TP2")
+      v
+
+    case ViewportResize(gameViewPort) =>
+      println("@@@ ViewportResize w:h=" + gameViewPort.width + ":" + gameViewPort.height)
+      Outcome(viewModel.copy(
+        viewPortWidth = gameViewPort.width,
+        viewPortHeight = gameViewPort.height))
 
     case _ =>
       Outcome(viewModel)
@@ -59,49 +68,53 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-    val textRules = TextBox("Rules Scene", 400, 40)
-      .withColor(RGBA.Black)
-      .withFontSize(Pixels(30))
-      .moveTo(20, 0)
+    val layerBg = (GameAssets.rulesBg)
 
     val bootData = context.frameContext.startUpData.flicFlacBootData
 
-    val width = bootData.pixelWidth
-    val height = bootData.pixelHeight
-
+    //val width = bootData.pixelWidth
+    //val height = bootData.pixelHeight
+    val width = viewModel.viewPortWidth
+    val height = viewModel.viewPortWidth
+       
     Outcome {
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
-        |+| SceneUpdateFragment(textRules)
+        |+| SceneUpdateFragment(Layer(layerBg))  // FIXME scaling ???
         |+| SceneUpdateFragment(viewModel.splashButton.draw)
 //        |+| SceneUpdateFragment(viewModel.rulesButton.draw)
-        |+| SceneUpdateFragment(viewModel.gameButton.draw)
+        |+| SceneUpdateFragment(viewModel.playButton.draw)
 //        |+| SceneUpdateFragment(viewModel.resultsButton.draw)
     }
   end present
 end SceneRules
 
 final case class RulesSceneViewModel(
+    viewPortWidth: Int,
+    viewPortHeight: Int,
     splashButton: Button,
 //  rulesButton: Button,
-    gameButton: Button
+    playButton: Button
 //  resultsButton: Button
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[RulesSceneViewModel] =
+    println("@@@ update TPX")
     for
       bn1 <- splashButton.updateFromPointers(pointers)
-//      bn2 <- rulessButton.update(pointers)
-      bn3 <- gameButton.updateFromPointers(pointers)
+//      bn2 <- rulesButton.update(pointers)
+      bn3 <- playButton.updateFromPointers(pointers)
 //      bn4 <- resultsButton.update(pointers)
-    yield this.copy(splashButton = bn1, /*rulesButton = bn2,*/ gameButton = bn3 /*, resultsButton = bn4*/ )
+    yield this.copy(splashButton = bn1, /*rulesButton = bn2,*/ playButton = bn3 /*, resultsButton = bn4*/ )
 end RulesSceneViewModel
 
 object RulesSceneViewModel:
 
   val initial: RulesSceneViewModel =
     RulesSceneViewModel(
+      viewPortWidth = 1700,     // FIXME ... should be getting the current screen size somehow
+      viewPortHeight = 1250,    // FIXME ... should be getting the current screen size somehow
       Button(
         buttonAssets = GameAssets.buttonSplashAssets,
-        bounds = Rectangle(240, 220, 240, 80),
+        bounds = Rectangle(20, 20, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonSplashEvent),
       /*
@@ -112,10 +125,10 @@ object RulesSceneViewModel:
       ).withUpActions(ButtonRulesEvent),
        */
       Button(
-        buttonAssets = GameAssets.buttonGameAssets,
-        bounds = Rectangle(500, 220, 240, 80),
+        buttonAssets = GameAssets.buttonPlayAssets,
+        bounds = Rectangle(20, 120, 240, 80),
         depth = Depth(6)
-      ).withUpActions(ButtonGameEvent)
+      ).withUpActions(ButtonPlayEvent)
       /*
       Button (
         buttonAssets = GameAssets.buttonResultsAssets,

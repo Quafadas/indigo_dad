@@ -21,7 +21,7 @@ object FlicFlacStartupData:
         hexGraphic = GameAssets.gHex,
         buttonSplashAsset = GameAssets.buttonSplashAssets,
         buttonRulesAsset = GameAssets.buttonRulesAssets,
-        buttonGameAsset = GameAssets.buttonGameAssets,
+        buttonPlayAsset = GameAssets.buttonPlayAssets,
         buttonResultsAsset = GameAssets.buttonResultsAssets
       )
     )
@@ -34,7 +34,7 @@ final case class StaticAssets(
     hexGraphic: Graphic[Material.ImageEffects],
     buttonSplashAsset: ButtonAssets,
     buttonRulesAsset: ButtonAssets,
-    buttonGameAsset: ButtonAssets,
+    buttonPlayAsset: ButtonAssets,
     buttonResultsAsset: ButtonAssets
 )
 

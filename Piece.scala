@@ -2,9 +2,11 @@ package game
 
 import indigo.*
 import indigoextras.ui.*
+import io.circe.Encoder
+import io.circe.Decoder
 
 final case class Piece(
-    pieceShape: Boolean, // ............ true=block, false=cylinder
+    pieceShape: Int, // ................ 0=cylinder, 1=block
     pieceIdentity: Int, // ............. 0,1,2,3,4,5 for Blue/Green/Yellow/Orange/Red/Purple
     pCurPos: Point, // ................. current position (in hexArrayCoords)
     pHomePos: Point, // ................ starting/home position (in hexArrayCoords)
@@ -15,7 +17,8 @@ final case class Piece(
     bSelected: Boolean = false, // ..... piece is selected
     bCaptured: Boolean = false, // ..... piece is captured (or not)
     bMoved: Boolean = false // ......... piece has moved this turn
-)
+) derives Encoder.AsObject,
+      Decoder
 object Piece:
 
   // --------------------------------------------------
@@ -84,7 +87,7 @@ object Piece:
   // --------------------------------------------------
   // Identifying this piece ...
 
-  def pieceShape(p: Piece): Boolean =
+  def pieceShape(p: Piece): Int =
     p.pieceShape
   end pieceShape
 
@@ -105,12 +108,15 @@ object PieceAssets:
   val blocksAssetName = AssetName(GameAssets.blAssetName)
   val cylindersAssetName = AssetName(GameAssets.cyAssetName)
 
+  val pieceTypes: Vector[String] =
+    Vector("Cyldr", "Block")
+
   val pieceNames: Vector[String] = // Piece Names %6
     Vector("Blue", "Green", "Yellow", "Orange", "Red", "Purple")
 
-  def getGraphic(shape: Boolean, id: Int, flipped: Boolean): Graphic[Material.ImageEffects] =
+  def getGraphic(shape: Int, id: Int, flipped: Boolean): Graphic[Material.ImageEffects] =
     val safeId = id % 6
-    val pieceAssetName = if shape then blocksAssetName else cylindersAssetName
+    val pieceAssetName = if shape == CYLINDER then cylindersAssetName else blocksAssetName
     val verticalOffset = if flipped then gHeight else 0
     val pieceRect = Rectangle(gWidth * safeId, 0 + verticalOffset, gWidth + 1, gHeight + 1)
     val pieceGraphic = Graphic(pieceRect, 4, Material.ImageEffects(pieceAssetName)) // Pieces on Layer 4

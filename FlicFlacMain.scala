@@ -8,6 +8,7 @@ import indigo.shared.scenegraph.SceneUpdateFragment
 import indigo.shared.events.MouseEvent
 import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.math.*
+import io.circe.parser.decode
 
 import org.scalajs.dom
 
@@ -43,7 +44,7 @@ end Game
 object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
   var kount1 = 3
-  var kount2 = 1000
+  var kount2 = 3
   var kount3 = 3
   var kount4 = 3
 
@@ -72,7 +73,19 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
 
   def initialModel(flicFlacStartupData: FlicFlacStartupData): Outcome[FlicFlacGameModel] =
     println("@@@ FlicFlacMain-initialModel()")
-    Outcome(FlicFlacGameModel.creation(Point(0, 0)))
+
+    val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlac")) match
+      case Right(model: FlicFlacGameModel) =>
+        println("@@@ Restored model")
+        model
+      case Left(_) =>
+        println("@@@ Created model")
+        FlicFlacGameModel.creation(Point(0, 0))
+
+    /*
+    val cacheOrNew = FlicFlacGameModel.creation(Point(0, 0))
+     */
+    Outcome(cacheOrNew)
   end initialModel
 
   def initialScene(flicFlacBootData: FlicFlacBootData): Option[SceneName] =
@@ -142,14 +155,14 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
         kount4 = kount4 - 1
       end if
       Outcome(flicFlacViewModel)
-
+/*
     case ViewportResize(gameViewPort) =>
       val w = gameViewPort.width
       val h = gameViewPort.height
       // flicFlacViewModel.gameScene.
       println("@@@ FlicFlacMain-updateViewModel ViewportResize w:h " + w + ":" + h)
       Outcome(flicFlacViewModel)
-
+*/
     case _ =>
       if kount3 > 0 then
         println("@@@ FlicFlac Main-updateViewModel _")
@@ -175,7 +188,7 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
 //      println("@@@ Main-ButtonParamsEvent")
 //      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneParams.name))
 
-    case ButtonGameEvent =>
+    case ButtonPlayEvent =>
       println("@@@ Main-ButtonGameEvent")
       Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneGame.name))
 
@@ -221,7 +234,8 @@ final case class FlicFlacViewModel(
 
 case object ButtonSplashEvent extends GlobalEvent
 case object ButtonRulesEvent extends GlobalEvent
-case object ButtonGameEvent extends GlobalEvent
+case object ButtonPlayEvent extends GlobalEvent
+case object ButtonNewGameEvent extends GlobalEvent
 case object ButtonResultsEvent extends GlobalEvent
 case object ButtonParamsEvent extends GlobalEvent
 case object ButtonRoundEvent extends GlobalEvent

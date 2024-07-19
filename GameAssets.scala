@@ -19,6 +19,9 @@ object GameAssets:
   val spAssetPath = "assets/FlicFlacV4.png"
   val cnAssetName = "corners"
   val cnAssetPath = "assets/Corners.png"
+  val rlAssetName = "rules"
+  val rlAssetPath = "assets/Rules.png"
+
 
   println("@@@ Object GameAssets START")
 
@@ -29,8 +32,8 @@ object GameAssets:
       AssetType.Image(AssetName(cyAssetName), AssetPath(cyAssetPath)),
       AssetType.Image(AssetName(blAssetName), AssetPath(blAssetPath)),
       AssetType.Image(AssetName(spAssetName), AssetPath(spAssetPath)),
-      AssetType.Image(AssetName(cnAssetName), AssetPath(cnAssetPath))
-    )
+      AssetType.Image(AssetName(cnAssetName), AssetPath(cnAssetPath)),
+      AssetType.Image(AssetName(rlAssetName), AssetPath(rlAssetPath)))
 
   def gHex: Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName)))
@@ -51,7 +54,7 @@ object GameAssets:
       down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(240, 160, 240, 80)
     )
 
-  def buttonGameAssets: ButtonAssets =
+  def buttonPlayAssets: ButtonAssets =
     ButtonAssets(
       up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(480, 0, 240, 80),
       over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(480, 80, 240, 80),
@@ -70,6 +73,13 @@ object GameAssets:
       up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(0, 240, 240, 80),
       over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(0, 320, 240, 80),
       down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(0, 400, 240, 80)
+    )
+
+  def buttonNewGameAssets: ButtonAssets =
+    ButtonAssets(
+      up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(240, 240, 240, 80),
+      over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(240, 320, 240, 80),
+      down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(240, 400, 240, 80)
     )
 
   def buttonRoundAssets: ButtonAssets =
@@ -113,6 +123,10 @@ object GameAssets:
       .scaleBy(sf, sf)
     Batch(layerC1, layerC2, layerC3, layerC4)
   end cornerLayers
+
+  def rulesBg: Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(0, 0, 1700, 1250), 2, Material.ImageEffects(AssetName(rlAssetName)))
+
 
   println("@@@ Object GameAssets FINISH")
 end GameAssets

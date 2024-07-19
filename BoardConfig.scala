@@ -1,8 +1,9 @@
 package game
 
 import indigo.*
-
-class BoardConfig(
+import io.circe.Encoder
+import io.circe.Decoder
+case class BoardConfig(
 
 // format: off
     iHexPixelWidth: Int,        // GWIDTH pixel width of graphic
@@ -13,7 +14,8 @@ class BoardConfig(
     iHeight: Int,               // half the amount to add to a hex centre y coord to reach the next hexagon below
     iHalfway: Int               // xcoord of halfway along the top left diagonal line of first hex
 // format: on
-):
+) derives Encoder.AsObject,
+      Decoder:
   println("@@@ ## Class BoardConfig Start")
 
   val gWidth = iHexPixelWidth - 1 // ..... The graphic will overlap by one pixel because of -1
