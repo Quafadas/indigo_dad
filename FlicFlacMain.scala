@@ -155,14 +155,14 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
         kount4 = kount4 - 1
       end if
       Outcome(flicFlacViewModel)
-
+/*
     case ViewportResize(gameViewPort) =>
       val w = gameViewPort.width
       val h = gameViewPort.height
       // flicFlacViewModel.gameScene.
       println("@@@ FlicFlacMain-updateViewModel ViewportResize w:h " + w + ":" + h)
       Outcome(flicFlacViewModel)
-
+*/
     case _ =>
       if kount3 > 0 then
         println("@@@ FlicFlac Main-updateViewModel _")
@@ -188,7 +188,7 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
 //      println("@@@ Main-ButtonParamsEvent")
 //      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneParams.name))
 
-    case ButtonGameEvent =>
+    case ButtonPlayEvent =>
       println("@@@ Main-ButtonGameEvent")
       Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneGame.name))
 
@@ -234,7 +234,7 @@ final case class FlicFlacViewModel(
 
 case object ButtonSplashEvent extends GlobalEvent
 case object ButtonRulesEvent extends GlobalEvent
-case object ButtonGameEvent extends GlobalEvent
+case object ButtonPlayEvent extends GlobalEvent
 case object ButtonNewGameEvent extends GlobalEvent
 case object ButtonResultsEvent extends GlobalEvent
 case object ButtonParamsEvent extends GlobalEvent

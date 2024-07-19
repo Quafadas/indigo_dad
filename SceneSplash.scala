@@ -87,7 +87,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
         |+| SceneUpdateFragment(textSplash)
 //        |+| SceneUpdateFragment(viewModel.splashButton.draw)
         |+| SceneUpdateFragment(viewModel.rulesButton.draw)
-        |+| SceneUpdateFragment(viewModel.gameButton.draw)
+        |+| SceneUpdateFragment(viewModel.playButton.draw)
         |+| SceneUpdateFragment(viewModel.resultsButton.draw)
     }
   end present
@@ -96,16 +96,16 @@ end SceneSplash
 final case class SplashSceneViewModel(
 //  splashButton: Button,
     rulesButton: Button,
-    gameButton: Button,
+    playButton: Button,
     resultsButton: Button
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[SplashSceneViewModel] =
     for
 //      bn1 <- splashButton.updateFrom(pointers)
       bn2 <- rulesButton.updateFromPointers(pointers)
-      bn3 <- gameButton.updateFromPointers(pointers)
+      bn3 <- playButton.updateFromPointers(pointers)
       bn4 <- resultsButton.updateFromPointers(pointers)
-    yield this.copy( /*splashButton = bn1,*/ rulesButton = bn2, gameButton = bn3, resultsButton = bn4)
+    yield this.copy( /*splashButton = bn1,*/ rulesButton = bn2, playButton = bn3, resultsButton = bn4)
 end SplashSceneViewModel
 
 object SplashSceneViewModel:
@@ -126,10 +126,10 @@ object SplashSceneViewModel:
         depth = Depth(6)
       ).withUpActions(ButtonRulesEvent),
       Button(
-        buttonAssets = GameAssets.buttonGameAssets,
+        buttonAssets = GameAssets.buttonPlayAssets,
         bounds = Rectangle(50, 150, 240, 80),
         depth = Depth(6)
-      ).withUpActions(ButtonGameEvent),
+      ).withUpActions(ButtonPlayEvent),
       Button(
         buttonAssets = GameAssets.buttonResultsAssets,
         bounds = Rectangle(50, 250, 240, 80),

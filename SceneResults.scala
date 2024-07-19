@@ -104,10 +104,10 @@ object ResultsSceneViewModel:
         depth = Depth(6)
       ).withUpActions(ButtonRulesEvent),
       Button(
-        buttonAssets = GameAssets.buttonGameAssets,
+        buttonAssets = GameAssets.buttonPlayAssets,
         bounds = Rectangle(20, 260, 240, 80),
         depth = Depth(6)
-      ).withUpActions(ButtonGameEvent)
+      ).withUpActions(ButtonPlayEvent)
       /*
       Button (
         buttonAssets = GameAssets.buttonResultsAssets,

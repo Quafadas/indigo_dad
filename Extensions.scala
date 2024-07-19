@@ -10,6 +10,7 @@ import indigoextras.ui.*
   */
 extension (b: Button)
   def updateFromPointers(p: Pointers): Outcome[Button] =
+    println ("@@@ updateFromPointers START")
     val inBounds = b.bounds.isPointWithin(p.position)
 
     val hoverEvents: Batch[GlobalEvent] =
@@ -27,41 +28,52 @@ extension (b: Button)
     val pointerEvents: Batch[GlobalEvent] =
       hoverEvents ++ downEvents ++ upEvents
 
+    println ("@@@ updateFromPointers MATCH")
+
     b.state match
 
       // Stay in Down state
       case ButtonState.Down if inBounds && p.pressed =>
+        println ("@@@ updateFromPointers TP1")
         Outcome(b).addGlobalEvents(b.onHoldDown() ++ pointerEvents)
 
       // Move from Up to Down state on button/pointer press
       case ButtonState.Up if inBounds && p.pressed =>
+        println ("@@@ updateFromPointers TP2")
         Outcome(b.toDownState).addGlobalEvents(b.onHoverOver() ++ pointerEvents)
 
       // Move from Down to Up state (out of bounds)
       case ButtonState.Down if !inBounds && (p.pressed || p.released || p.moved) =>
+        println ("@@@ updateFromPointers TP3")
         Outcome(b.toUpState).addGlobalEvents(b.onHoverOut() ++ pointerEvents)
 
       // Move from Down to Up state (mouse/pointer released)
       case ButtonState.Down if inBounds && p.released =>
+        println ("@@@ updateFromPointers TP4")
         Outcome(b.toUpState).addGlobalEvents(pointerEvents)
 
       // Move from Over to Up state (out of bounds)
       case ButtonState.Over if !inBounds && (p.pressed || p.released || p.moved) =>
+        println ("@@@ updateFromPointers TP5")
         Outcome(b.toUpState).addGlobalEvents(b.onHoverOut() ++ pointerEvents)
 
       // Move from Over to Down state (mouse/pointer press)
       case ButtonState.Over if inBounds && p.pressed =>
+        println ("@@@ updateFromPointers TP6")
         Outcome(b.toDownState).addGlobalEvents(b.onDown() ++ pointerEvents)
 
       // Move from Up to Over (mouse/pointer moved within bounds)
       case ButtonState.Up if inBounds && p.moved =>
+        println ("@@@ updateFromPointers TP7")
         Outcome(b.toOverState).addGlobalEvents(b.onHoverOver() ++ pointerEvents)
 
       // Unaccounted for states.
       case _ =>
+        println ("@@@ updateFromPointers TP8")
         Outcome(b).addGlobalEvents(pointerEvents)
     end match
   ; // dummy statement here helps scalafmt to format correctly
+
 end extension
 
 /** This is a workaround to make up for Pointer not exposing any convenience methods.

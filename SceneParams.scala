@@ -106,10 +106,10 @@ object ParamsSceneViewModel:
       ).withUpActions(ButtonParamsEvent),
        */
       Button(
-        buttonAssets = GameAssets.buttonGameAssets,
+        buttonAssets = GameAssets.buttonPlayAssets,
         bounds = Rectangle(500, 220, 240, 80),
         depth = Depth(6)
-      ).withUpActions(ButtonGameEvent)
+      ).withUpActions(ButtonPlayEvent)
       /*
       Button (
         buttonAssets = GameAssets.buttonResultsAssets,
