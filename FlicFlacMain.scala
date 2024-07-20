@@ -131,6 +131,8 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
       flicFlacGameModel: FlicFlacGameModel
   ): Outcome[FlicFlacViewModel] =
     println("@@@ FlicFlacMain-initialViewModel()")
+    val w = flicFlacStartupData.flicFlacBootData.gameViewPort.width
+    val h = flicFlacStartupData.flicFlacBootData.gameViewPort.height
     val staticAssets = flicFlacStartupData.staticAssets
     Outcome(
       FlicFlacViewModel(
@@ -217,6 +219,21 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
 
     SceneUpdateFragment.empty
   }
+
+  def GetScaleFactor(viewWidth:Int, viewHeight:Int, sceneDimensions : Rectangle) : Double =
+      val dsfx: Double = viewWidth.toDouble / sceneDimensions.width
+      val dsfy: Double = viewHeight.toDouble / sceneDimensions.height
+      val dToCheck = if dsfx > dsfy then dsfy else dsfx
+    
+      val dSF = if (dToCheck >= 1.0) then 1.0
+              else if dToCheck >= 0.9 then 0.9
+              else if dToCheck >= 0.8 then 0.8
+              else if dToCheck >= 0.75 then 0.75
+              else if dToCheck >= 0.67 then 0.67
+              else if dToCheck >= 0.5 then 0.5
+              else if dToCheck >= 0.33 then 0.33
+              else 0.25
+      dSF
 
   println("@@@ Object HelloIndigo Finishes")
 

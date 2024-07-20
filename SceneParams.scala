@@ -94,7 +94,7 @@ object ParamsSceneViewModel:
   val initial: ParamsSceneViewModel =
     ParamsSceneViewModel(
       Button(
-        buttonAssets = GameAssets.buttonSplashAssets,
+        buttonAssets = GameAssets.buttonSplashAssets(1.0),
         bounds = Rectangle(240, 220, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonSplashEvent),
@@ -106,7 +106,7 @@ object ParamsSceneViewModel:
       ).withUpActions(ButtonParamsEvent),
        */
       Button(
-        buttonAssets = GameAssets.buttonPlayAssets,
+        buttonAssets = GameAssets.buttonPlayAssets(1.0),
         bounds = Rectangle(500, 220, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonPlayEvent)
