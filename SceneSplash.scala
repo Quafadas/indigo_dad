@@ -57,7 +57,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case ViewportResize(gameViewPort) =>
-      println("@@@ ViewportResize bounds:size" + gameViewPort.bounds + ":" + gameViewPort.size)
+      println("@@@ SceneSplash ViewportResize bounds:size" + gameViewPort.bounds + ":" + gameViewPort.size)
       Outcome(viewModel.changeButtonBoundaries(viewModel, gameViewPort))
 
     case _ =>
@@ -77,7 +77,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
     val height = viewModel.viewPortHeight
 
     val dSF = GetScaleFactor(width, height, GameAssets.SplashSceneDimensions)
-    val textSplash = TextBox("Splash Scene V27 : " + dSF, 1000, 40)
+    val textSplash = TextBox("Splash Scene V28 : " + dSF, 800, 40)
       .withColor(RGBA.Yellow)
       .withFontSize(Pixels(30))
       .moveTo(30, 0)
@@ -147,7 +147,7 @@ final case class SplashSceneViewModel(
         depth = Depth(6)
       ).withUpActions(ButtonPlayEvent)
 
-    val x3 = (50*dSF).toInt    // FIXME the following four values 50,50,240,80 need to #defines
+    val x3 = (50*dSF).toInt    // FIXME the following four values 50,250,240,80 need to #defines
     val y3 = (250*dSF).toInt
     val w3 = (240*dSF).toInt
     val h3 = (80*dSF).toInt

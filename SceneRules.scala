@@ -6,8 +6,6 @@ import indigoextras.ui.*
 
 object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
-  var kount2 = 5
-
   type SceneModel = FlicFlacGameModel
   type SceneViewModel = RulesSceneViewModel
 
@@ -31,10 +29,6 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] =
     case _ =>
-      if kount2 > 0 then
-        println("@@@ SceneRules-updateModel")
-        kount2 = kount2 - 1
-      end if
       Outcome(model)
   end updateModel
 
@@ -47,7 +41,7 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case ViewportResize(gameViewPort) =>
-      println("@@@ ViewportResize bounds:size" + gameViewPort.bounds + ":" + gameViewPort.size)
+      println("@@@ SceneRules ViewportResize bounds:size" + gameViewPort.bounds + ":" + gameViewPort.size)
       Outcome(viewModel.changeButtonBoundaries(viewModel, gameViewPort))
 
     case _ =>
@@ -65,17 +59,14 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
 
     val layerBg = (GameAssets.rulesBg)
 
-    val bootData = context.frameContext.startUpData.flicFlacBootData
-
-    //val width = bootData.pixelWidth
-    //val height = bootData.pixelHeight
     val width = viewModel.viewPortWidth
-    val height = viewModel.viewPortWidth
+    val height = viewModel.viewPortHeight
+    val dSF = HelloIndigo.GetScaleFactor(width, height, GameAssets.SplashSceneDimensions)
        
     Outcome {
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
-        |+| SceneUpdateFragment(Layer(layerBg))  // FIXME scaling ???
-        |+| SceneUpdateFragment(GameAssets.cornerLayers(GameAssets.RulesSceneDimensions, 1.0, RGBA.Black)) // Splash Scene is 1920x1080
+        |+| SceneUpdateFragment(Layer(layerBg.scaleBy(dSF,dSF)))
+        |+| SceneUpdateFragment(GameAssets.cornerLayers(GameAssets.RulesSceneDimensions, dSF, RGBA.Black))
         |+| SceneUpdateFragment(viewModel.splashButton.draw)
 //        |+| SceneUpdateFragment(viewModel.rulesButton.draw)
         |+| SceneUpdateFragment(viewModel.playButton.draw)

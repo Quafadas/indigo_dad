@@ -62,7 +62,7 @@ object FlicFlacConfig:
       clearColor = RGBA.fromHexString("#000000"),
       magnification = 1,
       transparentBackground = false,
-      resizePolicy = ResizePolicy.Resize,
+      resizePolicy = ResizePolicy.ResizePreserveAspect,
       advanced = AdvancedGameConfig(
         renderingTechnology = RenderingTechnology.WebGL2WithFallback,
         antiAliasing = false,
