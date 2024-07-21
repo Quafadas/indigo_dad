@@ -94,17 +94,17 @@ object ResultsSceneViewModel:
   val initial: ResultsSceneViewModel =
     ResultsSceneViewModel(
       Button(
-        buttonAssets = GameAssets.buttonSplashAssets,
+        buttonAssets = GameAssets.buttonSplashAssets(1.0),
         bounds = Rectangle(20, 60, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonSplashEvent),
       Button(
-        buttonAssets = GameAssets.buttonRulesAssets,
+        buttonAssets = GameAssets.buttonRulesAssets(1.0),
         bounds = Rectangle(20, 160, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonRulesEvent),
       Button(
-        buttonAssets = GameAssets.buttonPlayAssets,
+        buttonAssets = GameAssets.buttonPlayAssets(1.0),
         bounds = Rectangle(20, 260, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonPlayEvent)

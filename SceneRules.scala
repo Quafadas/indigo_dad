@@ -6,8 +6,6 @@ import indigoextras.ui.*
 
 object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
-  var kount2 = 5
-
   type SceneModel = FlicFlacGameModel
   type SceneViewModel = RulesSceneViewModel
 
@@ -31,10 +29,6 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] =
     case _ =>
-      if kount2 > 0 then
-        println("@@@ SceneRules-updateModel")
-        kount2 = kount2 - 1
-      end if
       Outcome(model)
   end updateModel
 
@@ -44,16 +38,11 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] =
     case FrameTick =>
-      println("@@@ SceneRules - FrameTick TP1")
-      val v = viewModel.update(context.mouse, context.frameContext.inputState.pointers)
-      println("@@@ SceneRules - FrameTick TP2")
-      v
+      viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case ViewportResize(gameViewPort) =>
-      println("@@@ ViewportResize w:h=" + gameViewPort.width + ":" + gameViewPort.height)
-      Outcome(viewModel.copy(
-        viewPortWidth = gameViewPort.width,
-        viewPortHeight = gameViewPort.height))
+      println("@@@ SceneRules ViewportResize bounds:size" + gameViewPort.bounds + ":" + gameViewPort.size)
+      Outcome(viewModel.changeButtonBoundaries(viewModel, gameViewPort))
 
     case _ =>
       Outcome(viewModel)
@@ -70,16 +59,15 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
 
     val layerBg = (GameAssets.rulesBg)
 
-    val bootData = context.frameContext.startUpData.flicFlacBootData
-
-    //val width = bootData.pixelWidth
-    //val height = bootData.pixelHeight
     val width = viewModel.viewPortWidth
-    val height = viewModel.viewPortWidth
-       
+    val height = viewModel.viewPortHeight
+    scribe.info("DANGER SCALE FACTOR !")
+    val dSF = 1.0 // FlicFlacGame().GetScaleFactor(width, height, GameAssets.SplashSceneDimensions)
+
     Outcome {
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
-        |+| SceneUpdateFragment(Layer(layerBg))  // FIXME scaling ???
+        |+| SceneUpdateFragment(Layer(layerBg.scaleBy(dSF, dSF)))
+        |+| SceneUpdateFragment(GameAssets.cornerLayers(GameAssets.RulesSceneDimensions, dSF, RGBA.Black))
         |+| SceneUpdateFragment(viewModel.splashButton.draw)
 //        |+| SceneUpdateFragment(viewModel.rulesButton.draw)
         |+| SceneUpdateFragment(viewModel.playButton.draw)
@@ -97,23 +85,63 @@ final case class RulesSceneViewModel(
 //  resultsButton: Button
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[RulesSceneViewModel] =
-    println("@@@ update TPX")
     for
       bn1 <- splashButton.updateFromPointers(pointers)
 //      bn2 <- rulesButton.update(pointers)
       bn3 <- playButton.updateFromPointers(pointers)
 //      bn4 <- resultsButton.update(pointers)
     yield this.copy(splashButton = bn1, /*rulesButton = bn2,*/ playButton = bn3 /*, resultsButton = bn4*/ )
+
+  def changeButtonBoundaries(ssvm: RulesSceneViewModel, gvp: GameViewport): RulesSceneViewModel =
+
+    scribe.info("scale factor danger")
+    val dSF = 1.0 // HelloIndigo.GetScaleFactor(gvp.width, gvp.height, GameAssets.RulesSceneDimensions)
+    println("@@@ dSF:" + dSF)
+
+    val x1 = (20 * dSF).toInt // FIXME the following four values 50,50,240,80 need to #defines
+    val y1 = (20 * dSF).toInt
+    val w1 = (240 * dSF).toInt
+    val h1 = (80 * dSF).toInt
+    val r1 = Rectangle(x1, y1, w1, h1)
+
+    val newSplashButton =
+      Button(
+        buttonAssets = GameAssets.buttonSplashAssets(dSF),
+        bounds = r1,
+        depth = Depth(6)
+      ).withUpActions(ButtonSplashEvent)
+
+    val x2 = (20 * dSF).toInt // FIXME the following four values 50,50,150,80 need to #defines
+    val y2 = (120 * dSF).toInt
+    val w2 = (240 * dSF).toInt
+    val h2 = (80 * dSF).toInt
+    val r2 = Rectangle(x2, y2, w2, h2)
+
+    val newPlayButton =
+      Button(
+        buttonAssets = GameAssets.buttonPlayAssets(dSF),
+        bounds = r2,
+        depth = Depth(6)
+      ).withUpActions(ButtonPlayEvent)
+
+    this.copy(
+      viewPortWidth = gvp.width,
+      viewPortHeight = gvp.height,
+      splashButton = newSplashButton,
+      playButton = newPlayButton
+    )
+  end changeButtonBoundaries
+
 end RulesSceneViewModel
 
 object RulesSceneViewModel:
 
   val initial: RulesSceneViewModel =
     RulesSceneViewModel(
-      viewPortWidth = 1700,     // FIXME ... should be getting the current screen size somehow
-      viewPortHeight = 1250,    // FIXME ... should be getting the current screen size somehow
+      viewPortWidth = 1700, // FIXME ... should be getting the current screen size somehow
+      viewPortHeight = 1250, // FIXME ... should be getting the current screen size somehow
       Button(
-        buttonAssets = GameAssets.buttonSplashAssets,
+        buttonAssets = GameAssets.buttonSplashAssets(1.0),
         bounds = Rectangle(20, 20, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonSplashEvent),
@@ -125,7 +153,7 @@ object RulesSceneViewModel:
       ).withUpActions(ButtonRulesEvent),
        */
       Button(
-        buttonAssets = GameAssets.buttonPlayAssets,
+        buttonAssets = GameAssets.buttonPlayAssets(1.0),
         bounds = Rectangle(20, 120, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonPlayEvent)
@@ -137,4 +165,5 @@ object RulesSceneViewModel:
       ).withUpActions(ButtonResultsEvent)
        */
     )
+
 end RulesSceneViewModel

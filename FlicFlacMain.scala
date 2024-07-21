@@ -122,6 +122,8 @@ case class FlicFlacGame(
       flicFlacGameModel: FlicFlacGameModel
   ): Outcome[FlicFlacViewModel] =
     println("@@@ FlicFlacMain-initialViewModel()")
+    val w = flicFlacStartupData.flicFlacBootData.gameViewPort.width
+    val h = flicFlacStartupData.flicFlacBootData.gameViewPort.height
     val staticAssets = flicFlacStartupData.staticAssets
     Outcome(
       FlicFlacViewModel(
@@ -130,7 +132,8 @@ case class FlicFlacGame(
         RulesSceneViewModel.initial,
         GameSceneViewModel.initial,
         ResultsSceneViewModel.initial,
-        ParamsSceneViewModel.initial
+        ParamsSceneViewModel.initial,
+        flicFlacStartupData.flicFlacBootData.gameViewPort
       )
     )
   end initialViewModel
@@ -146,14 +149,37 @@ case class FlicFlacGame(
         kount4 = kount4 - 1
       end if
       Outcome(flicFlacViewModel)
-    /*
+
     case ViewportResize(gameViewPort) =>
       val w = gameViewPort.width
       val h = gameViewPort.height
-      // flicFlacViewModel.gameScene.
       println("@@@ FlicFlacMain-updateViewModel ViewportResize w:h " + w + ":" + h)
+      Outcome(flicFlacViewModel.copy(theGameViewPort = gameViewPort))
+
+    case ButtonSplashEvent =>
+      println("@@@ Main-ButtonSplashEvent")
       Outcome(flicFlacViewModel)
-     */
+        .addGlobalEvents(SceneEvent.JumpTo(SceneSplash.name))
+        .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
+
+    case ButtonRulesEvent =>
+      println("@@@ Main-ButtonRulesEvent")
+      Outcome(flicFlacViewModel)
+        .addGlobalEvents(SceneEvent.JumpTo(SceneRules.name))
+        .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
+
+    case ButtonPlayEvent =>
+      println("@@@ Main-ButtonGameEvent")
+      Outcome(flicFlacViewModel)
+        .addGlobalEvents(SceneEvent.JumpTo(SceneGame.name))
+        .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
+
+    case ButtonResultsEvent =>
+      println("@@@ Main-ButtonResultsEvent")
+      Outcome(flicFlacViewModel)
+        .addGlobalEvents(SceneEvent.JumpTo(SceneResults.name))
+        .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
+
     case _ =>
       if kount3 > 0 then
         println("@@@ FlicFlac Main-updateViewModel _")
@@ -166,26 +192,6 @@ case class FlicFlacGame(
       context: FrameContext[FlicFlacStartupData],
       flicFlacGameModel: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] =
-
-    case ButtonSplashEvent =>
-      println("@@@ Main-ButtonSplashEvent")
-      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneSplash.name))
-
-    case ButtonRulesEvent =>
-      println("@@@ Main-ButtonRulesEvent")
-      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneRules.name))
-
-//    case ButtonParamsEvent =>
-//      println("@@@ Main-ButtonParamsEvent")
-//      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneParams.name))
-
-    case ButtonPlayEvent =>
-      println("@@@ Main-ButtonGameEvent")
-      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneGame.name))
-
-    case ButtonResultsEvent =>
-      println("@@@ Main-ButtonResultsEvent")
-      Outcome(flicFlacGameModel).addGlobalEvents(SceneEvent.JumpTo(SceneResults.name))
 
     case _ =>
       if kount2 > 0 then
@@ -209,6 +215,23 @@ case class FlicFlacGame(
     SceneUpdateFragment.empty
   }
 
+  def GetScaleFactor(viewWidth: Int, viewHeight: Int, sceneDimensions: Rectangle): Double =
+    val dsfx: Double = viewWidth.toDouble / sceneDimensions.width
+    val dsfy: Double = viewHeight.toDouble / sceneDimensions.height
+    val dToCheck = if dsfx > dsfy then dsfy else dsfx
+
+    val dSF =
+      if dToCheck >= 1.0 then 1.0
+      else if dToCheck >= 0.9 then 0.9
+      else if dToCheck >= 0.8 then 0.8
+      else if dToCheck >= 0.75 then 0.75
+      else if dToCheck >= 0.67 then 0.67
+      else if dToCheck >= 0.5 then 0.5
+      else if dToCheck >= 0.33 then 0.33
+      else 0.25
+    dSF
+  end GetScaleFactor
+
   println("@@@ Object HelloIndigo Finishes")
 
 end FlicFlacGame
@@ -220,7 +243,8 @@ final case class FlicFlacViewModel(
     rulesScene: RulesSceneViewModel,
     gameScene: GameSceneViewModel,
     resultsScene: ResultsSceneViewModel,
-    paramsScene: ParamsSceneViewModel
+    paramsScene: ParamsSceneViewModel,
+    theGameViewPort: GameViewport
 )
 
 case object ButtonSplashEvent extends GlobalEvent

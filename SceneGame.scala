@@ -283,7 +283,7 @@ object GameSceneViewModel:
       None, // we have no last position of the pointer recorded
 
       Button(
-        buttonAssets = GameAssets.buttonRulesAssets,
+        buttonAssets = GameAssets.buttonRulesAssets(1.0),
         bounds = Rectangle(20, 40, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonRulesEvent),
@@ -293,12 +293,12 @@ object GameSceneViewModel:
         depth = Depth(6)
       ).withUpActions(ButtonNewGameEvent),
       Button(
-        buttonAssets = GameAssets.buttonResultsAssets,
+        buttonAssets = GameAssets.buttonResultsAssets(1.0),
         bounds = Rectangle(20, 240, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonResultsEvent),
       Button(
-        buttonAssets = GameAssets.buttonSplashAssets,
+        buttonAssets = GameAssets.buttonSplashAssets(1.0),
         bounds = Rectangle(20, 340, 240, 80),
         depth = Depth(6)
       ).withUpActions(ButtonSplashEvent)
