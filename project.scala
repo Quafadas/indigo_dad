@@ -14,3 +14,5 @@
 //> using dep io.indigoengine::indigo-json-circe::0.17.0
 //> using dep io.indigoengine::tyrian-indigo-bridge::0.17.0
 //> using dep io.indigoengine::tyrian::0.11.0
+
+//> using dep com.outr::scribe::3.15.0

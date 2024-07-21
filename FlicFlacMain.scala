@@ -28,17 +28,14 @@ import tyrian.TyrianIndigoBridge
 object Game:
   def main(args: Array[String]): Unit =
     println("@@@ Object Game main Launch Start")
-    val tss = TyrianSubSystem[IO, Int, FlicFlacGameModel](
-      None,
-      TyrianIndigoBridge[IO, Int, FlicFlacGameModel]()
-    )
-    HelloIndigo(tss).launch(
-      "indigo-container",
-      Map[String, String](
-        "width" -> dom.window.innerWidth.toString,
-        "height" -> dom.window.innerHeight.toString
-      )
-    )
+    TyrianApp.launch("myapp")
+    // HelloIndigo(tss).launch(
+    //   "indigo-container",
+    //   Map[String, String](
+    //     "width" -> dom.window.innerWidth.toString,
+    //     "height" -> dom.window.innerHeight.toString
+    //   )
+    // )
     println("@@@ Object Game main Launch Finish")
   end main
 end Game

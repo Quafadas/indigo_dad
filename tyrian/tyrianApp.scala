@@ -1,0 +1,61 @@
+package game
+
+import tyrian.Html.*
+import tyrian.*
+import cats.effect.IO
+import org.scalajs.dom
+
+import scala.scalajs.js.annotation.*
+
+enum Msg:
+  case StartIndigo extends Msg
+  case DoNothing extends Msg
+end Msg
+
+final case class TyrianModel(bridge: TyrianIndigoBridge[IO, Int, FlicFlacGameModel])
+object TyrianModel:
+  val init: TyrianModel = TyrianModel(TyrianIndigoBridge())
+end TyrianModel
+
+object TyrianApp extends TyrianIOApp[Msg, TyrianModel]:
+
+  // override def init
+
+  override def router: Location => Msg = { case _ =>
+    Msg.DoNothing
+  }
+
+  def init(flags: Map[String, String]): (TyrianModel, Cmd[IO, Msg]) =
+    (TyrianModel.init, Cmd.Emit(Msg.StartIndigo))
+
+  def update(model: TyrianModel): Msg => (TyrianModel, Cmd[IO, Msg]) = {
+    case Msg.StartIndigo =>
+      (
+        model,
+        Cmd.SideEffect {
+          HelloIndigo(model.bridge.subSystem(IndigoGameId("indigo-container"))).launch(
+            "indigo-container",
+            Map[String, String](
+              "width" -> dom.window.innerWidth.toString,
+              "height" -> dom.window.innerHeight.toString
+            )
+          )
+        }
+      )
+    case Msg.DoNothing =>
+      (model, Cmd.None)
+  }
+
+  end update
+
+  def view(model: TyrianModel): Html[Msg] =
+    div(
+      h1("Welcome to Flic Flac!"),
+      p("Start the game - beware all ye who enter here!"),
+      button(onClick(Msg.StartIndigo))("Start Indigo"),
+      div(id := "indigo-container")()
+    )
+
+  def subscriptions(model: TyrianModel): Sub[IO, Msg] =
+    Sub.None
+end TyrianApp
