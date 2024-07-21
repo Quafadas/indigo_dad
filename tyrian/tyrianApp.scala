@@ -9,7 +9,6 @@ import scala.scalajs.js.annotation.*
 
 enum Msg:
   case StartIndigo extends Msg
-  // case RenderUI extends Msg
   case DoNothing extends Msg
   case RunGame extends Msg
   case RetryIndigo extends Msg
@@ -31,10 +30,8 @@ object TyrianApp extends TyrianIOApp[Msg, TyrianModel]:
       scribe.info(s"loc.fullPath: ${loc.fullPath}")
       loc.fullPath.contains("runGame=true") match
         case true =>
-          scribe.info("Starting Indigo")
           Msg.StartIndigo
         case false =>
-          scribe.info("Run game not in URL")
           Msg.DoNothing
       end match
     case ext =>
@@ -51,10 +48,9 @@ object TyrianApp extends TyrianIOApp[Msg, TyrianModel]:
       println(model)
       val task: IO[Msg] = IO.delay{
         if dom.document.getElementById("indigo-container") == null then
-          dom.console.error("Indigo container not found")
           Msg.RetryIndigo
         else
-          HelloIndigo(model.bridge.subSystem(IndigoGameId("indigo-container"))).launch(
+          FlicFlacGame(model.bridge.subSystem(IndigoGameId("indigo-container"))).launch(
             "indigo-container",
             Map[String, String](
               "width" -> dom.window.innerWidth.toString,

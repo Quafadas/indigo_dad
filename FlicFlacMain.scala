@@ -24,28 +24,12 @@ import tyrian.TyrianIndigoBridge
 // Rework to ViewModelControl
 // *******************************************
 
-@JSExportTopLevel("IndigoGame")
-object Game:
-  def main(args: Array[String]): Unit =
-    scribe.info("@@@ TyrianApp launch")
-    TyrianApp.launch("myapp")
-    // HelloIndigo(tss).launch(
-    //   "indigo-container",
-    //   Map[String, String](
-    //     "width" -> dom.window.innerWidth.toString,
-    //     "height" -> dom.window.innerHeight.toString
-    //   )
-    // )
-    scribe.info("Tyrian App Finish")
-  end main
-end Game
-
 // gameSize can be one of 2,3,4,5,6 and is the number of major hexagons across one side where ...
 // ... a major hexagon is ring of 6 hexagons, with a central 7th black hexagon
 //val gameSize = 2 // <<<<<<<<<<<<<<<<<<<<<<<
 //val boardBasePoint : Point = Point(400,50)  // where the (inisible) top left hand corner of the hex grid board is positioned
 
-case class HelloIndigo(
+case class FlicFlacGame(
     tyrianSubSystem: TyrianSubSystem[IO, Int, FlicFlacGameModel]
 ) extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
@@ -227,7 +211,7 @@ case class HelloIndigo(
 
   println("@@@ Object HelloIndigo Finishes")
 
-end HelloIndigo
+end FlicFlacGame
 
 //final case class ViewModel()
 final case class FlicFlacViewModel(
