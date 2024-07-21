@@ -6,15 +6,12 @@ setup-ide:
   scala-cli setup-ide .
 
 dev:
-  cs launch io.github.quafadas:live-server-scala-cli-js_3:0.1.3 -- --path-to-index-html {{invocation_directory()}}/static
-
-copyAssets:
-  cp -r {{justfile_directory()}}/static/. {{outDir}}
+  cs launch io.github.quafadas::sjsls:0.2.0 -- --path-to-index-html {{invocation_directory()}}/static
 
 ## Builds the front end project
 buildJs:
   mkdir -p {{outDir}}
-  scala-cli --power package . -o {{outDir}} -f --js-mode release
+  scala-cli --power package . -o {{outDir}} -f
 
 ## JP 23/06/2024 switched to scalafmt during skype call with Simon
 format:

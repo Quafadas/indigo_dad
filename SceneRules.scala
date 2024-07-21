@@ -61,11 +61,12 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
 
     val width = viewModel.viewPortWidth
     val height = viewModel.viewPortHeight
-    val dSF = HelloIndigo.GetScaleFactor(width, height, GameAssets.SplashSceneDimensions)
-       
+    scribe.info("DANGER SCALE FACTOR !")
+    val dSF = 1.0 // FlicFlacGame().GetScaleFactor(width, height, GameAssets.SplashSceneDimensions)
+
     Outcome {
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
-        |+| SceneUpdateFragment(Layer(layerBg.scaleBy(dSF,dSF)))
+        |+| SceneUpdateFragment(Layer(layerBg.scaleBy(dSF, dSF)))
         |+| SceneUpdateFragment(GameAssets.cornerLayers(GameAssets.RulesSceneDimensions, dSF, RGBA.Black))
         |+| SceneUpdateFragment(viewModel.splashButton.draw)
 //        |+| SceneUpdateFragment(viewModel.rulesButton.draw)
@@ -91,44 +92,45 @@ final case class RulesSceneViewModel(
 //      bn4 <- resultsButton.update(pointers)
     yield this.copy(splashButton = bn1, /*rulesButton = bn2,*/ playButton = bn3 /*, resultsButton = bn4*/ )
 
-  def changeButtonBoundaries( ssvm : RulesSceneViewModel, gvp : GameViewport ) : RulesSceneViewModel =
+  def changeButtonBoundaries(ssvm: RulesSceneViewModel, gvp: GameViewport): RulesSceneViewModel =
 
-    val dSF = HelloIndigo.GetScaleFactor(gvp.width, gvp.height, GameAssets.RulesSceneDimensions)
-    println("@@@ dSF:"+dSF)
+    scribe.info("scale factor danger")
+    val dSF = 1.0 // HelloIndigo.GetScaleFactor(gvp.width, gvp.height, GameAssets.RulesSceneDimensions)
+    println("@@@ dSF:" + dSF)
 
-    val x1 = (20*dSF).toInt    // FIXME the following four values 50,50,240,80 need to #defines
-    val y1 = (20*dSF).toInt
-    val w1 = (240*dSF).toInt
-    val h1 = (80*dSF).toInt
-    val r1 = Rectangle(x1,y1,w1,h1)
+    val x1 = (20 * dSF).toInt // FIXME the following four values 50,50,240,80 need to #defines
+    val y1 = (20 * dSF).toInt
+    val w1 = (240 * dSF).toInt
+    val h1 = (80 * dSF).toInt
+    val r1 = Rectangle(x1, y1, w1, h1)
 
-    val newSplashButton =       
+    val newSplashButton =
       Button(
         buttonAssets = GameAssets.buttonSplashAssets(dSF),
         bounds = r1,
         depth = Depth(6)
       ).withUpActions(ButtonSplashEvent)
 
-    val x2 = (20*dSF).toInt    // FIXME the following four values 50,50,150,80 need to #defines
-    val y2 = (120*dSF).toInt
-    val w2 = (240*dSF).toInt
-    val h2 = (80*dSF).toInt
-    val r2 = Rectangle(x2,y2,w2,h2)
+    val x2 = (20 * dSF).toInt // FIXME the following four values 50,50,150,80 need to #defines
+    val y2 = (120 * dSF).toInt
+    val w2 = (240 * dSF).toInt
+    val h2 = (80 * dSF).toInt
+    val r2 = Rectangle(x2, y2, w2, h2)
 
-    val newPlayButton = 
+    val newPlayButton =
       Button(
         buttonAssets = GameAssets.buttonPlayAssets(dSF),
         bounds = r2,
         depth = Depth(6)
       ).withUpActions(ButtonPlayEvent)
 
-    this.copy(  viewPortWidth = gvp.width, 
-                viewPortHeight = gvp.height, 
-                splashButton = newSplashButton,
-                playButton = newPlayButton
-                )
-
-
+    this.copy(
+      viewPortWidth = gvp.width,
+      viewPortHeight = gvp.height,
+      splashButton = newSplashButton,
+      playButton = newPlayButton
+    )
+  end changeButtonBoundaries
 
 end RulesSceneViewModel
 
@@ -136,8 +138,8 @@ object RulesSceneViewModel:
 
   val initial: RulesSceneViewModel =
     RulesSceneViewModel(
-      viewPortWidth = 1700,     // FIXME ... should be getting the current screen size somehow
-      viewPortHeight = 1250,    // FIXME ... should be getting the current screen size somehow
+      viewPortWidth = 1700, // FIXME ... should be getting the current screen size somehow
+      viewPortHeight = 1250, // FIXME ... should be getting the current screen size somehow
       Button(
         buttonAssets = GameAssets.buttonSplashAssets(1.0),
         bounds = Rectangle(20, 20, 240, 80),
