@@ -11,6 +11,9 @@ import scala.math.*
 import io.circe.parser.decode
 
 import org.scalajs.dom
+import tyrian.TyrianSubSystem
+import cats.effect.IO
+import tyrian.TyrianIndigoBridge
 
 // *******************************************
 // Outstanding issues ...ViewModel.initialViewModel
@@ -25,7 +28,11 @@ import org.scalajs.dom
 object Game:
   def main(args: Array[String]): Unit =
     println("@@@ Object Game main Launch Start")
-    HelloIndigo.launch(
+    val tss = TyrianSubSystem[IO, Int, FlicFlacGameModel](
+      None,
+      TyrianIndigoBridge[IO, Int, FlicFlacGameModel]()
+    )
+    HelloIndigo(tss).launch(
       "indigo-container",
       Map[String, String](
         "width" -> dom.window.innerWidth.toString,
@@ -41,7 +48,9 @@ end Game
 //val gameSize = 2 // <<<<<<<<<<<<<<<<<<<<<<<
 //val boardBasePoint : Point = Point(400,50)  // where the (inisible) top left hand corner of the hex grid board is positioned
 
-object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
+case class HelloIndigo(
+    tyrianSubSystem: TyrianSubSystem[IO, Int, FlicFlacGameModel]
+) extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
   var kount1 = 3
   var kount2 = 3
@@ -123,6 +132,7 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
 
       BootResult(config, flicFlacBootData)
         .withAssets(assets)
+        .withSubSystems(tyrianSubSystem)
     }
   end boot
 
@@ -155,14 +165,14 @@ object HelloIndigo extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, Fli
         kount4 = kount4 - 1
       end if
       Outcome(flicFlacViewModel)
-/*
+    /*
     case ViewportResize(gameViewPort) =>
       val w = gameViewPort.width
       val h = gameViewPort.height
       // flicFlacViewModel.gameScene.
       println("@@@ FlicFlacMain-updateViewModel ViewportResize w:h " + w + ":" + h)
       Outcome(flicFlacViewModel)
-*/
+     */
     case _ =>
       if kount3 > 0 then
         println("@@@ FlicFlac Main-updateViewModel _")

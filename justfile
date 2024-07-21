@@ -14,7 +14,7 @@ copyAssets:
 ## Builds the front end project
 buildJs:
   mkdir -p {{outDir}}
-  scala-cli --power package . -o {{outDir}} -f --js-mode release
+  scala-cli --power package . -o {{outDir}} -f
 
 ## JP 23/06/2024 switched to scalafmt during skype call with Simon
 format:
