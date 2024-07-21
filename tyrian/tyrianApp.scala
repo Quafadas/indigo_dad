@@ -10,6 +10,7 @@ import scala.scalajs.js.annotation.*
 enum Msg:
   case StartIndigo extends Msg
   case DoNothing extends Msg
+  case NavigateToUrl(url: String) extends Msg
 end Msg
 
 final case class TyrianModel(bridge: TyrianIndigoBridge[IO, Int, FlicFlacGameModel])
@@ -21,8 +22,12 @@ object TyrianApp extends TyrianIOApp[Msg, TyrianModel]:
 
   // override def init
 
-  override def router: Location => Msg = { case _ =>
-    Msg.DoNothing
+  override def router: Location => Msg = {
+    case loc: Location.Internal =>
+      // loc.search
+      Msg.DoNothing
+    case ext =>
+      Msg.NavigateToUrl(ext.href)
   }
 
   def init(flags: Map[String, String]): (TyrianModel, Cmd[IO, Msg]) =
@@ -44,6 +49,12 @@ object TyrianApp extends TyrianIOApp[Msg, TyrianModel]:
       )
     case Msg.DoNothing =>
       (model, Cmd.None)
+    // format: off
+    case Msg.NavigateToUrl(url) => {
+        dom.console.error("external navigation not supported")
+        (model, Cmd.Emit(Msg.DoNothing))
+    }
+    // format: on
   }
 
   end update

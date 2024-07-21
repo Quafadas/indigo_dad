@@ -8,9 +8,6 @@ setup-ide:
 dev:
   cs launch io.github.quafadas::sjsls:0.2.0 -- --path-to-index-html {{invocation_directory()}}/static
 
-copyAssets:
-  cp -r {{justfile_directory()}}/static/. {{outDir}}
-
 ## Builds the front end project
 buildJs:
   mkdir -p {{outDir}}
