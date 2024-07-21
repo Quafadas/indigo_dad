@@ -27,7 +27,7 @@ import tyrian.TyrianIndigoBridge
 @JSExportTopLevel("IndigoGame")
 object Game:
   def main(args: Array[String]): Unit =
-    println("@@@ Object Game main Launch Start")
+    scribe.info("@@@ TyrianApp launch")
     TyrianApp.launch("myapp")
     // HelloIndigo(tss).launch(
     //   "indigo-container",
@@ -36,7 +36,7 @@ object Game:
     //     "height" -> dom.window.innerHeight.toString
     //   )
     // )
-    println("@@@ Object Game main Launch Finish")
+    scribe.info("Tyrian App Finish")
   end main
 end Game
 

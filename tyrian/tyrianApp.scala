@@ -4,40 +4,56 @@ import tyrian.Html.*
 import tyrian.*
 import cats.effect.IO
 import org.scalajs.dom
-
+import scala.concurrent.duration.DurationDouble
 import scala.scalajs.js.annotation.*
 
 enum Msg:
   case StartIndigo extends Msg
+  // case RenderUI extends Msg
   case DoNothing extends Msg
+  case RunGame extends Msg
+  case RetryIndigo extends Msg
   case NavigateToUrl(url: String) extends Msg
 end Msg
 
-final case class TyrianModel(bridge: TyrianIndigoBridge[IO, Int, FlicFlacGameModel])
+final case class TyrianModel(
+    bridge: TyrianIndigoBridge[IO, Int, FlicFlacGameModel],
+    renderUi: Boolean = true
+)
 object TyrianModel:
   val init: TyrianModel = TyrianModel(TyrianIndigoBridge())
 end TyrianModel
 
 object TyrianApp extends TyrianIOApp[Msg, TyrianModel]:
 
-  // override def init
-
   override def router: Location => Msg = {
     case loc: Location.Internal =>
-      // loc.search
-      Msg.DoNothing
+      scribe.info(s"loc.fullPath: ${loc.fullPath}")
+      loc.fullPath.contains("runGame=true") match
+        case true =>
+          scribe.info("Starting Indigo")
+          Msg.StartIndigo
+        case false =>
+          scribe.info("Run game not in URL")
+          Msg.DoNothing
+      end match
     case ext =>
       Msg.NavigateToUrl(ext.href)
   }
 
   def init(flags: Map[String, String]): (TyrianModel, Cmd[IO, Msg]) =
-    (TyrianModel.init, Cmd.Emit(Msg.StartIndigo))
+    (TyrianModel.init, Cmd.Emit(Msg.DoNothing))
 
   def update(model: TyrianModel): Msg => (TyrianModel, Cmd[IO, Msg]) = {
+    // format: off
     case Msg.StartIndigo =>
-      (
-        model,
-        Cmd.SideEffect {
+      scribe.info("Starting Indigo")
+      println(model)
+      val task: IO[Msg] = IO.delay{
+        if dom.document.getElementById("indigo-container") == null then
+          dom.console.error("Indigo container not found")
+          Msg.RetryIndigo
+        else
           HelloIndigo(model.bridge.subSystem(IndigoGameId("indigo-container"))).launch(
             "indigo-container",
             Map[String, String](
@@ -45,32 +61,39 @@ object TyrianApp extends TyrianIOApp[Msg, TyrianModel]:
               "height" -> dom.window.innerHeight.toString
             )
           )
-        }
-      )
+          Msg.DoNothing
+      }
+      (model.copy(renderUi = false), Cmd.Run(task))
+
+    case Msg.RetryIndigo =>
+      scribe.info("Retrying Indigo")
+      (model, Cmd.emitAfterDelay(Msg.StartIndigo, 0.5.seconds))
+
     case Msg.DoNothing =>
       (model, Cmd.None)
-    // format: off
+
     case Msg.NavigateToUrl(url) => {
         dom.console.error("external navigation not supported")
-        (model, Cmd.Emit(Msg.DoNothing))
+        (model, Cmd.None)
     }
+    case Msg.RunGame =>
+      (
+        model.copy(renderUi = false),
+        Nav.loadUrl[IO](s"${dom.window.location}?runGame=true"),
+      )
     // format: on
   }
 
   end update
 
   def view(model: TyrianModel): Html[Msg] =
-    div(
-      h1("Flic Flac!"),
-      p("Start the game - beware all ye who enter here!"),
-      p("We coudl write out the rules here"),
-      p(
-        "But I think the best thing, would be to get client side routing working ... so that we can also launch directly to the game, this might be a propblem in deployment though"
-      ),
-      button(onClick(Msg.StartIndigo))("Start Indigo"),
-      div(id := "indigo-container")()
-    )
-
+    if model.renderUi then
+      div(id := "myapp")(
+        h1("Flic Flac!"),
+        p("Start the game - beware all ye who enter here!"),
+        button(onClick(Msg.RunGame))("Start Game")
+      )
+    else div(id := "indigo-container")()
   def subscriptions(model: TyrianModel): Sub[IO, Msg] =
     Sub.None
 end TyrianApp
