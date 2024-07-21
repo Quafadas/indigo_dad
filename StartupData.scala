@@ -19,10 +19,10 @@ object FlicFlacStartupData:
       flicFlacBootData = flicFlacBootData,
       staticAssets = StaticAssets(
         hexGraphic = GameAssets.gHex,
-        buttonSplashAsset = GameAssets.buttonSplashAssets,
-        buttonRulesAsset = GameAssets.buttonRulesAssets,
-        buttonPlayAsset = GameAssets.buttonPlayAssets,
-        buttonResultsAsset = GameAssets.buttonResultsAssets
+        buttonSplashAsset = GameAssets.buttonSplashAssets(1.0),
+        buttonRulesAsset = GameAssets.buttonRulesAssets(1.0),
+        buttonPlayAsset = GameAssets.buttonPlayAssets(1.0),
+        buttonResultsAsset = GameAssets.buttonResultsAssets(1.0)
       )
     )
   println("@@@ Object FlicFlacStartupData FINISH")
@@ -62,7 +62,7 @@ object FlicFlacConfig:
       clearColor = RGBA.fromHexString("#000000"),
       magnification = 1,
       transparentBackground = false,
-      resizePolicy = ResizePolicy.Resize,
+      resizePolicy = ResizePolicy.ResizePreserveAspect,
       advanced = AdvancedGameConfig(
         renderingTechnology = RenderingTechnology.WebGL2WithFallback,
         antiAliasing = false,
