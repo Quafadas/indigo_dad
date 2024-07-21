@@ -50,8 +50,12 @@ object TyrianApp extends TyrianIOApp[Msg, TyrianModel]:
 
   def view(model: TyrianModel): Html[Msg] =
     div(
-      h1("Welcome to Flic Flac!"),
+      h1("Flic Flac!"),
       p("Start the game - beware all ye who enter here!"),
+      p("We coudl write out the rules here"),
+      p(
+        "But I think the best thing, would be to get client side routing working ... so that we can also launch directly to the game, this might be a propblem in deployment though"
+      ),
       button(onClick(Msg.StartIndigo))("Start Indigo"),
       div(id := "indigo-container")()
     )
