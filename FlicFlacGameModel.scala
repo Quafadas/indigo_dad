@@ -8,6 +8,7 @@ import io.circe.parser.decode
 import game.Piece.pieceShape
 
 final case class FlicFlacGameModel(
+    scalingFactor : Double,
     pieces: Pieces,
     highLighter: HighLighter,
     hexBoard3: HexBoard3
@@ -20,9 +21,10 @@ object FlicFlacGameModel:
 
   def creation(center: Point): FlicFlacGameModel =
     scribe.debug("@@@ FlicFlacGameModel creation")
+    val defaultScalingFactor = 1.0
     val hexBoard3 = HexBoard3()
     val highLighter = HighLighter(hexBoard3, false, Point(0,0))
-    FlicFlacGameModel(summonPieces(hexBoard3), highLighter, hexBoard3)
+    FlicFlacGameModel(defaultScalingFactor, summonPieces(hexBoard3), highLighter, hexBoard3)
   end creation
 
   def summonPieces(hexBoard3: HexBoard3): Pieces =
@@ -87,32 +89,36 @@ object FlicFlacGameModel:
     end for
     var resultingPieces: Pieces = Pieces(resultingVector)
     
+    val previousSF = previousModel.scalingFactor
     val prevHighLighter = previousModel.highLighter
     val prevBoard = previousModel.hexBoard3
-    val newModel = FlicFlacGameModel(resultingPieces, prevHighLighter, prevBoard)
+    val newModel = FlicFlacGameModel(previousSF, resultingPieces, prevHighLighter, prevBoard)
     printPieces(newModel)
     newModel
 
   end modifyPiece
 
   def modifyHighLighter(previousModel: FlicFlacGameModel, highLighter: HighLighter) : FlicFlacGameModel = 
+    val previousSF = previousModel.scalingFactor
     val previousPieces = previousModel.pieces
     val prevBoard = previousModel.hexBoard3
-    val newModel = FlicFlacGameModel(previousPieces, highLighter, prevBoard)
+    val newModel = FlicFlacGameModel(previousSF, previousPieces, highLighter, prevBoard)
     newModel    
     
   end modifyHighLighter
 
   def reset(previousModel: FlicFlacGameModel): FlicFlacGameModel =
     scribe.debug("@@@ Reset model")
+    val defaultSF = 1.0
     val hexBoard3 = HexBoard3()
     val highLighter = HighLighter(hexBoard3, false, Point(0,0))
-    FlicFlacGameModel(summonPieces(hexBoard3),highLighter, hexBoard3)
+    FlicFlacGameModel(defaultSF, summonPieces(hexBoard3),highLighter, hexBoard3)
   end reset
 
   def retrieve(): FlicFlacGameModel =
     val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlac")) match
       case Right(model: FlicFlacGameModel) =>
+        // FIXME we should check for version number here and goto create if mismatch
         scribe.debug("@@@ Restored model")
         model
       case Left(_) =>
@@ -141,27 +147,6 @@ object FlicFlacGameModel:
       scribe.debug(s)
     end for
   end printPieces
-  /*
-    pCurPos: Point, // ................. current position (in hexArrayCoords)
-    pHomePos: Point, // ................ starting/home position (in hexArrayCoords)
-
-    // parameters below required for model, but not for creation
-
-    bFlipped: Boolean = false, // ...... piece normal is f, piece flipped is 1
-    bSelected: Boolean = false, // ..... piece is selected
-    bCaptured: Boolean = false, // ..... piece is captured (or not)
-    bMoved: Boolean = false // ......... piece has moved this turn
-   */
-
-  def debugJP(id: String, iTickStart: Int, model: FlicFlacGameModel): Unit =
-    if iTickStart > 0 then iTick = iTickStart
-    end if
-    if iTick > 0 then
-      scribe.debug("@@@ $$ " + id)
-      scribe.debug("@@@ " + model.pieces.modelPieces.head)
-      iTick = iTick - 1
-    end if
-  end debugJP
 
   scribe.debug("@@@ Object FlicFlacGameModel Finish")
 end FlicFlacGameModel

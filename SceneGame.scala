@@ -30,10 +30,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   var iDragTick = 0
   var dMsg = "-----"
 
-  // FIXME, eventually we will calculate / fix scaleFactor and boardCfg BasePoint ...
-  // ... from window dimensions supplied in main
-  var scaleFactor = 1.0
-
   def updateModel(
       context: SceneContext[FlicFlacStartupData],
       model: FlicFlacGameModel
@@ -41,7 +37,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
     case e: PointerEvent.PointerDown =>
       val clickPoint = e.position
-      val hexPosn = model.hexBoard3.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
+      val hexPosn = model.hexBoard3.hexXYCoordsFromDisplayXY(clickPoint, model.scalingFactor)
       hexPosn match
         case Some(pos) =>
           // Pointer Down, Pos on Grid
@@ -111,7 +107,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
     case e: PointerEvent.PointerUp =>
       val clickPoint = e.position
-      val hexPosn = model.hexBoard3.hexXYCoordsFromDisplayXY(clickPoint, scaleFactor)
+      val hexPosn = model.hexBoard3.hexXYCoordsFromDisplayXY(clickPoint, model.scalingFactor)
       hexPosn match
         case Some(pos) =>
           // Pointer Up, Pos on Grid
@@ -168,10 +164,48 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     case ButtonNewGameEvent =>
       Outcome(FlicFlacGameModel.reset(model))
 
+    case ButtonPlusEvent =>
+      scribe.debug("@@@ ButtonPlusEvent")
+      val oldSF = model.scalingFactor
+      Outcome(model.copy(scalingFactor=increaseScaleFactor(oldSF)))
+
+    case ButtonMinusEvent =>
+      scribe.debug("@@@ ButtonMinusEvent")
+      val oldSF = model.scalingFactor
+      Outcome(model.copy(scalingFactor=decreaseScaleFactor(oldSF)))
+
     case _ =>
       Outcome(FlicFlacGameModel.modify(model, None, None))
   }
+
   end updateModel
+
+  def increaseScaleFactor(oldSF: Double): Double =
+    val newSF =
+      if oldSF >= 0.9 then 1.0
+      else if oldSF >= 0.8 then 0.9
+      else if oldSF >= 0.75 then 0.8
+      else if oldSF >= 0.67 then 0.75
+      else if oldSF >= 0.5 then 0.67
+      else if oldSF >= 0.33 then 0.5
+      else 0.33
+    scribe.debug("@@@ increaseScaleFactor to:" + newSF )
+    newSF
+  end increaseScaleFactor
+
+  def decreaseScaleFactor(oldSF: Double): Double =
+    val newSF =
+      if oldSF <= 0.33 then 0.25
+      else if oldSF <= 0.5 then 0.33
+      else if oldSF <= 0.67 then 0.5
+      else if oldSF <= 0.75 then 0.67
+      else if oldSF <= 0.8 then 0.75
+      else if oldSF <= 0.9 then 0.8
+      else 0.9
+    scribe.debug("@@@ decreaseScaleFactor to:" + newSF )
+    newSF
+  end decreaseScaleFactor
+
 
   def updateViewModel(
       context: SceneContext[FlicFlacStartupData],
@@ -195,16 +229,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       iDragTick += 1
       Outcome(viewModel)
     
-    case ButtonPlusEvent =>
-      scribe.debug("@@@ ButtonPlusEvent")
-      val oldSF = viewModel.scalingFactor
-      Outcome(viewModel.copy(scalingFactor=viewModel.increaseScaleFactor(oldSF)))
-
-    case ButtonMinusEvent =>
-      scribe.debug("@@@ ButtonMinusEvent")
-      val oldSF = viewModel.scalingFactor
-      Outcome(viewModel.copy(scalingFactor=viewModel.decreaseScaleFactor(oldSF)))
-
     case _ =>
       Outcome(viewModel)
   end updateViewModel
@@ -228,12 +252,13 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val width = bootData.pixelWidth
     val height = bootData.pixelHeight
 
-    val sFactor = ((10*scaleFactor).toInt).toString()
+    val dSF = model.scalingFactor
+    val sFactor = ((10*dSF).toInt).toString()
 
     Outcome(
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Cyan)))
-        |+| SceneUpdateFragment(Shape.Box(GameAssets.GameSceneDimensions, Fill.Color(RGBA.White)).scaleBy(scaleFactor,scaleFactor))      
-        |+| SceneUpdateFragment(GameAssets.cornerLayers(GameAssets.GameSceneDimensions, scaleFactor, RGBA.Magenta))
+        |+| SceneUpdateFragment(Shape.Box(GameAssets.GameSceneDimensions, Fill.Color(RGBA.White)).scaleBy(dSF,dSF))      
+        |+| SceneUpdateFragment(GameAssets.cornerLayers(GameAssets.GameSceneDimensions, dSF, RGBA.Magenta))
         |+| SceneUpdateFragment(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Magenta)))
         |+| SceneUpdateFragment(TextBox(sFactor,50,20).withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(0,0))
         |+| SceneUpdateFragment(textGame)
@@ -243,15 +268,14 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(viewModel.splashButton.draw)
         |+| SceneUpdateFragment(viewModel.plusButton.draw)
         |+| SceneUpdateFragment(viewModel.minusButton.draw)
-        |+| model.hexBoard3.paint(model, scaleFactor)
-        |+| model.highLighter.paint(model, scaleFactor)
-        |+| model.pieces.paint(model, scaleFactor, viewModel.optDragPos)
+        |+| model.hexBoard3.paint(model, dSF)
+        |+| model.highLighter.paint(model, dSF)
+        |+| model.pieces.paint(model, dSF, viewModel.optDragPos)
     )
   end present
 end SceneGame
 
 final case class GameSceneViewModel(
-    val scalingFactor: Double,
     var optDragPos: Option[Point],
     rulesButton: Button,
     newGameButton: Button,
@@ -276,8 +300,8 @@ final case class GameSceneViewModel(
                       minusButton = bn6 
                     )
 
-  def changeButtonBoundaries( ssvm : GameSceneViewModel, gvp : GameViewport ) : GameSceneViewModel =
-    val dSF = ssvm.scalingFactor
+  def changeButtonBoundaries( model : FlicFlacGameModel, gvp : GameViewport ) : GameSceneViewModel =
+    val dSF = model.scalingFactor
     scribe.debug("@@@ dSF:"+dSF)
 
     val newRulesButton =       
@@ -334,32 +358,6 @@ final case class GameSceneViewModel(
     
   end changeButtonBoundaries
 
-  def increaseScaleFactor(oldSF: Double): Double =
-    val newSF =
-      if oldSF >= 0.9 then 1.0
-      else if oldSF >= 0.8 then 0.9
-      else if oldSF >= 0.75 then 0.8
-      else if oldSF >= 0.67 then 0.75
-      else if oldSF >= 0.5 then 0.67
-      else if oldSF >= 0.33 then 0.5
-      else 0.33
-    scribe.debug("@@@ increaseScaleFactor to:" + newSF )
-    newSF
-  end increaseScaleFactor
-
-  def decreaseScaleFactor(oldSF: Double): Double =
-    val newSF =
-      if oldSF <= 0.33 then 0.25
-      else if oldSF <= 0.5 then 0.33
-      else if oldSF <= 0.67 then 0.5
-      else if oldSF <= 0.75 then 0.67
-      else if oldSF <= 0.8 then 0.75
-      else if oldSF <= 0.9 then 0.8
-      else 0.9
-    scribe.debug("@@@ decreaseScaleFactor to:" + newSF )
-    newSF
-  end decreaseScaleFactor
-
 end GameSceneViewModel
 
 object GameSceneViewModel:
@@ -373,7 +371,6 @@ object GameSceneViewModel:
     
   val initial: GameSceneViewModel =
     GameSceneViewModel(
-      1.0, // .... the default scaling factor
       None, // ... we have no last position of the pointer recorded
 
       Button(
