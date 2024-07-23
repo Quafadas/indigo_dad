@@ -41,9 +41,9 @@ object GameAssets:
 
   def gHex(sf: Double): Graphic[Material.ImageEffects] =
     if (sf < 0.25) || (sf > 1.0) then               // FIXME we should not need this trap in the end
-      scribe.debug ("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-      scribe.debug ("@@@ BAD sf:" + sf)
-      scribe.debug ("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+      scribe.error ("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+      scribe.error ("@@@ BAD sf:" + sf)
+      scribe.error ("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
       Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName)))//.scaleBy(sf,sf)
     else
       Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName))).scaleBy(sf,sf)
@@ -86,11 +86,18 @@ object GameAssets:
     val down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(240, 400, 240, 80).scaleBy(sf,sf)
     ButtonAssets(up, over,down)
 
-  def buttonRoundAssets(sf: Double): ButtonAssets =
-    val up = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 0, 90, 80).scaleBy(sf,sf)
-    val over = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 80, 90, 80).scaleBy(sf,sf)
-    val down = Graphic(0, 0, 240, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 160, 90, 80).scaleBy(sf,sf)
+  def buttonPlusAssets(sf: Double): ButtonAssets =
+    val up = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 0, 90, 80).scaleBy(sf,sf)
+    val over = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 80, 90, 80).scaleBy(sf,sf)
+    val down = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 160, 90, 80).scaleBy(sf,sf)
     ButtonAssets(up, over, down)
+
+  def buttonMinusAssets(sf: Double): ButtonAssets =
+    val up = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 240, 90, 80).scaleBy(sf,sf)
+    val over = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 320, 90, 80).scaleBy(sf,sf)
+    val down = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 400, 90, 80).scaleBy(sf,sf)
+    ButtonAssets(up, over, down)
+
 
   def splashBg: Graphic[Material.ImageEffects] =
     Graphic(SplashSceneDimensions, 2, Material.ImageEffects(AssetName(spAssetName)))

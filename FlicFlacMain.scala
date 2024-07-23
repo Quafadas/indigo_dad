@@ -142,7 +142,7 @@ case class FlicFlacGame(
         GameSceneViewModel.initial,
         ResultsSceneViewModel.initial,
         ParamsSceneViewModel.initial,
-        flicFlacStartupData.flicFlacBootData.gameViewPort
+        flicFlacStartupData.flicFlacBootData.gameViewPort,
       )
     )
   end initialViewModel
@@ -255,7 +255,7 @@ final case class FlicFlacViewModel(
     gameScene: GameSceneViewModel,
     resultsScene: ResultsSceneViewModel,
     paramsScene: ParamsSceneViewModel,
-    theGameViewPort: GameViewport
+    theGameViewPort: GameViewport,
 )
 
 case object ButtonSplashEvent extends GlobalEvent
@@ -264,4 +264,5 @@ case object ButtonPlayEvent extends GlobalEvent
 case object ButtonNewGameEvent extends GlobalEvent
 case object ButtonResultsEvent extends GlobalEvent
 case object ButtonParamsEvent extends GlobalEvent
-case object ButtonRoundEvent extends GlobalEvent
+case object ButtonPlusEvent extends GlobalEvent
+case object ButtonMinusEvent extends GlobalEvent

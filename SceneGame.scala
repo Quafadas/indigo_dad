@@ -194,6 +194,16 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
       iDragTick += 1
       Outcome(viewModel)
+    
+    case ButtonPlusEvent =>
+      scribe.debug("@@@ ButtonPlusEvent")
+      val oldSF = viewModel.scalingFactor
+      Outcome(viewModel.copy(scalingFactor=viewModel.increaseScaleFactor(oldSF)))
+
+    case ButtonMinusEvent =>
+      scribe.debug("@@@ ButtonMinusEvent")
+      val oldSF = viewModel.scalingFactor
+      Outcome(viewModel.copy(scalingFactor=viewModel.decreaseScaleFactor(oldSF)))
 
     case _ =>
       Outcome(viewModel)
@@ -231,6 +241,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(viewModel.newGameButton.draw)
         |+| SceneUpdateFragment(viewModel.resultsButton.draw)
         |+| SceneUpdateFragment(viewModel.splashButton.draw)
+        |+| SceneUpdateFragment(viewModel.plusButton.draw)
+        |+| SceneUpdateFragment(viewModel.minusButton.draw)
         |+| model.hexBoard3.paint(model, scaleFactor)
         |+| model.highLighter.paint(model, scaleFactor)
         |+| model.pieces.paint(model, scaleFactor, viewModel.optDragPos)
@@ -239,11 +251,14 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 end SceneGame
 
 final case class GameSceneViewModel(
+    val scalingFactor: Double,
     var optDragPos: Option[Point],
     rulesButton: Button,
     newGameButton: Button,
     resultsButton: Button,
-    splashButton: Button
+    splashButton: Button,
+    plusButton: Button,
+    minusButton: Button
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[GameSceneViewModel] =
     for
@@ -251,10 +266,18 @@ final case class GameSceneViewModel(
       bn2 <- newGameButton.updateFromPointers(pointers)
       bn3 <- resultsButton.updateFromPointers(pointers)
       bn4 <- splashButton.updateFromPointers(pointers)
-    yield this.copy(rulesButton = bn1, newGameButton = bn2, resultsButton = bn3, splashButton = bn4)
+      bn5 <- plusButton.updateFromPointers(pointers)
+      bn6 <- minusButton.updateFromPointers(pointers)
+    yield this.copy(  rulesButton = bn1, 
+                      newGameButton = bn2, 
+                      resultsButton = bn3, 
+                      splashButton = bn4, 
+                      plusButton = bn5,
+                      minusButton = bn6 
+                    )
 
   def changeButtonBoundaries( ssvm : GameSceneViewModel, gvp : GameViewport ) : GameSceneViewModel =
-    val dSF = 1.0
+    val dSF = ssvm.scalingFactor
     scribe.debug("@@@ dSF:"+dSF)
 
     val newRulesButton =       
@@ -285,14 +308,57 @@ final case class GameSceneViewModel(
         depth = Depth(6)
       ).withUpActions(ButtonSplashEvent)
 
-    this.copy(  // optDragPos
+    val newPlusButton =       
+      Button(
+        buttonAssets = GameAssets.buttonPlusAssets(dSF),
+        bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.plusBounds, dSF),
+        depth = Depth(6)
+      ).withUpActions(ButtonPlusEvent)
+
+    val newMinusButton =       
+      Button(
+        buttonAssets = GameAssets.buttonMinusAssets(dSF),
+        bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.minusBounds, dSF),
+        depth = Depth(6)
+      ).withUpActions(ButtonMinusEvent)
+
+    this.copy( // scalingFactor
+               // optDragPos
                 rulesButton = newRulesButton,
                 newGameButton = newNewGameButton,
                 resultsButton = newResultsButton,
-                splashButton = newSplashButton
+                splashButton = newSplashButton,
+                plusButton = newMinusButton,
+                minusButton = newMinusButton
                 )
     
   end changeButtonBoundaries
+
+  def increaseScaleFactor(oldSF: Double): Double =
+    val newSF =
+      if oldSF >= 0.9 then 1.0
+      else if oldSF >= 0.8 then 0.9
+      else if oldSF >= 0.75 then 0.8
+      else if oldSF >= 0.67 then 0.75
+      else if oldSF >= 0.5 then 0.67
+      else if oldSF >= 0.33 then 0.5
+      else 0.33
+    scribe.debug("@@@ increaseScaleFactor to:" + newSF )
+    newSF
+  end increaseScaleFactor
+
+  def decreaseScaleFactor(oldSF: Double): Double =
+    val newSF =
+      if oldSF <= 0.33 then 0.25
+      else if oldSF <= 0.5 then 0.33
+      else if oldSF <= 0.67 then 0.5
+      else if oldSF <= 0.75 then 0.67
+      else if oldSF <= 0.8 then 0.75
+      else if oldSF <= 0.9 then 0.8
+      else 0.9
+    scribe.debug("@@@ decreaseScaleFactor to:" + newSF )
+    newSF
+  end decreaseScaleFactor
 
 end GameSceneViewModel
 
@@ -302,10 +368,13 @@ object GameSceneViewModel:
   val newGameBounds = Rectangle(20, 140, 240, 80)
   val resultsBounds = Rectangle(20, 240, 240, 80)
   val splashBounds = Rectangle(20, 340, 240, 80)
+  val plusBounds = Rectangle(20, 440, 90, 80)
+  val minusBounds = Rectangle(170, 440, 90, 80)
     
   val initial: GameSceneViewModel =
     GameSceneViewModel(
-      None, // we have no last position of the pointer recorded
+      1.0, // .... the default scaling factor
+      None, // ... we have no last position of the pointer recorded
 
       Button(
         buttonAssets = GameAssets.buttonRulesAssets(1.0),
@@ -326,6 +395,16 @@ object GameSceneViewModel:
         buttonAssets = GameAssets.buttonSplashAssets(1.0),
         bounds = splashBounds,
         depth = Depth(6)
-      ).withUpActions(ButtonSplashEvent)
+      ).withUpActions(ButtonSplashEvent),
+      Button(
+        buttonAssets = GameAssets.buttonPlusAssets(1.0),
+        bounds = plusBounds,
+        depth = Depth(6)
+      ).withUpActions(ButtonPlusEvent),
+      Button(
+        buttonAssets = GameAssets.buttonMinusAssets(1.0),
+        bounds = minusBounds,
+        depth = Depth(6)
+      ).withUpActions(ButtonMinusEvent)
     )
 end GameSceneViewModel
