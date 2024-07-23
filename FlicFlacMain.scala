@@ -9,6 +9,9 @@ import indigo.shared.events.MouseEvent
 import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.math.*
 import io.circe.parser.decode
+import scribe.*
+import scribe.format._
+
 
 import org.scalajs.dom
 import tyrian.TyrianSubSystem
@@ -33,12 +36,18 @@ case class FlicFlacGame(
     tyrianSubSystem: TyrianSubSystem[IO, Int, FlicFlacGameModel]
 ) extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
+  // scribe reporting levels: fatal,error,warn,info,debug,trace
+  //val myFormatter: Formatter = formatter"[$threadName] $positionAbbreviated - $message$newLine"
+  Logger.root
+    .clearHandlers()
+    .withHandler(formatter = Formatter.simple)
+    .withMinimumLevel(Level.Debug)
+    .replace()
+
   var kount1 = 3
   var kount2 = 3
   var kount3 = 3
   var kount4 = 3
-
-  println("@@@ Object HelloIndigo Starts")
 
   val magnification = 1
 
@@ -56,20 +65,20 @@ case class FlicFlacGame(
       assetCollection: AssetCollection,
       dice: Dice
   ): Outcome[Startup[FlicFlacStartupData]] =
-    println("@@@ FlicFlacMain-setup()")
+    scribe.debug("@@@ FlicFlacMain-setup()")
     val outCome = FlicFlacStartupData.initialise(flicFlacBootData)
     outCome
   end setup
 
   def initialModel(flicFlacStartupData: FlicFlacStartupData): Outcome[FlicFlacGameModel] =
-    println("@@@ FlicFlacMain-initialModel()")
+    scribe.debug("@@@ FlicFlacMain-initialModel()")
 
     val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlac")) match
       case Right(model: FlicFlacGameModel) =>
-        println("@@@ Restored model")
+        scribe.debug("@@@ Restored model")
         model
       case Left(_) =>
-        println("@@@ Created model")
+        scribe.debug("@@@ Created model")
         FlicFlacGameModel.creation(Point(0, 0))
 
     /*
@@ -79,7 +88,7 @@ case class FlicFlacGame(
   end initialModel
 
   def initialScene(flicFlacBootData: FlicFlacBootData): Option[SceneName] =
-    println("@@@ FlicFlacMain-initialScene()")
+    scribe.debug("@@@ FlicFlacMain-initialScene()")
     Some(SceneSplash.name)
   end initialScene
 
@@ -90,13 +99,13 @@ case class FlicFlacGame(
   def scenes(
       flicFlacBootData: FlicFlacBootData
   ): NonEmptyList[Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]] =
-    println("@@@ FlicFlacMain-scenes()")
+    scribe.debug("@@@ FlicFlacMain-scenes()")
     NonEmptyList(SceneSplash, SceneRules, SceneGame, SceneResults)
   end scenes
 
   def boot(flags: Map[String, String]): Outcome[BootResult[FlicFlacBootData, FlicFlacGameModel]] =
-    println("@@@ FlicFlacMain-boot")
-    println("@@@ BootFlags: " + flags)
+    scribe.debug("@@@ FlicFlacMain-boot")
+    scribe.debug("@@@ BootFlags: " + flags)
     val width = flags("width").toInt
     val height = flags("height").toInt
     Outcome {
@@ -121,7 +130,7 @@ case class FlicFlacGame(
       flicFlacStartupData: FlicFlacStartupData,
       flicFlacGameModel: FlicFlacGameModel
   ): Outcome[FlicFlacViewModel] =
-    println("@@@ FlicFlacMain-initialViewModel()")
+    scribe.debug("@@@ FlicFlacMain-initialViewModel()")
     val w = flicFlacStartupData.flicFlacBootData.gameViewPort.width
     val h = flicFlacStartupData.flicFlacBootData.gameViewPort.height
     val staticAssets = flicFlacStartupData.staticAssets
@@ -145,7 +154,7 @@ case class FlicFlacGame(
   ): GlobalEvent => Outcome[FlicFlacViewModel] =
     case FrameTick =>
       if kount4 > 0 then
-        println("@@@ FlicFlacMain-updateViewModel FrameTick")
+        scribe.debug("@@@ FlicFlacMain-updateViewModel FrameTick")
         kount4 = kount4 - 1
       end if
       Outcome(flicFlacViewModel)
@@ -153,37 +162,37 @@ case class FlicFlacGame(
     case ViewportResize(gameViewPort) =>
       val w = gameViewPort.width
       val h = gameViewPort.height
-      println("@@@ FlicFlacMain-updateViewModel ViewportResize w:h " + w + ":" + h)
+      scribe.debug("@@@ FlicFlacMain-updateViewModel ViewportResize w:h " + w + ":" + h)
       flicFlacGameModel.hexBoard3.calculateXpYp(1.0) // FIXME this needs to be immutable!!!
       Outcome(flicFlacViewModel.copy(theGameViewPort = gameViewPort))
 
     case ButtonSplashEvent =>
-      println("@@@ Main-ButtonSplashEvent")
+      scribe.debug("@@@ Main-ButtonSplashEvent")
       Outcome(flicFlacViewModel)
         .addGlobalEvents(SceneEvent.JumpTo(SceneSplash.name))
         .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
 
     case ButtonRulesEvent =>
-      println("@@@ Main-ButtonRulesEvent")
+      scribe.debug("@@@ Main-ButtonRulesEvent")
       Outcome(flicFlacViewModel)
         .addGlobalEvents(SceneEvent.JumpTo(SceneRules.name))
         .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
 
     case ButtonPlayEvent =>
-      println("@@@ Main-ButtonGameEvent")
+      scribe.debug("@@@ Main-ButtonGameEvent")
       Outcome(flicFlacViewModel)
         .addGlobalEvents(SceneEvent.JumpTo(SceneGame.name))
         .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
 
     case ButtonResultsEvent =>
-      println("@@@ Main-ButtonResultsEvent")
+      scribe.debug("@@@ Main-ButtonResultsEvent")
       Outcome(flicFlacViewModel)
         .addGlobalEvents(SceneEvent.JumpTo(SceneResults.name))
         .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
 
     case _ =>
       if kount3 > 0 then
-        println("@@@ FlicFlac Main-updateViewModel _")
+        scribe.debug("@@@ FlicFlac Main-updateViewModel _")
         kount3 = kount3 - 1
       end if
       Outcome(flicFlacViewModel)
@@ -196,7 +205,7 @@ case class FlicFlacGame(
 
     case _ =>
       if kount2 > 0 then
-        println("@@@ FlicFlacMain-updateModel")
+        scribe.debug("@@@ FlicFlacMain-updateModel")
         kount2 = kount2 - 1
       end if
       Outcome(flicFlacGameModel)
@@ -209,7 +218,7 @@ case class FlicFlacGame(
   ): Outcome[SceneUpdateFragment] = Outcome {
 
     if kount1 > 0 then
-      println("@@@ FlicFlacMain-present")
+      scribe.debug("@@@ FlicFlacMain-present")
       kount1 = kount1 - 1
     end if
 
@@ -233,7 +242,8 @@ case class FlicFlacGame(
     dSF
   end GetScaleFactor
 
-  println("@@@ Object HelloIndigo Finishes")
+  scribe.debug("@@@ FlicFlacMain class FlicFlacGame Finish")
+
 
 end FlicFlacGame
 

@@ -23,7 +23,7 @@ object GameAssets:
   val rlAssetPath = "assets/Rules.png"
 
 
-  println("@@@ Object GameAssets START")
+  scribe.debug("@@@ Object GameAssets START")
 
   val SplashSceneDimensions = Rectangle(0, 0, 1920,1080)
   val RulesSceneDimensions = Rectangle(0, 0, 1700, 1250)
@@ -41,9 +41,9 @@ object GameAssets:
 
   def gHex(sf: Double): Graphic[Material.ImageEffects] =
     if (sf < 0.25) || (sf > 1.0) then               // FIXME we should not need this trap in the end
-      println ("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-      println ("@@@ BAD sf:" + sf)
-      println ("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+      scribe.debug ("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+      scribe.debug ("@@@ BAD sf:" + sf)
+      scribe.debug ("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
       Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName)))//.scaleBy(sf,sf)
     else
       Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName))).scaleBy(sf,sf)
@@ -143,5 +143,5 @@ object GameAssets:
   end scaleButtonBounds
 
 
-  println("@@@ Object GameAssets FINISH")
+  scribe.debug("@@@ Object GameAssets FINISH")
 end GameAssets

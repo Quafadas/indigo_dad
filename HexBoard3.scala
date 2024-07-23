@@ -19,7 +19,7 @@ case class HH3(
 
 case class HexBoard3():
 
-  println("@@@ Class HexBoard3 Start")
+  scribe.debug("@@@ Class HexBoard3 Start")
 
 // format: off
 
@@ -195,7 +195,7 @@ case class HexBoard3():
       arrayWidth: Int,
       color: Int
   ): Unit =
-    //  println("fillHorizontalBorder row:" + row + " height:" + height + " color:" + color)
+    //  scribe.debug("fillHorizontalBorder row:" + row + " height:" + height + " color:" + color)
     var thisRow = row
     val lastRow = row + height - 1
     while thisRow <= lastRow do
@@ -218,7 +218,7 @@ case class HexBoard3():
    */
 
   def fillVerticalBorder(col: Int, row: Int, height: Int, color: Int): Unit =
-    //  println("fillVerticalBorder col:" + col + " row:" + row + " height:" + height)
+    //  scribe.debug("fillVerticalBorder col:" + col + " row:" + row + " height:" + height)
     var y = row & 1
     while y < height do
       setHexColor(Point(col,y),color)
@@ -379,7 +379,7 @@ case class HexBoard3():
    */
 
   def hexXYCoordsFromDisplayXY(pDs: Point, fS: Double): Option[Point] =
-    //println("hexXYFromDisplayXY START:" + pDs)
+    //scribe.debug("hexXYFromDisplayXY START:" + pDs)
     val GWIDTH = graphicWidth // ................................... The Hex graphic width without overlap of one pixel
     val GHEIGHT = graphicHeight // ................................. The Hex graphic height without overlap of one pixel
     val pB = pBase // .............................................. Base Corner (Top LHS) of Rectangle containing board
@@ -393,7 +393,7 @@ case class HexBoard3():
     val pC2 = Point(pC1.x + widthScaled, pC1.y + heightScaled) // .. pC2 is bottom RH corner of the detection rectangle
     val xH = (xHalfway * fS).toInt // .............................. scaling the tiny offset required for detection grid alignment
 
-    //println("hexXYFromDisplayXY BOUNDARIES:: " + pC1 + " :: " + pC2)
+    //scribe.debug("hexXYFromDisplayXY BOUNDARIES:: " + pC1 + " :: " + pC2)
 
     // The detection grid needs to start halfway up the top LH diagonal of the first hex which (before scaling) is 10,20)
     if (pDs.x >= pC1.x + xH) && (pDs.x < pC2.x - xH) && (pDs.y >= pC1.y) && (pDs.y < pC2.y) then
@@ -405,19 +405,19 @@ case class HexBoard3():
       val offsetY = pDs.y - pB.y - ((x & 1) * yHeightScaled)
       val y = ((offsetY / yHeightScaled) & 0xfffe) + (x & 1) // << this enforces  ((x & y are even) || (x & y are odd))
 
-      //println("hexXYFromDisplayXY OFFSETS X/Y " + offsetX + ":" + offsetY + " POS X/Y " + x + ":" + y + " W:" + xWidth + " H:" + yHeight)
+      //scribe.debug("hexXYFromDisplayXY OFFSETS X/Y " + offsetX + ":" + offsetY + " POS X/Y " + x + ":" + y + " W:" + xWidth + " H:" + yHeight)
 
       val c = hexArray(x / 2)(y).c
       if (c != CX) then                       // exclude hexes from display if color is CX
         val hexXYCoords = Point(x / 2, y)     // x/2 because hexArray has even/odd columns
-        // println("hexXYFromDisplayXY FINISH:" + hexXYCoords)
+        // scribe.debug("hexXYFromDisplayXY FINISH:" + hexXYCoords)
         Some(hexXYCoords)
       else 
-        // println("hexXYFromDisplayXY FINISHES with NONE (non-displayable hex)")    
+        // scribe.debug("hexXYFromDisplayXY FINISHES with NONE (non-displayable hex)")    
         None
       end if
     else
-      // println("hexXYFromDisplayXY FINISHES with NONE (outside detection grid)")    
+      // scribe.debug("hexXYFromDisplayXY FINISHES with NONE (outside detection grid)")    
       None
     end if
   end hexXYCoordsFromDisplayXY
@@ -453,7 +453,7 @@ case class HexBoard3():
     end match
   end getBlockHomePos
 
-  println("@@@ Class HexBoard3 Finish")
+  scribe.debug("@@@ Class HexBoard3 Finish")
 
 
 end HexBoard3

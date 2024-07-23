@@ -41,7 +41,7 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case ViewportResize(gameViewPort) =>
-      println("@@@ SceneRules ViewportResize bounds:size" + gameViewPort.bounds + ":" + gameViewPort.size)
+      scribe.debug("@@@ SceneRules ViewportResize bounds:size" + gameViewPort.bounds + ":" + gameViewPort.size)
       Outcome(viewModel.changeButtonBoundaries(viewModel, gameViewPort))
 
     case _ =>
@@ -61,7 +61,7 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
 
     val width = viewModel.viewPortWidth
     val height = viewModel.viewPortHeight
-    scribe.info("@@@ DANGER SCALE FACTOR !")
+    scribe.debug("@@@ DANGER SCALE FACTOR !")   // FIXME
     val scaleFactor = 1.0 // FlicFlacGame().GetScaleFactor(width, height, GameAssets.SplashSceneDimensions)
     val sFactor = ((10*scaleFactor).toInt).toString()
 
@@ -97,9 +97,9 @@ final case class RulesSceneViewModel(
 
   def changeButtonBoundaries(ssvm: RulesSceneViewModel, gvp: GameViewport): RulesSceneViewModel =
 
-    scribe.info("scale factor danger")
+    scribe.debug("scale factor danger")  // FIXME
     val dSF = 1.0 // HelloIndigo.GetScaleFactor(gvp.width, gvp.height, GameAssets.RulesSceneDimensions)
-    println("@@@ dSF:" + dSF)
+    scribe.debug("@@@ dSF:" + dSF)
 
     val x1 = (20 * dSF).toInt // FIXME the following four values 50,50,240,80 need to #defines
     val y1 = (20 * dSF).toInt

@@ -37,7 +37,7 @@ def mix(i: Int): RGBA =
 final case class Pieces(
     modelPieces: Vector[Piece],
 ):
-  println("@@@ Pieces Start")
+  scribe.debug("@@@ Pieces Start")
 
   /* paint draws the 12 pieces
    */
@@ -81,6 +81,6 @@ final case class Pieces(
     frag
   end paint
 
-  println("@@@ Pieces Finish")
+  scribe.debug("@@@ Pieces Finish")
 
 end Pieces

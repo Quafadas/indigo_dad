@@ -15,11 +15,11 @@ final case class FlicFlacGameModel(
       Decoder
 
 object FlicFlacGameModel:
-  println("@@@ Object FlicFlacGameModel Start")
+  scribe.debug("@@@ Object FlicFlacGameModel Start")
   var iTick = 0
 
   def creation(center: Point): FlicFlacGameModel =
-    println("@@@ FlicFlacGameModel creation")
+    scribe.debug("@@@ FlicFlacGameModel creation")
     val hexBoard3 = HexBoard3()
     val highLighter = HighLighter(hexBoard3, false, Point(0,0))
     FlicFlacGameModel(summonPieces(hexBoard3), highLighter, hexBoard3)
@@ -104,7 +104,7 @@ object FlicFlacGameModel:
   end modifyHighLighter
 
   def reset(previousModel: FlicFlacGameModel): FlicFlacGameModel =
-    println("@@@ Reset model")
+    scribe.debug("@@@ Reset model")
     val hexBoard3 = HexBoard3()
     val highLighter = HighLighter(hexBoard3, false, Point(0,0))
     FlicFlacGameModel(summonPieces(hexBoard3),highLighter, hexBoard3)
@@ -113,10 +113,10 @@ object FlicFlacGameModel:
   def retrieve(): FlicFlacGameModel =
     val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlac")) match
       case Right(model: FlicFlacGameModel) =>
-        println("@@@ Restored model")
+        scribe.debug("@@@ Restored model")
         model
       case Left(_) =>
-        println("@@@ Created model")
+        scribe.debug("@@@ Created model")
         FlicFlacGameModel.creation(Point(0, 0))
     cacheOrNew
   end retrieve
@@ -138,7 +138,7 @@ object FlicFlacGameModel:
         + sFlipped
         + sCaptured
         + sMoved
-      println(s)
+      scribe.debug(s)
     end for
   end printPieces
   /*
@@ -157,11 +157,11 @@ object FlicFlacGameModel:
     if iTickStart > 0 then iTick = iTickStart
     end if
     if iTick > 0 then
-      println("@@@ $$ " + id)
-      println("@@@ " + model.pieces.modelPieces.head)
+      scribe.debug("@@@ $$ " + id)
+      scribe.debug("@@@ " + model.pieces.modelPieces.head)
       iTick = iTick - 1
     end if
   end debugJP
 
-  println("@@@ Object FlicFlacGameModel Finish")
+  scribe.debug("@@@ Object FlicFlacGameModel Finish")
 end FlicFlacGameModel

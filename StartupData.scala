@@ -5,7 +5,7 @@ import indigoextras.ui.*
 
 object FlicFlacStartupData:
 
-  println("@@@ Object FlicFlacStartupData START")
+  scribe.debug("@@@ Object FlicFlacStartupData START")
 
   def initialise(
       flicFlacBootData: FlicFlacBootData
@@ -25,7 +25,7 @@ object FlicFlacStartupData:
         buttonResultsAsset = GameAssets.buttonResultsAssets(1.0)
       )
     )
-  println("@@@ Object FlicFlacStartupData FINISH")
+  scribe.debug("@@@ Object FlicFlacStartupData FINISH")
 end FlicFlacStartupData
 
 final case class FlicFlacStartupData(flicFlacBootData: FlicFlacBootData, staticAssets: StaticAssets)
@@ -45,16 +45,16 @@ final case class FlicFlacBootData(pixelWidth: Int, pixelHeight: Int, viewport: G
 end FlicFlacBootData
 
 object FlicFlacBootData:
-  println("@@@ Object FlicFlacBootData START")
+  scribe.debug("@@@ Object FlicFlacBootData START")
 
   def create(w: Int, h: Int): FlicFlacBootData =
     FlicFlacBootData(w, h, GameViewport(w, h))
 
-  println("@@@ Object FlicFlacBootData FINISH")
+  scribe.debug("@@@ Object FlicFlacBootData FINISH")
 end FlicFlacBootData
 
 object FlicFlacConfig:
-  println("@@@ Object FlicFlacConfig START")
+  scribe.debug("@@@ Object FlicFlacConfig START")
   val config: GameConfig =
     GameConfig(
       viewport = GameViewport(720, 516),
@@ -72,5 +72,5 @@ object FlicFlacConfig:
         disableContextMenu = true
       )
     )
-  println("@@@ Object FlicFlacConfig FINISH")
+  scribe.debug("@@@ Object FlicFlacConfig FINISH")
 end FlicFlacConfig

@@ -10,7 +10,7 @@ final case class HighLighter(
   val currentPos: Point
 ):
 
-  println("@@@ Class HighLighter Start")
+  scribe.debug("@@@ Class HighLighter Start")
 
   /*
   setPos repositions the highlighter hex as appropriate
@@ -35,14 +35,12 @@ final case class HighLighter(
     if model.highLighter.displayOn then
       val pB = model.hexBoard3.pBase // ................. Base Corner (Top LHS) of Rectangle containing board
       val layer = GameAssets.gHex(fS).modifyMaterial(_.withTint(mix(CM)))
-      val x = model.hexBoard3
-  
       val pPos = model.hexBoard3.getXpYp(currentPos)
       frag = SceneUpdateFragment(Layer(layer.moveTo(pB.x + pPos.x, pB.y + pPos.y).scaleBy(fS, fS)))
     end if
     frag
   end paint
 
-  println("@@@ Class HighLighter Finish")
+  scribe.debug("@@@ Class HighLighter Finish")
 
 end HighLighter

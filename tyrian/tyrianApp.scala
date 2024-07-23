@@ -6,6 +6,7 @@ import cats.effect.IO
 import org.scalajs.dom
 import scala.concurrent.duration.DurationDouble
 import scala.scalajs.js.annotation.*
+import scribe.*
 
 enum Msg:
   case StartIndigo extends Msg
@@ -44,7 +45,7 @@ object TyrianApp extends TyrianIOApp[Msg, TyrianModel]:
   def update(model: TyrianModel): Msg => (TyrianModel, Cmd[IO, Msg]) = {
     // format: off
     case Msg.StartIndigo =>
-      scribe.info("Starting Indigo")
+      println("Starting Indigo")
       println(model)
       val task: IO[Msg] = IO.delay{
         if dom.document.getElementById("indigo-container") == null then

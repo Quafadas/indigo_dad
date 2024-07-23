@@ -40,7 +40,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] = { case _ =>
     if kount2 > 0 then
-      println("@@@ SceneSplash-updateModel")
+      scribe.debug("@@@ SceneSplash-updateModel")
       kount2 = kount2 - 1
     end if
     Outcome(model)
@@ -56,7 +56,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case ViewportResize(gameViewPort) =>
-      println("@@@ SceneSplash ViewportResize bounds:size" + gameViewPort.bounds + ":" + gameViewPort.size)
+      scribe.debug("@@@ SceneSplash ViewportResize bounds:size" + gameViewPort.bounds + ":" + gameViewPort.size)
       Outcome(viewModel.changeButtonBoundaries(viewModel, gameViewPort))
 
     case _ =>
@@ -75,7 +75,7 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
     val width = viewModel.viewPortWidth
     val height = viewModel.viewPortHeight
 
-    scribe.info("Scael factor danger")
+    scribe.debug("Scale factor danger") // FIXME
     val dSF = 1.0 // GetScaleFactor(width, height, GameAssets.SplashSceneDimensions)
     val sFactor = ((10*dSF).toInt).toString()
 
@@ -122,9 +122,9 @@ final case class SplashSceneViewModel(
 
   def changeButtonBoundaries(ssvm: SplashSceneViewModel, gvp: GameViewport): SplashSceneViewModel =
 
-    scribe.info("scale factor danger")
+    scribe.debug("scale factor danger")  //FIXME
     val dSF = 1.0 // GetScaleFactor(gvp.width, gvp.height, GameAssets.SplashSceneDimensions)
-    println("@@@ dSF:" + dSF)
+    scribe.debug("@@@ dSF:" + dSF)
 
     val x1 = (50 * dSF).toInt // FIXME the following four values 50,50,240,80 need to #defines
     val y1 = (50 * dSF).toInt
