@@ -34,8 +34,8 @@ def mix(i: Int): RGBA =
     case CM => RGBA.fromHexString("#FF00FFFF") // Magenta
     case _  => RGBA.fromHexString("#FF00FFFF") // Magenta
 
-class Pieces(
-    hexBoard: HexBoard
+final case class Pieces(
+    modelPieces: Vector[Piece],
 ):
   println("@@@ Pieces Start")
 
@@ -43,16 +43,17 @@ class Pieces(
    */
   def paint(model: FlicFlacGameModel, fS: Double, optDragPos: Option[Point]): SceneUpdateFragment =
     var frag = SceneUpdateFragment.empty
-    val pB = model.boardConfig.pB // extract GridBasePoint for later
+    
+    val pB = model.hexBoard3.pBase // extract GridBasePoint for later
 
     // first draw all the unselected pieces ...
 
-    for p <- model.modelPieces do
+    for p <- model.pieces.modelPieces do
       val layer = PieceAssets.getGraphic(p.pieceShape, p.pieceIdentity, p.bFlipped)
       val pSrc = p.pCurPos
 
       if Piece.selected(p) == false then
-        val pPos = hexBoard.getXpYp(pSrc)
+        val pPos = model.hexBoard3.getXpYp(pSrc)
         val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS)))
         frag = frag |+| newFrag
       end if
@@ -60,7 +61,7 @@ class Pieces(
     // second draw the selected piece if it exists
     // ... (only expecting one for now, but perhaps game might allow more in future)
 
-    for p <- model.modelPieces do
+    for p <- model.pieces.modelPieces do
       if Piece.selected(p) == true then
         val layer = PieceAssets.getGraphic(p.pieceShape, p.pieceIdentity, p.bFlipped)
         val pSrc = p.pCurPos
@@ -71,7 +72,7 @@ class Pieces(
             val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pPos).scaleBy(fS, fS)))
             frag = frag |+| newFrag
           case None =>
-            val pPos = hexBoard.getXpYp(pSrc)
+            val pPos = model.hexBoard3.getXpYp(pSrc)
             val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS)))
             frag = frag |+| newFrag
         end match

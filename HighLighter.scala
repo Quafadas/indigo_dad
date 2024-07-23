@@ -2,44 +2,47 @@ package game
 
 import indigo.*
 
-class HighLighter(boardCfg: BoardConfig, hexBoard: HexBoard, fS: Double):
-
-  println("@@@ HighLighter Start")
-
-  var displayOn = false
+final case class HighLighter(
   // val gHex = boardCfg.getHexGraphic() // The Hex graphic used to paint the grid
-  val gHex = GameAssets.gHex // The Hex graphic used to paint the grid
+  // val gHex = GameAssets.gHex // The Hex graphic used to paint the grid
+  val hexBoard3: HexBoard3,
+  val displayOn: Boolean,
+  val currentPos: Point
+):
 
-  var currentPos: Point = Point(0, 0) // testPoint is a simple coordinate inside hexArray
+  println("@@@ Class HighLighter Start")
 
   /*
   setPos repositions the highlighter hex as appropriate
    */
-  def setPos(newPos: Point): Unit =
-    currentPos = newPos
-  end setPos
+  def setPosAndShine(highLighter: HighLighter, newPos: Point): HighLighter =
+    highLighter.copy(displayOn=true, currentPos = newPos)
+  end setPosAndShine
 
   /*
   show enables or disables the display of the HighLighter hex
    */
-  def shine(onOff: Boolean): Unit =
-    displayOn = onOff
+  def shine(highLighter: HighLighter, onOff: Boolean): HighLighter =
+    highLighter.copy(displayOn = onOff)
   end shine
 
   /*
   paint generates a "SceneUpdateFragment" containing the new position of the Highligter Hex
    */
-  def paint(fS: Double): SceneUpdateFragment =
-    var frag = SceneUpdateFragment.empty // ... the latest fragment for the test hexagon
-    if displayOn then
-      val pB = boardCfg.pB // ................. Base Corner (Top LHS) of Rectangle containing board
-      val layer = gHex.modifyMaterial(_.withTint(mix(CM)))
-      val pPos = hexBoard.getXpYp(currentPos)
+
+  def paint(model: FlicFlacGameModel, fS: Double): SceneUpdateFragment =
+    var frag = SceneUpdateFragment.empty // ............. the latest fragment for the test hexagon
+    if model.highLighter.displayOn then
+      val pB = model.hexBoard3.pBase // ................. Base Corner (Top LHS) of Rectangle containing board
+      val layer = GameAssets.gHex(fS).modifyMaterial(_.withTint(mix(CM)))
+      val x = model.hexBoard3
+  
+      val pPos = model.hexBoard3.getXpYp(currentPos)
       frag = SceneUpdateFragment(Layer(layer.moveTo(pB.x + pPos.x, pB.y + pPos.y).scaleBy(fS, fS)))
     end if
     frag
   end paint
 
-  println("@@@ HighLighter Finish")
+  println("@@@ Class HighLighter Finish")
 
 end HighLighter

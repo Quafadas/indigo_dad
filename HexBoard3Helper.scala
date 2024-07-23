@@ -5,7 +5,7 @@ import indigo.*
 /* HexBoardHelper contains additional functions used to test the hex board during development.
  */
 
-class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCfg: BoardConfig, fS: Double):
+class HexBoardHelper3() extends HexBoard3():
 
   fillLeftTopHex(arrayWidth, arrayHeight, CM)
   fillCentreTopHex(arrayWidth, arrayHeight, CM)
@@ -148,4 +148,4 @@ class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCf
     setHexColor(Point(width - 1, height - 1), color)
   end fillRightBottomHex
 
-end HexBoardHelper
+end HexBoardHelper3

@@ -154,6 +154,7 @@ case class FlicFlacGame(
       val w = gameViewPort.width
       val h = gameViewPort.height
       println("@@@ FlicFlacMain-updateViewModel ViewportResize w:h " + w + ":" + h)
+      flicFlacGameModel.hexBoard3.calculateXpYp(1.0) // FIXME this needs to be immutable!!!
       Outcome(flicFlacViewModel.copy(theGameViewPort = gameViewPort))
 
     case ButtonSplashEvent =>

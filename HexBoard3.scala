@@ -6,7 +6,7 @@ import indigo.*
     including the ones you cannot see.
  */
 
-case class HH(
+case class HH3(
     x: Int, // cartesian x coordinate of centre of hex
     y: Int, // cartesian y coordinate of centre of hex
     c: Int, // colour and visibility of hex
@@ -17,9 +17,9 @@ case class HH(
     yP: Int // pixel y offset from base point for origin of png to paint this hex
 )
 
-class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
+case class HexBoard3():
 
-  println("@@@ Class HexBoard Start")
+  println("@@@ Class HexBoard3 Start")
 
 // format: off
 
@@ -49,27 +49,35 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
 // format : on
 
 
-  val gHex = GameAssets.gHex // The Hex graphic used to paint the grid
+  //###val gHex = GameAssets.gHex // The Hex graphic used to paint the grid
 
   // The hexagons are aligned such that they have a flat bottom and top
   // The board is aligned such that it has pointy bottom and top, in terms of flat bottom hexagons
   // Note there is an interleaving edge between neighbouring hexagons, that comes from the rows above and below
 
-  var hexBoardUpdated = true // set true when paint needs to recalculate the board image
-  var hexFragsCombined = SceneUpdateFragment.empty // holds the latest calculations from the paint routine
+  //###var hexBoardUpdated = true // set true when paint needs to recalculate the board image
+  //###var hexFragsCombined = SceneUpdateFragment.empty // holds the latest calculations from the paint routine
 
   // The number of hexagonal rings (ring of 6 with centre) composing one side of the board
-  val sZ = boardCfg.getSideSize() 
-  val borderlessArrayWidth = 6 * (sZ - 1) + 3         // 3,9,15,21 ...
-  val borderlessArrayHeight = 12 * (sZ - 1) + 6       // 7,17,29,41 ...
-  val arrayWidth = (borderlessArrayWidth + 1 + 2) / 2 // +2 because of borders
-  val arrayHeight = borderlessArrayHeight + 4         // +4 because of borders
+  //###val sZ = boardCfg.getSideSize()                     // forcing sZ=3
+  //###val borderlessArrayWidth = 6 * (sZ - 1) + 3         // forcing borderlessArrayWidth=15
+  //###val borderlessArrayHeight = 12 * (sZ - 1) + 6       // forcing borderlessArrayHeight=30
+  //###val arrayWidth = (borderlessArrayWidth + 1 + 2) / 2 // forcing arrayWidth=9
+  //###val arrayHeight = borderlessArrayHeight + 4         // forcing arrayHeight=34
 
-  var hexArray = createArrayOfHH(arrayWidth, arrayHeight)
-  // println("hexArray size:" + sZ + " w:h" + borderlessArrayWidth +":" + height + " aw:ah" + + arrayWidth +":" + borderlessArrayHeight + " .rowLength:" + hexArray.length)
+  val arrayWidth = 9 // ................ forcing arrayWidth=9 (calculated from sZ=3)
+  val arrayHeight = 34 // .............. forcing arrayHeight=34 (calculated from sZ=3)
+  val graphicWidth = 90 // ............. the width of the graphic crop for each hex
+  val graphicHeight = 80 // ............ the width of the graphic crop for each hex
+  val pBase = Point(260,30) // ......... coords of invisible left hand corner
+  val xWidth = 70 // ................... amount to add to a hex centre x coord to reach the vertical line of the next column
+  val yHeight = 40 // .................. half the amount to add to a hex centre y coord to reach the next hexagon below
+  val xHalfway = 10 // ................. xcoord of halfway along the top left diagonal line of first hex
+
+  val hexArray = createArrayOfHH(arrayWidth, arrayHeight)
 
   // start with black board, populates q,r,s (for debugging the helper routine printBoard can follow this line)
-  fillBoard(arrayWidth, arrayHeight, mix(CK), scaleFactor )
+  fillBoard(arrayWidth, arrayHeight, mix(CK))
 
   // The first two rows are an invisible border
   fillHorizontalBorder(0, 2, arrayWidth, CX ) 
@@ -99,16 +107,16 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
   createArrayOfHH creates an array of mini hexagons according to width and height parameters
   NB width and height are hexagonal width/height dimensions, not physical dimensions
    */
-  def createArrayOfHH(width: Int, height: Int): Array[Array[HH]] =
-    Array.ofDim[HH](width, height)
+  def createArrayOfHH(width: Int, height: Int): Array[Array[HH3]] =
+    Array.ofDim[HH3](width, height)
 
   /*
   fillBoard populates each hexArray cell
   the embedded while loops populate x,y,c,q,r,s,xP,yP, but not xP, yP
-  after the while loops calculateXpyP calcualtes the paint position
+  Afterwards, calculateXpyP calcualtes the paint position according to scale
   for the graphic to paint the hex cell
    */
-  def fillBoard(width: Int, height: Int, color: RGBA, fS : Double): Unit =
+  def fillBoard(width: Int, height: Int, color: RGBA): Unit =
     var row = 0
     while row < height do
       var col = row & 1
@@ -117,13 +125,12 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
         val q = col
         val r = (row - col) / 2
         val s = (-row - col) / 2
-        hexArray(n)(row) = HH(col, row, CW, q, r, s, 0, 0)
+        hexArray(n)(row) = HH3(col, row, CW, q, r, s, 0, 0)
         col += 2
         n += 1
       end while
       row += 1
     end while
-    calculateXpYp(fS) // calculate the hex cells paint positions
   end fillBoard
 
   /*
@@ -152,7 +159,7 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
       Vector(CB, CR, CB), // 16
       Vector(CP, CP, CG)  // 17
     )
-    val sZ = boardCfg.getSideSize()
+    val sZ = 3
     var col = 0
     var n = 0
     var thisRow = row
@@ -236,10 +243,7 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
    */
   def getQRSofTopCentreHex(width: Int, height: Int): (Int, Int, Int) =
     val x: Int = (width - 1) / 2
-    var y: Int = 0
-    if ((width - 1) & 1) == 1 then y = 1
-    else y = 0
-    end if
+    val y: Int = if ((width - 1) & 1) == 1 then 1 else 0
     return (hexArray(x)(y).q, hexArray(x)(y).r, hexArray(x)(y).s)
   end getQRSofTopCentreHex
 
@@ -248,10 +252,7 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
    */
   def getQRSofBottomCentreHex(width: Int, height: Int): (Int, Int, Int) =
     val x: Int = (width - 1) / 2
-    var y: Int = 0
-    if ((width - 1) & 1) == 1 then y = height - 1
-    else y = height - 2
-    end if
+    val y: Int = if ((width - 1) & 1) == 1 then height - 1 else height - 2
     return (hexArray(x)(y).q, hexArray(x)(y).r, hexArray(x)(y).s)
   end getQRSofBottomCentreHex
 
@@ -302,27 +303,14 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
 
   def setHexColor(pos: Point, col : Int) : Unit = 
     val hh = hexArray(pos.x)(pos.y)
-    hexArray(pos.x)(pos.y) = HH(hh.x, hh.y, col, hh.q, hh.r, hh.s, hh.xP, hh.yP)
+    hexArray(pos.x)(pos.y) = HH3(hh.x, hh.y, col, hh.q, hh.r, hh.s, hh.xP, hh.yP)
   end setHexColor
 
   /*
-  changeScale changes the scale of the board. At the moment (for test purposes) the scale is incremented
-  in a modulo fashion on each call such that 0.2 <= scale <= 2. For testing purposes this function is invoked
-  by right mouse button
-   */
-  def changeScale(fS: Double): Unit =
-    // println("changeScale to: " + fS)
-    calculateXpYp(fS)
-    hexBoardUpdated = true
-  end changeScale
-
-  /*
   calculateXpYp calculates the positions of the origins for the graphics used to paint each cell
-  This function is invoked when the board is first established and when the scale changes
+  This function is invoked when a resize event occurs or the scale changes
    */
   def calculateXpYp(fS: Double): Unit =
-    val xWidth = boardCfg.xWidth    // amount to add to a hex centre x coord to reach the vertical line of the next column
-    val yHeight = boardCfg.yHeight  // half the amount to add to a hex centre y coord to reach the next hexagon below
     val xMultiplier = xWidth * fS   // predetermine multiplier to speed things up
     val yMultiplier = yHeight * fS  // predetermine multiplier to speed things up
 
@@ -333,7 +321,7 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
         val hh = hexArray(x)(y)
         val xP = math.round(hh.x * xMultiplier).toInt
         val yP = math.round(hh.y * yMultiplier).toInt
-        hexArray(x)(y) = HH(hh.x,hh.y,hh.c,hh.q,hh.r,hh.s,xP,yP) // writing xP and yP away
+        hexArray(x)(y) = HH3(hh.x,hh.y,hh.c,hh.q,hh.r,hh.s,xP,yP) // writing xP and yP away
         x += 1
       end while
       y += 1
@@ -358,37 +346,31 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
   paint supplies the "SceneUpdateFragment" that contains all the graphics required to paint the hexboard
   Experience shows that this routine is time critical, so optimisation is key
    */
-  def paint(fS: Double): SceneUpdateFragment =
-    if hexBoardUpdated then
-      // we are beginning a new calculation for the board position, scale and or size
-      hexFragsCombined = SceneUpdateFragment.empty  // start this combination with an empty update
-      val pB = boardCfg.pB                          // Base Corner (Top LHS) of Rectangle containing board
-      val xWidth = boardCfg.xWidth                  // amount to add to a hex centre x coord to reach the vertical line of the next column
-      val yHeight = boardCfg.yHeight                // half the amount to add to a hex centre y coord to reach the next hexagon below
-      val xMultiplier = xWidth * fS                 // predetermine multiplier to speed things up
-      val yMultiplier = yHeight * fS                // predetermine multiplier to speed things up
 
-      var y = 0
-      while y < arrayHeight do
-        var x = 0
-        while x < arrayWidth do
-          val hh = hexArray(x)(y)
-          if hh.c != CX then
-            // this hex is visible so paint it
-            val layer = gHex.modifyMaterial(_.withTint(mix(hh.c)))
-            val frag = SceneUpdateFragment(
-              Layer(layer.moveTo(pB.x + hh.xP, pB.y + hh.yP).scaleBy(fS, fS))
-            )
-            hexFragsCombined = hexFragsCombined |+| frag
-          end if
-          x += 1
-        end while
-        y += 1
+  
+  def paint(model: FlicFlacGameModel, dSF: Double): SceneUpdateFragment =
+    var hexFragsCombined = SceneUpdateFragment.empty // start this combination with an empty update
+
+    var y = 0
+    while y < arrayHeight do
+      var x = 0
+      while x < arrayWidth do
+        val hh = hexArray(x)(y)
+        if hh.c != CX then
+          // this hex is visible so paint it
+          val layer = GameAssets.gHex(dSF).modifyMaterial(_.withTint(mix(hh.c)))
+          val frag = SceneUpdateFragment(
+            Layer(layer.moveTo(pBase.x + hh.xP, pBase.y + hh.yP).scaleBy(dSF, dSF))
+          )
+          hexFragsCombined = hexFragsCombined |+| frag
+        end if
+        x += 1
       end while
-      hexBoardUpdated = false
-    end if
+      y += 1
+    end while
     hexFragsCombined // returns the previous calculation if updateNeeded is false
   end paint
+
 
   /*
   hexXYCoordsFromDisplayXY takes the mouse display coordinates (pDs) and converts them
@@ -398,22 +380,18 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
 
   def hexXYCoordsFromDisplayXY(pDs: Point, fS: Double): Option[Point] =
     //println("hexXYFromDisplayXY START:" + pDs)
-    val GWIDTH = boardCfg.gWidth                                // The Hex graphic width without overlap of one pixel
-    val GHEIGHT = boardCfg.gHeight                              // The Hex graphic height without overlap of one pixel
-    val xWidth = boardCfg.xWidth                                // amount to add to a hex centre x coord to reach the vertical line of the next column
-    val yHeight = boardCfg.yHeight                              // half the amount to add to a hex centre y coord to reach the next hexagon below
-    val pB = boardCfg.pB                                        // Base Corner (Top LHS) of Rectangle containing board
-    val sZ = boardCfg.getSideSize()                             // number of major hex rings (7 mini hexes) constituting a side
-    val width = (((6 * sZ) - 2) * xWidth)                       // calculating board dimensions where xwidth is the small hexagon display width
-    val height = (((6 * sZ) - 1) * yHeight * 2) - yHeight       // calculating board dimensions where yHeight is only half the small hexagon display height
-    val widthScaled = math.round((width * fS)).toInt            // scaling board dimensions
-    val heightScaled = math.round((height * fS)).toInt          // scaling board dimensions
-    val gWidthScaled = math.round(((GWIDTH / 2) * fS)).toInt    // scaling the dimensions of the original hex
-    val gHeightScaled = math.round(((GHEIGHT / 2) * fS)).toInt  // scaling the dimensions of the original hex
-    val pC1 = Point(pB.x + gWidthScaled, pB.y + gHeightScaled)  // PC1 is top LH corner of the detection rectangle
-    val pC2 = Point(pC1.x + widthScaled, pC1.y + heightScaled)  // pC2 is bottom RH corner of the detection rectangle
-    val xHalfway = boardCfg.xHalfway                            // xcoord of halfway along the top left diagonal line of first hex
-    val xH = (xHalfway * fS).toInt                              // scaling the tiny offset required for detection grid alignment
+    val GWIDTH = graphicWidth // ................................... The Hex graphic width without overlap of one pixel
+    val GHEIGHT = graphicHeight // ................................. The Hex graphic height without overlap of one pixel
+    val pB = pBase // .............................................. Base Corner (Top LHS) of Rectangle containing board
+    val width = 16 * xWidth // ..................................... calculating board dimensions where xwidth is the small hexagon display width
+    val height = 33 * yHeight // ................................... calculating board dimensions where yHeight is only half the small hexagon display height
+    val widthScaled = math.round((width * fS)).toInt // ............ scaling board dimensions
+    val heightScaled = math.round((height * fS)).toInt // .......... scaling board dimensions
+    val gWidthScaled = math.round(((GWIDTH / 2) * fS)).toInt // .... scaling the dimensions of the original hex
+    val gHeightScaled = math.round(((GHEIGHT / 2) * fS)).toInt // .. scaling the dimensions of the original hex
+    val pC1 = Point(pB.x + gWidthScaled, pB.y + gHeightScaled) // .. PC1 is top LH corner of the detection rectangle
+    val pC2 = Point(pC1.x + widthScaled, pC1.y + heightScaled) // .. pC2 is bottom RH corner of the detection rectangle
+    val xH = (xHalfway * fS).toInt // .............................. scaling the tiny offset required for detection grid alignment
 
     //println("hexXYFromDisplayXY BOUNDARIES:: " + pC1 + " :: " + pC2)
 
@@ -448,8 +426,8 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
   def getCylinderHomePos(id: Int): Point =
     val p1 = Point(0,1)
     val p2 = Point(arrayWidth-2,1)
-    val p3 = Point(0, arrayHeight-1 - ((sZ&1)*2))
-    val p4 = Point(arrayWidth-2, arrayHeight-1-((sZ&1)*2))
+    val p3 = Point(0, arrayHeight-3)
+    val p4 = Point(arrayWidth-2, arrayHeight-3)
     id match
         case CB => p1 + Point(0,0)  // Blue
         case CR => p1 + Point(0,2)  // Red
@@ -463,8 +441,8 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
   def getBlockHomePos(id: Int): Point =
     val p1 = Point(0,1)
     val p2 = Point(arrayWidth-2,1)
-    val p3 = Point(0, arrayHeight-1 - ((sZ&1)*2))
-    val p4 = Point(arrayWidth-2, arrayHeight-1-((sZ&1)*2))
+    val p3 = Point(0, arrayHeight-3)
+    val p4 = Point(arrayWidth-2, arrayHeight-3)
     id match
         case CB => p3 + Point(0,0)  // Blue
         case CR => p3 + Point(0,-2) // Red
@@ -475,8 +453,8 @@ class HexBoard(boardCfg: BoardConfig, scaleFactor: Double):
     end match
   end getBlockHomePos
 
-  println("@@@ Class HexBoard Finish")
+  println("@@@ Class HexBoard3 Finish")
 
 
-end HexBoard
+end HexBoard3
 

@@ -18,7 +18,7 @@ object FlicFlacStartupData:
     FlicFlacStartupData(
       flicFlacBootData = flicFlacBootData,
       staticAssets = StaticAssets(
-        hexGraphic = GameAssets.gHex,
+        hexGraphic = GameAssets.gHex(1.0),
         buttonSplashAsset = GameAssets.buttonSplashAssets(1.0),
         buttonRulesAsset = GameAssets.buttonRulesAssets(1.0),
         buttonPlayAsset = GameAssets.buttonPlayAssets(1.0),
