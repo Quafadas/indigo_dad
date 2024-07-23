@@ -77,6 +77,8 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
 
     scribe.info("Scael factor danger")
     val dSF = 1.0 // GetScaleFactor(width, height, GameAssets.SplashSceneDimensions)
+    val sFactor = ((10*dSF).toInt).toString()
+
     val textSplash = TextBox("Splash Scene V28 : " + dSF, 800, 40)
       .withColor(RGBA.Yellow)
       .withFontSize(Pixels(30))
@@ -91,9 +93,9 @@ object SceneSplash extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
 
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Black)))
         |+| SceneUpdateFragment(Layer(layerBg.scaleBy(dSF, dSF)))
-        |+| SceneUpdateFragment(
-          GameAssets.cornerLayers(GameAssets.SplashSceneDimensions, dSF, RGBA.Yellow)
-        ) // Splash Scene is 1920x1080
+        |+| SceneUpdateFragment(GameAssets.cornerLayers(GameAssets.SplashSceneDimensions, dSF, RGBA.Yellow))
+        |+| SceneUpdateFragment(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Yellow)))
+        |+| SceneUpdateFragment(TextBox(sFactor,50,20).withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(0,0))
         |+| SceneUpdateFragment(textSplash.scaleBy(dSF, dSF))
         |+| SceneUpdateFragment(viewModel.rulesButton.draw)
         |+| SceneUpdateFragment(viewModel.playButton.draw)

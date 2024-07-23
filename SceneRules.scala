@@ -61,13 +61,16 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
 
     val width = viewModel.viewPortWidth
     val height = viewModel.viewPortHeight
-    scribe.info("DANGER SCALE FACTOR !")
-    val dSF = 1.0 // FlicFlacGame().GetScaleFactor(width, height, GameAssets.SplashSceneDimensions)
+    scribe.info("@@@ DANGER SCALE FACTOR !")
+    val scaleFactor = 1.0 // FlicFlacGame().GetScaleFactor(width, height, GameAssets.SplashSceneDimensions)
+    val sFactor = ((10*scaleFactor).toInt).toString()
 
     Outcome {
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
-        |+| SceneUpdateFragment(Layer(layerBg.scaleBy(dSF, dSF)))
-        |+| SceneUpdateFragment(GameAssets.cornerLayers(GameAssets.RulesSceneDimensions, dSF, RGBA.Black))
+        |+| SceneUpdateFragment(Layer(layerBg.scaleBy(scaleFactor, scaleFactor)))
+        |+| SceneUpdateFragment(GameAssets.cornerLayers(GameAssets.RulesSceneDimensions, scaleFactor, RGBA.Black))
+        |+| SceneUpdateFragment(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Black)))
+        |+| SceneUpdateFragment(TextBox(sFactor,50,20).withColor(RGBA.Yellow).withFontSize(Pixels(20)).moveTo(0,0))
         |+| SceneUpdateFragment(viewModel.splashButton.draw)
 //        |+| SceneUpdateFragment(viewModel.rulesButton.draw)
         |+| SceneUpdateFragment(viewModel.playButton.draw)

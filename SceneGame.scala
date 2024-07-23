@@ -219,8 +219,14 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val width = bootData.pixelWidth
     val height = bootData.pixelHeight
 
+    val sFactor = ((10*scaleFactor).toInt).toString()
+
     Outcome(
-      SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.White)))
+      SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Cyan)))
+        |+| SceneUpdateFragment(Shape.Box(GameAssets.GameSceneDimensions, Fill.Color(RGBA.White)).scaleBy(scaleFactor,scaleFactor))      
+        |+| SceneUpdateFragment(GameAssets.cornerLayers(GameAssets.GameSceneDimensions, scaleFactor, RGBA.Magenta))
+        |+| SceneUpdateFragment(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Magenta)))
+        |+| SceneUpdateFragment(TextBox(sFactor,50,20).withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(0,0))
         |+| SceneUpdateFragment(textGame)
         |+| SceneUpdateFragment(viewModel.rulesButton.draw)
         |+| SceneUpdateFragment(viewModel.newGameButton.draw)
@@ -247,32 +253,79 @@ final case class GameSceneViewModel(
       bn3 <- resultsButton.updateFromPointers(pointers)
       bn4 <- splashButton.updateFromPointers(pointers)
     yield this.copy(rulesButton = bn1, newGameButton = bn2, resultsButton = bn3, splashButton = bn4)
+
+  def changeButtonBoundaries( ssvm : GameSceneViewModel, gvp : GameViewport ) : GameSceneViewModel =
+    val dSF = 1.0
+    println("@@@ dSF:"+dSF)
+
+    val newRulesButton =       
+      Button(
+        buttonAssets = GameAssets.buttonRulesAssets(dSF),
+        bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.rulesBounds, dSF),
+        depth = Depth(6)
+      ).withUpActions(ButtonRulesEvent)
+
+    val newNewGameButton =       
+      Button(
+        buttonAssets = GameAssets.buttonNewGameAssets(dSF),
+        bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.newGameBounds, dSF),
+        depth = Depth(6)
+      ).withUpActions(ButtonNewGameEvent)
+
+    val newResultsButton =       
+      Button(
+        buttonAssets = GameAssets.buttonResultsAssets(dSF),
+        bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.resultsBounds, dSF),
+        depth = Depth(6)
+      ).withUpActions(ButtonResultsEvent)
+
+    val newSplashButton =       
+      Button(
+        buttonAssets = GameAssets.buttonSplashAssets(dSF),
+        bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.splashBounds, dSF),
+        depth = Depth(6)
+      ).withUpActions(ButtonSplashEvent)
+
+    this.copy(  // optDragPos
+                rulesButton = newRulesButton,
+                newGameButton = newNewGameButton,
+                resultsButton = newResultsButton,
+                splashButton = newSplashButton
+                )
+    
+  end changeButtonBoundaries
+
 end GameSceneViewModel
 
 object GameSceneViewModel:
 
+  val rulesBounds = Rectangle(20, 40, 240, 80)
+  val newGameBounds = Rectangle(20, 140, 240, 80)
+  val resultsBounds = Rectangle(20, 240, 240, 80)
+  val splashBounds = Rectangle(20, 340, 240, 80)
+    
   val initial: GameSceneViewModel =
     GameSceneViewModel(
       None, // we have no last position of the pointer recorded
 
       Button(
         buttonAssets = GameAssets.buttonRulesAssets(1.0),
-        bounds = Rectangle(20, 40, 240, 80),
+        bounds = rulesBounds,
         depth = Depth(6)
       ).withUpActions(ButtonRulesEvent),
       Button(
         buttonAssets = GameAssets.buttonNewGameAssets(1.0),
-        bounds = Rectangle(20, 140, 240, 80),
+        bounds = newGameBounds,
         depth = Depth(6)
       ).withUpActions(ButtonNewGameEvent),
       Button(
         buttonAssets = GameAssets.buttonResultsAssets(1.0),
-        bounds = Rectangle(20, 240, 240, 80),
+        bounds = resultsBounds,
         depth = Depth(6)
       ).withUpActions(ButtonResultsEvent),
       Button(
         buttonAssets = GameAssets.buttonSplashAssets(1.0),
-        bounds = Rectangle(20, 340, 240, 80),
+        bounds = splashBounds,
         depth = Depth(6)
       ).withUpActions(ButtonSplashEvent)
     )
