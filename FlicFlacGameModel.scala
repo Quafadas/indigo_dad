@@ -103,8 +103,7 @@ object FlicFlacGameModel:
     val previousPieces = previousModel.pieces
     val prevBoard = previousModel.hexBoard3
     val newModel = FlicFlacGameModel(previousSF, previousPieces, highLighter, prevBoard)
-    newModel    
-    
+    newModel       
   end modifyHighLighter
 
   def reset(previousModel: FlicFlacGameModel): FlicFlacGameModel =

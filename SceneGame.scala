@@ -167,12 +167,22 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     case ButtonPlusEvent =>
       scribe.debug("@@@ ButtonPlusEvent")
       val oldSF = model.scalingFactor
-      Outcome(model.copy(scalingFactor=increaseScaleFactor(oldSF)))
+      val newSF = increaseScaleFactor(oldSF)
+      val newHexBoard3 = model.hexBoard3.calculateXpYp(newSF, model.hexBoard3)
+      val newModel = model.copy(scalingFactor=newSF, hexBoard3 = newHexBoard3)
+      val asJson = newModel.asJson.noSpaces
+      org.scalajs.dom.window.localStorage.setItem("FlicFlac", asJson)
+      Outcome(newModel)
 
     case ButtonMinusEvent =>
       scribe.debug("@@@ ButtonMinusEvent")
       val oldSF = model.scalingFactor
-      Outcome(model.copy(scalingFactor=decreaseScaleFactor(oldSF)))
+      val newSF = decreaseScaleFactor(oldSF)
+      val newHexBoard3 = model.hexBoard3.calculateXpYp(newSF, model.hexBoard3)
+      val newModel = model.copy(scalingFactor=newSF, hexBoard3 = newHexBoard3)
+      val asJson = newModel.asJson.noSpaces
+      org.scalajs.dom.window.localStorage.setItem("FlicFlac", asJson)
+      Outcome(newModel)
 
     case _ =>
       Outcome(FlicFlacGameModel.modify(model, None, None))
@@ -225,10 +235,9 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         case None =>
           viewModel.optDragPos = None
       end match
-
       iDragTick += 1
       Outcome(viewModel)
-    
+
     case _ =>
       Outcome(viewModel)
   end updateViewModel

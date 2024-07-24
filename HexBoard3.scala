@@ -7,14 +7,16 @@ import indigo.*
  */
 
 case class HH3(
-    x: Int, // cartesian x coordinate of centre of hex
-    y: Int, // cartesian y coordinate of centre of hex
-    c: Int, // colour and visibility of hex
-    q: Int, // cubic q Coord (-ve to +ve = left to right)
-    r: Int, // cubic r Coord (-ve to +ve = top right to bottom left)
-    s: Int, // cubic s Coord (-ve to +ve = bottom right to top left)
-    xP: Int, // pixel x offset from base point for origin of png to paint this hex
-    yP: Int // pixel y offset from base point for origin of png to paint this hex
+    x: Int, // .... cartesian x coordinate of centre of hex
+    y: Int, // .... cartesian y coordinate of centre of hex
+    c: Int, // .... colour and visibility of hex
+    q: Int, // .... cubic q Coord (-ve to +ve = left to right)
+    r: Int, // .... cubic r Coord (-ve to +ve = top right to bottom left)
+    s: Int, // .... cubic s Coord (-ve to +ve = bottom right to top left)
+    xR: Int, // ... original copy of xS (ie with scale factor 1)
+    yR: Int, // ... original copy of yS (ie with scale factor 1)
+    xS: Int, // ... pixel x scaled offset from base point for origin of png to paint this hex 
+    yS: Int // .... pixel y scaled offset from base point for origin of png to paint this hex
 )
 
 case class HexBoard3():
@@ -118,14 +120,16 @@ case class HexBoard3():
    */
   def fillBoard(width: Int, height: Int, color: RGBA): Unit =
     var row = 0
-    while row < height do
+    while row < height do // array height
       var col = row & 1
       var n = 0
-      while n < width do
+      while n < width do  // array width
         val q = col
         val r = (row - col) / 2
         val s = (-row - col) / 2
-        hexArray(n)(row) = HH3(col, row, CW, q, r, s, 0, 0)
+        val xP = col * xWidth
+        val yP = row * yHeight
+        hexArray(n)(row) = HH3(col, row, CW, q, r, s, xP, yP, xP, yP)
         col += 2
         n += 1
       end while
@@ -303,39 +307,35 @@ case class HexBoard3():
 
   def setHexColor(pos: Point, col : Int) : Unit = 
     val hh = hexArray(pos.x)(pos.y)
-    hexArray(pos.x)(pos.y) = HH3(hh.x, hh.y, col, hh.q, hh.r, hh.s, hh.xP, hh.yP)
+    hexArray(pos.x)(pos.y) = HH3(hh.x, hh.y, col, hh.q, hh.r, hh.s, hh.xR, hh.yR, hh.xS, hh.yS)
   end setHexColor
 
   /*
   calculateXpYp calculates the positions of the origins for the graphics used to paint each cell
   This function is invoked when a resize event occurs or the scale changes
    */
-  def calculateXpYp(fS: Double): Unit =
-    val xMultiplier = xWidth * fS   // predetermine multiplier to speed things up
-    val yMultiplier = yHeight * fS  // predetermine multiplier to speed things up
+  def calculateXpYp(fS: Double, hexboard3: HexBoard3): HexBoard3 =
 
     var y = 0
     while y < arrayHeight do
       var x = 0
       while x < arrayWidth do
-        val hh = hexArray(x)(y)
-        val xP = math.round(hh.x * xMultiplier).toInt
-        val yP = math.round(hh.y * yMultiplier).toInt
-        hexArray(x)(y) = HH3(hh.x,hh.y,hh.c,hh.q,hh.r,hh.s,xP,yP) // writing xP and yP away
+        val hh = hexboard3.hexArray(x)(y)
+        val xP = math.round(hh.xR * fS).toInt
+        val yP = math.round(hh.yR * fS).toInt
+        hexboard3.hexArray(x)(y) = HH3(hh.x,hh.y,hh.c,hh.q,hh.r,hh.s,hh.xR,hh.yR,xP,yP) // writing xS and yS away
         x += 1
       end while
       y += 1
     end while
+    hexboard3 
   end calculateXpYp
 
   def getXpYp(pSrc: Point) : Point =
     var pValidated = Point(0,0)
     val x = pSrc.x
     val y = pSrc.y
-    if (x >= 0) && (x < arrayWidth) && (y >= 0) && (y < arrayHeight) then
-      pValidated = pSrc
-    end if
-    val pResult = Point(hexArray(x)(y).xP, hexArray(x)(y).yP)
+    val pResult = Point(hexArray(x)(y).xS, hexArray(x)(y).yS)
     pResult
   end getXpYp
 
@@ -359,9 +359,9 @@ case class HexBoard3():
         if hh.c != CX then
           // this hex is visible so paint it
           val layer = GameAssets.gHex(dSF).modifyMaterial(_.withTint(mix(hh.c)))
-          val frag = SceneUpdateFragment(
-            Layer(layer.moveTo(pBase.x + hh.xP, pBase.y + hh.yP).scaleBy(dSF, dSF))
-          )
+          val scaledX = hh.xS + pBase.x
+          val scaledY = hh.yS + pBase.y
+          val frag = SceneUpdateFragment(Layer(layer.moveTo(scaledX, scaledY)))
           hexFragsCombined = hexFragsCombined |+| frag
         end if
         x += 1

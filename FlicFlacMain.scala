@@ -74,6 +74,7 @@ case class FlicFlacGame(
     scribe.debug("@@@ FlicFlacMain-initialModel()")
 
     val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlac")) match
+
       case Right(model: FlicFlacGameModel) =>
         scribe.debug("@@@ Restored model")
         model
@@ -81,9 +82,6 @@ case class FlicFlacGame(
         scribe.debug("@@@ Created model")
         FlicFlacGameModel.creation(Point(0, 0))
 
-    /*
-    val cacheOrNew = FlicFlacGameModel.creation(Point(0, 0))
-     */
     Outcome(cacheOrNew)
   end initialModel
 
@@ -163,7 +161,7 @@ case class FlicFlacGame(
       val w = gameViewPort.width
       val h = gameViewPort.height
       scribe.debug("@@@ FlicFlacMain-updateViewModel ViewportResize w:h " + w + ":" + h)
-      flicFlacGameModel.hexBoard3.calculateXpYp(1.0) // FIXME this needs to be immutable!!!
+      // flicFlacGameModel.hexBoard3.calculateXpYp(1.0) // FIXME this needs to be immutable!!!
       Outcome(flicFlacViewModel.copy(theGameViewPort = gameViewPort))
 
     case ButtonSplashEvent =>
