@@ -223,27 +223,27 @@ case class FlicFlacGame(
     SceneUpdateFragment.empty
   }
 
-  def GetScaleFactor(viewWidth: Int, viewHeight: Int, sceneDimensions: Rectangle): Double =
-    val dsfx: Double = viewWidth.toDouble / sceneDimensions.width
-    val dsfy: Double = viewHeight.toDouble / sceneDimensions.height
-    val dToCheck = if dsfx > dsfy then dsfy else dsfx
-
-    val dSF =
-      if dToCheck >= 1.0 then 1.0
-      else if dToCheck >= 0.9 then 0.9
-      else if dToCheck >= 0.8 then 0.8
-      else if dToCheck >= 0.75 then 0.75
-      else if dToCheck >= 0.67 then 0.67
-      else if dToCheck >= 0.5 then 0.5
-      else if dToCheck >= 0.33 then 0.33
-      else 0.25
-    dSF
-  end GetScaleFactor
-
   scribe.debug("@@@ FlicFlacMain class FlicFlacGame Finish")
-
-
 end FlicFlacGame
+
+
+def GetScaleFactor(viewWidth: Int, viewHeight: Int, sceneDimensions: Rectangle): Double =
+  val dsfx: Double = viewWidth.toDouble / sceneDimensions.width
+  val dsfy: Double = viewHeight.toDouble / sceneDimensions.height
+  val dToCheck = if dsfx > dsfy then dsfy else dsfx
+
+  val dSF =
+    if dToCheck >= 1.0 then 1.0
+    else if dToCheck >= 0.9 then 0.9
+    else if dToCheck >= 0.8 then 0.8
+    else if dToCheck >= 0.75 then 0.75
+    else if dToCheck >= 0.67 then 0.67
+    else if dToCheck >= 0.5 then 0.5
+     else if dToCheck >= 0.33 then 0.33
+    else 0.25
+  dSF
+end GetScaleFactor
+
 
 //final case class ViewModel()
 final case class FlicFlacViewModel(
@@ -264,3 +264,4 @@ case object ButtonResultsEvent extends GlobalEvent
 case object ButtonParamsEvent extends GlobalEvent
 case object ButtonPlusEvent extends GlobalEvent
 case object ButtonMinusEvent extends GlobalEvent
+

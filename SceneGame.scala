@@ -184,6 +184,17 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       org.scalajs.dom.window.localStorage.setItem("FlicFlac", asJson)
       Outcome(newModel)
 
+    case ViewportResize(gameViewPort) =>
+      val w = gameViewPort.width - model.hexBoard3.pBase.x
+      val h = gameViewPort.height - model.hexBoard3.pBase.y
+      val dSF = GetScaleFactor(w,h,GameAssets.GameSceneDimensions)
+      scribe.debug("@@@ updateModel ViewportResize w:h->s " + w + ":" + h + "->" + dSF)
+      val newHexBoard3 = model.hexBoard3.calculateXpYp(dSF, model.hexBoard3)
+      val newModel = model.copy(scalingFactor = dSF, hexBoard3 = newHexBoard3)
+      val asJson = newModel.asJson.noSpaces
+      org.scalajs.dom.window.localStorage.setItem("FlicFlac", asJson)
+      Outcome(newModel)
+
     case _ =>
       Outcome(FlicFlacGameModel.modify(model, None, None))
   }
@@ -263,11 +274,18 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
     val dSF = model.scalingFactor
     val sFactor = ((10*dSF).toInt).toString()
+    val iHeight = (math.round(GameAssets.GameSceneDimensions.height * dSF)).toInt
+    val iLeftWidth = model.hexBoard3.pBase.x
+    val iRightWidth = (math.round(GameAssets.GameSceneDimensions.right - model.hexBoard3.pBase.x)*dSF).toInt
+    val rLeft = Rectangle(0,0,iLeftWidth,iHeight)
+    val rRight = Rectangle(Point(iLeftWidth,0), Size(iRightWidth,iHeight))
+    val rCorners = Rectangle(Point(iLeftWidth,0), Size(iRightWidth+model.hexBoard3.pBase.x,iHeight))
 
     Outcome(
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Cyan)))
-        |+| SceneUpdateFragment(Shape.Box(GameAssets.GameSceneDimensions, Fill.Color(RGBA.White)).scaleBy(dSF,dSF))      
-        |+| SceneUpdateFragment(GameAssets.cornerLayers(GameAssets.GameSceneDimensions, dSF, RGBA.Magenta))
+        |+| SceneUpdateFragment(Shape.Box(rLeft, Fill.Color(RGBA.White)))      
+        |+| SceneUpdateFragment(Shape.Box(rRight, Fill.Color(RGBA.White)))
+        |+| SceneUpdateFragment(GameAssets.cornerLayers(rCorners, 1.0, RGBA.Magenta))
         |+| SceneUpdateFragment(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Magenta)))
         |+| SceneUpdateFragment(TextBox(sFactor,50,20).withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(0,0))
         |+| SceneUpdateFragment(textGame)
@@ -286,6 +304,7 @@ end SceneGame
 
 final case class GameSceneViewModel(
     var optDragPos: Option[Point],
+    gameViewport: GameViewport,
     rulesButton: Button,
     newGameButton: Button,
     resultsButton: Button,
@@ -370,7 +389,6 @@ final case class GameSceneViewModel(
 end GameSceneViewModel
 
 object GameSceneViewModel:
-
   val rulesBounds = Rectangle(20, 40, 240, 80)
   val newGameBounds = Rectangle(20, 140, 240, 80)
   val resultsBounds = Rectangle(20, 240, 240, 80)
@@ -381,6 +399,8 @@ object GameSceneViewModel:
   val initial: GameSceneViewModel =
     GameSceneViewModel(
       None, // ... we have no last position of the pointer recorded
+
+      GameViewport(1920,1080),
 
       Button(
         buttonAssets = GameAssets.buttonRulesAssets(1.0),

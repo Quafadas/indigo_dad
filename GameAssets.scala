@@ -27,8 +27,15 @@ object GameAssets:
 
   val SplashSceneDimensions = Rectangle(0, 0, 1920,1080)
   val RulesSceneDimensions = Rectangle(0, 0, 1700, 1250)
-  val GameSceneDimensions = Rectangle(0,0,1800,1800)        // FIXME this needs calculating
-
+  /* Calculating the game rectangle was non-trivial (and not perfect)...
+  ... factors taking into consideration were ...
+  1) HexBoard3.pBase = Point(260,0)
+  2) hh(8)(33) Point(.xR & .yR)=Point(1190,1320) ... watch out 1320 is the x coord
+  3) additional margins for half hex in both directions
+  Tested on the scale Factors 1.0, 0.9, 0.8, 0.75, 0.5, 0.33, 0.25
+  */
+  val GameSceneDimensions = Rectangle(0,0,1580,1450)      
+  
   def get(): Set[AssetType] =
     Set(
       AssetType.Image(AssetName(hxAssetName), AssetPath(hxAssetPath)),
@@ -118,21 +125,17 @@ object GameAssets:
     val newWidth20 = ((r.width-20).toDouble * sf).toInt
     val newHeight20 = ((r.height-20).toDouble *sf).toInt
     val layerC1 = (GameAssets.cornerTopLeft)
-      .moveTo(0,0)
+      .moveTo(r.left,r.top)
       .modifyMaterial(_.withTint(cornerColor))
-      .scaleBy(sf, sf)
     val layerC2 = (GameAssets.cornerTopRight)
-      .moveTo(newWidth20, 0)
+      .moveTo(newWidth20, r.top)
       .modifyMaterial(_.withTint(cornerColor))
-      .scaleBy(sf, sf)
     val layerC3 = (GameAssets.cornerBottomLeft)
-      .moveTo(0, newHeight20)
+      .moveTo(r.left, newHeight20)
       .modifyMaterial(_.withTint(cornerColor))
-      .scaleBy(sf, sf)
     val layerC4 = (GameAssets.cornerBottomRight)
       .moveTo(newWidth20, newHeight20)
       .modifyMaterial(_.withTint(cornerColor))
-      .scaleBy(sf, sf)
 
     Batch(layerC1, layerC2, layerC3, layerC4)
   end cornerLayers
