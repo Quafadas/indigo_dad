@@ -264,5 +264,6 @@ case object ButtonResultsEvent extends GlobalEvent
 case object ButtonParamsEvent extends GlobalEvent
 case object ButtonPlusEvent extends GlobalEvent
 case object ButtonMinusEvent extends GlobalEvent
+case object ButtonTurnEvent extends GlobalEvent
 case object SubSysGameUpdate extends GlobalEvent
 

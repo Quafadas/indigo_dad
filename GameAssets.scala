@@ -105,6 +105,13 @@ object GameAssets:
     val down = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(960, 400, 90, 80).scaleBy(sf,sf)
     ButtonAssets(up, over, down)
 
+  def buttonTurnAssets(sf: Double): ButtonAssets =
+    val up = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(1050, 0, 90, 80).scaleBy(sf,sf)
+    val over = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(1050, 80, 90, 80).scaleBy(sf,sf)
+    val down = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(1050, 160, 90, 80).scaleBy(sf,sf)
+    ButtonAssets(up, over, down)
+
+
 
   def splashBg: Graphic[Material.ImageEffects] =
     Graphic(SplashSceneDimensions, 2, Material.ImageEffects(AssetName(spAssetName)))
