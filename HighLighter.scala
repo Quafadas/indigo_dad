@@ -36,7 +36,7 @@ final case class HighLighter(
       val pB = model.hexBoard3.pBase // ................. Base Corner (Top LHS) of Rectangle containing board
       val layer = GameAssets.gHex(fS).modifyMaterial(_.withTint(mix(CM)))
       val pPos = model.hexBoard3.getXpYp(currentPos)
-      frag = SceneUpdateFragment(Layer(layer.moveTo(pB.x + pPos.x, pB.y + pPos.y).scaleBy(fS, fS)))
+      frag = SceneUpdateFragment(Layer(layer.moveTo(pB.x + pPos.x, pB.y + pPos.y)))
     end if
     frag
   end paint
