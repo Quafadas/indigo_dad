@@ -9,8 +9,12 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
 
   val id: SubSystemId = SubSystemId("SubSystemGame")
 
-  val eventFilter: GlobalEvent => Option[EventType] =
-    _ => None
+  val eventFilter: GlobalEvent => Option[EventType] = {
+    case e: GlobalEvent => 
+      if (e==SubSysGameUpdate) then Some(e)
+      else None
+    case null => None
+  }
 
   // Extra line here, as mandated by indigo's SubSystem.scala. Yet it is not in the examples!!!
   def reference(flicFlacGameModel: FlicFlacGameModel): Unit = ()
@@ -20,8 +24,11 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
   def update(
       context: SubSystemFrameContext[ReferenceData],
       message: String
-  ): EventType => Outcome[String] =
-    _ => Outcome(message)
+  ): EventType => Outcome[String] = {
+
+    case SubSysGameUpdate =>  Outcome(message)
+    case _ => Outcome(message)
+  }
 
   def present(
       context: SubSystemFrameContext[ReferenceData],

@@ -24,7 +24,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
   def eventFilters: EventFilters = EventFilters.Permissive
 
-  def subSystems = Set(SSGame("Game"))
+  def subSystems = Set(SSGame("SubSystemGame"))
 
   var iFrameTick = 0
   var iDragTick = 0
