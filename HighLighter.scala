@@ -3,8 +3,6 @@ package game
 import indigo.*
 
 final case class HighLighter(
-  // val gHex = boardCfg.getHexGraphic() // The Hex graphic used to paint the grid
-  // val gHex = GameAssets.gHex // The Hex graphic used to paint the grid
   val hexBoard3: HexBoard3,
   val displayOn: Boolean,
   val currentPos: Point
