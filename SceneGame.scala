@@ -46,22 +46,27 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               // Pointer Down, Pos on Grid, Piece Selected
               if piece.pCurPos == pos then
                 // Pointer Down, Pos on Grid, Piece Selected, PiecePos=PointerPos <<##A##>>
-                dMsg = "##AA## Down|Grid|Sel|=="
+                dMsg = "##A## Down|Grid|Sel|=="
                 scribe.debug("@@@ PointerEvent " + dMsg)
                 val newHL = model.highLighter.setPosAndShine(model.highLighter, pos)
+                val modelA1 = model.copy(highLighter = newHL)
                 val updatedPiece = Piece.setSelected(piece, true)
-                Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
+                Outcome(FlicFlacGameModel.modify(modelA1, Some(updatedPiece), None))
+//                Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
               else
                 // Pointer Down, Pos on Grid, Piece Selected, PiecePos!=PointerPos <<##B##>>
                 dMsg = "##B## Down|Grid|Sel|!="
                 scribe.debug("@@@ PointerEvent " + dMsg)
                 val newHL = model.highLighter.shine(model.highLighter, false)
-                if model.hexBoard3.isThisHexBlack(pos) == true then
+                val modelB1 = model.copy(highLighter = newHL)
+                if modelB1.hexBoard3.isThisHexBlack(pos) == true then
                   val updatedPiece = Piece.setPosFlipDeselect(piece, pos)
-                  Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
+                  Outcome(FlicFlacGameModel.modify(modelB1, Some(updatedPiece), None))
+//                  Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
                 else
                   val updatedPiece = Piece.setPosDeselect(piece, pos)
-                  Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
+                  Outcome(FlicFlacGameModel.modify(modelB1, Some(updatedPiece), None))
+//                  Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
                 end if
               end if
 
@@ -200,7 +205,21 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       Outcome(model)
 
     case _ =>
-      Outcome(FlicFlacGameModel.modify(model, None, None))
+
+/*      
+      FlicFlacGameModel.findPieceSelected(model) match
+        case None => Outcome(FlicFlacGameModel.modify(model, None, None))
+        case Some(piece) =>
+          val x = piece.pCurPos.x
+          val y = piece.pCurPos.y
+          val q = model.hexBoard3.hexArray(x)(y).q
+          val r = model.hexBoard3.hexArray(x)(y).r
+          val s = model.hexBoard3.hexArray(x)(y).s
+          scribe.debug("@@@ (x:y) (q:r:s)==>(" + x +":" + y +") (" + q +":" + r +":" + s +")")
+
+        Outcome(model.copy(possibleMoveSpots = model.possibleMoveSpots.calculatePossibleMoves(model) ))
+*/
+      Outcome(model)
   }
 
   end updateModel
@@ -244,7 +263,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     case e: PointerEvent.PointerMove =>
       FlicFlacGameModel.findPieceSelected(model) match
         case Some(p) =>
-          scribe.debug("@@@ PointerEventMove @ " + e.position)
+          scribe.trace("@@@ PointerEventMove @ " + e.position)
           viewModel.optDragPos = Some(e.position)
 
         case None =>
@@ -285,6 +304,11 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val rRight = Rectangle(Point(iLeftWidth,0), Size(iRightWidth,iHeight))
     val rCorners = Rectangle(Point(iLeftWidth,0), Size(iRightWidth+model.hexBoard3.pBase.x,iHeight))
 
+    // Testing Spot ...
+      val layer = GameAssets.gSpot(dSF)
+      val pPos = model.hexBoard3.getXpYp(Point(5,5))
+      val spotLayer = Layer(layer.moveTo(model.hexBoard3.pBase.x + pPos.x, model.hexBoard3.pBase.y + pPos.y))
+
     Outcome(
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Cyan)))
         |+| SceneUpdateFragment(Shape.Box(rLeft, Fill.Color(RGBA.White)))      
@@ -301,6 +325,10 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(viewModel.minusButton.draw)
         |+| SceneUpdateFragment(viewModel.turnButton.draw)
         |+| model.hexBoard3.paint(model, dSF)
+
+        |+| SceneUpdateFragment(spotLayer)
+        |+| model.possibleMoveSpots.paint(model)
+
         |+| model.highLighter.paint(model, dSF)
         |+| model.pieces.paint(model, dSF, viewModel.optDragPos)
     )

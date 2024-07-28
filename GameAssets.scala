@@ -55,6 +55,9 @@ object GameAssets:
     else
       Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName))).scaleBy(sf,sf)
 
+  def gSpot(sf : Double): Graphic[Material.ImageEffects] = 
+      Graphic(Rectangle(0, 0, 91, 81), 3, Material.ImageEffects(AssetName(hxAssetName))).withCrop(100, 0, 91, 81).scaleBy(sf,sf)
+
   // Check FlacFont.txt for details
 
   def buttonSplashAssets(sf: Double): ButtonAssets =
@@ -110,8 +113,6 @@ object GameAssets:
     val over = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(1050, 80, 90, 80).scaleBy(sf,sf)
     val down = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(1050, 160, 90, 80).scaleBy(sf,sf)
     ButtonAssets(up, over, down)
-
-
 
   def splashBg: Graphic[Material.ImageEffects] =
     Graphic(SplashSceneDimensions, 2, Material.ImageEffects(AssetName(spAssetName)))
