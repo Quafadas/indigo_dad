@@ -6,17 +6,18 @@ import io.circe.Encoder
 import io.circe.Decoder
 
 final case class Piece(
-    pieceShape: Int, // ................ 0=cylinder, 1=block
-    pieceIdentity: Int, // ............. 0,1,2,3,4,5 for Blue/Green/Yellow/Orange/Red/Purple
-    pCurPos: Point, // ................. current position (in hexArrayCoords)
-    pHomePos: Point, // ................ starting/home position (in hexArrayCoords)
+    pieceShape: Int, // .................... 0=cylinder, 1=block
+    pieceIdentity: Int, // ................. 0,1,2,3,4,5 for Blue/Green/Yellow/Orange/Red/Purple
+    pCurPos: Point, // ..................... current position (in hexArrayCoords)
+    pHomePos: Point, // .................... starting/home position (in hexArrayCoords)
+    pTurnStartPos: Point, // ............... piece position at start of turn
 
     // parameters below required for model, but not for creation
 
-    bFlipped: Boolean = false, // ...... piece normal is f, piece flipped is 1
-    bSelected: Boolean = false, // ..... piece is selected
-    bCaptured: Boolean = false, // ..... piece is captured (or not)
-    bMoved: Boolean = false // ......... piece has moved this turn
+    bFlipped: Boolean = false, // .......... piece normal is f, piece flipped is 1
+    bSelected: Boolean = false, // ......... piece is selected
+    bCaptured: Boolean = false, // ......... piece is captured (or not)
+    bMoved: Boolean = false // ............. piece has moved this turn
 ) derives Encoder.AsObject,
       Decoder
 object Piece:

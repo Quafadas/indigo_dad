@@ -123,7 +123,9 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                 // Pointer Up, Pos on Grid, Piece Selected, PiecePos==PointerPos <<##G##>>
                 dMsg = "##G## Up|Grid|Sel|=="
                 scribe.debug("@@@ PointerEvent " + dMsg)
-                Outcome(FlicFlacGameModel.modify(model, None, None))
+                val newHL = model.highLighter.shine(model.highLighter, false)
+                val updatedPiece = Piece.setPosDeselect(piece, pos)
+                Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
               else
                 // Pointer Up, Pos on Grid, Piece Selected, PiecePos!=PointerPos <<##H##>>
                 dMsg = "##H## Up|Grid|Sel|!="
@@ -142,6 +144,18 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               // Pointer Up, Pos on Grid, No piece selected <<##I##>>
               dMsg = "##I## Up|Grid|Non"
               scribe.debug("@@@ PointerEvent " + dMsg)
+
+              // FIXME 8 test lines to show magenta hex detail follows ...
+
+              val w = pos.x
+              val h = pos.y
+              val x = model.hexBoard3.hexArray(w)(h).x
+              val y = model.hexBoard3.hexArray(w)(h).y              
+              val q = model.hexBoard3.hexArray(w)(h).q
+              val r = model.hexBoard3.hexArray(w)(h).r
+              val s = model.hexBoard3.hexArray(w)(h).s
+              scribe.debug("@@@ Magenta hexboard3: (w,h) x,y,q,r,s = ("+ w + "," + h + ") : "
+                   + x + "," + y + " : " + q + "," + r + "," + s)
               Outcome(FlicFlacGameModel.modify(model, None, None))
           end match // findPieceSelected
 

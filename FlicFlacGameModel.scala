@@ -23,7 +23,7 @@ enum GameState {
   case BLOCK_TURN
   case BLOCK_PAUSE
   case BLOCK_RESOLVE
-  case CYCLINDER_TURN
+  case CYLINDER_TURN
   case CYLINDER_PAUSE
   case CYLINDER_RESOLVE
   case FINISH
@@ -35,7 +35,7 @@ object FlicFlacGameModel:
 
   def creation(center: Point): FlicFlacGameModel =
     scribe.debug("@@@ FlicFlacGameModel creation")
-    val startingGameState = GameState.START
+    val startingGameState = GameState.CYLINDER_TURN   // FIXME
     val startingTurnTime = 90  // 10ths of a second FIXME we need this configurable
     val defaultScalingFactor = 1.0
     val hexBoard3 = HexBoard3()
@@ -52,19 +52,32 @@ object FlicFlacGameModel:
   end creation
 
   def summonPieces(hexBoard3: HexBoard3): Pieces =
+    val cy1 = hexBoard3.getCylinderHomePos(CB)
+    val cy2 = hexBoard3.getCylinderHomePos(CG)
+    val cy3 = hexBoard3.getCylinderHomePos(CY)
+    val cy4 = hexBoard3.getCylinderHomePos(CO)
+    val cy5 = hexBoard3.getCylinderHomePos(CR)
+    val cy6 = hexBoard3.getCylinderHomePos(CP)
+    val bk1 = hexBoard3.getBlockHomePos(CB)
+    val bk2 = hexBoard3.getBlockHomePos(CG)
+    val bk3 = hexBoard3.getBlockHomePos(CY)
+    val bk4 = hexBoard3.getBlockHomePos(CO)
+    val bk5 = hexBoard3.getBlockHomePos(CR)
+    val bk6 = hexBoard3.getBlockHomePos(CP)
+
     val startingModelPieces: Vector[Piece] = Vector(
-      Piece(CYLINDER, CB, hexBoard3.getCylinderHomePos(CB), hexBoard3.getCylinderHomePos(CB)),
-      Piece(CYLINDER, CG, hexBoard3.getCylinderHomePos(CG), hexBoard3.getCylinderHomePos(CG)),
-      Piece(CYLINDER, CY, hexBoard3.getCylinderHomePos(CY), hexBoard3.getCylinderHomePos(CY)),
-      Piece(CYLINDER, CO, hexBoard3.getCylinderHomePos(CO), hexBoard3.getCylinderHomePos(CO)),
-      Piece(CYLINDER, CR, hexBoard3.getCylinderHomePos(CR), hexBoard3.getCylinderHomePos(CR)),
-      Piece(CYLINDER, CP, hexBoard3.getCylinderHomePos(CP), hexBoard3.getCylinderHomePos(CP)),
-      Piece(BLOCK, CB, hexBoard3.getBlockHomePos(CB), hexBoard3.getBlockHomePos(CB)),
-      Piece(BLOCK, CG, hexBoard3.getBlockHomePos(CG), hexBoard3.getBlockHomePos(CG)),
-      Piece(BLOCK, CY, hexBoard3.getBlockHomePos(CY), hexBoard3.getBlockHomePos(CY)),
-      Piece(BLOCK, CO, hexBoard3.getBlockHomePos(CO), hexBoard3.getBlockHomePos(CO)),
-      Piece(BLOCK, CR, hexBoard3.getBlockHomePos(CR), hexBoard3.getBlockHomePos(CR)),
-      Piece(BLOCK, CP, hexBoard3.getBlockHomePos(CP), hexBoard3.getBlockHomePos(CP))
+      Piece(CYLINDER, CB, cy1, cy1, cy1),
+      Piece(CYLINDER, CG, cy2, cy2, cy2),
+      Piece(CYLINDER, CY, cy3, cy3, cy3),
+      Piece(CYLINDER, CO, cy4, cy4, cy4),
+      Piece(CYLINDER, CR, cy5, cy5, cy5),
+      Piece(CYLINDER, CP, cy6, cy6, cy6),
+      Piece(BLOCK, CB, bk1, bk1, bk1),
+      Piece(BLOCK, CG, bk2, bk2, bk2),
+      Piece(BLOCK, CY, bk3, bk3, bk3),
+      Piece(BLOCK, CO, bk4, bk4, bk4),
+      Piece(BLOCK, CR, bk5, bk5, bk5),
+      Piece(BLOCK, CP, bk6, bk6, bk6)
     )
     Pieces(startingModelPieces)
   end summonPieces
@@ -110,23 +123,21 @@ object FlicFlacGameModel:
     possibleHighLighter match {
       case Some(newHighLighter) =>
         previousModel.copy(highLighter = newHighLighter)
-
       case None =>
         previousModel
     }
   end modifyHighLighter
 
   def modifyPossibleMoves(previousModel : FlicFlacGameModel) : FlicFlacGameModel = 
-    FlicFlacGameModel.findPieceSelected(previousModel) match
-      case Some(piece) =>
-        previousModel.copy(possibleMoveSpots = Spots(Set((5,7),(5,9),(5,11))))       // FIXME dummy data 5,7 & 5,9 * 5,11
-      case None =>
-        previousModel.copy(possibleMoveSpots = Spots(Set.empty))
+    val newSpots = previousModel.possibleMoveSpots.calculatePossibleMoves(previousModel)
+
+    previousModel.copy(possibleMoveSpots = newSpots)
+  end modifyPossibleMoves
 
 
   def reset(previousModel: FlicFlacGameModel): FlicFlacGameModel =
     scribe.debug("@@@ Reset model")
-    val resetGameState = GameState.START
+    val resetGameState = GameState.CYLINDER_TURN
     val resetTime = 0
     val defaultSF = 1.0
     val hexBoard3 = HexBoard3()

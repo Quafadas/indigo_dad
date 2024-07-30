@@ -453,6 +453,56 @@ case class HexBoard3():
     end match
   end getBlockHomePos
 
+  // convert from embedded qrs to embedded xy
+  def getXYfromQRS(q: Int, r: Int, s:Int) : (Int, Int) =
+    val x = q
+    val y = q + (2*r)
+    (x,y)
+  end getXYfromQRS
+
+  // convert from embedded xy to embedded qrs
+  def getQRSfromXY(x: Int, y: Int) : (Int, Int, Int) = 
+    val q = x
+    val r = (y-x)/2
+    val s = -q -r
+    (q,r,s)
+  end getQRSfromXY
+
+  // convert from array xy to embedded xy
+  def getXYfromAxAy(aX: Int, aY: Int) : (Int, Int) = 
+    val x = (2*aX) + (aY&1)
+    val y = aY
+    (x,y)
+  end getXYfromAxAy
+
+  // convert from embedded xy to array xy
+  def getAxAyfromXY(x: Int, y: Int) : (Int, Int) = 
+    val aX = (x - (x&1))/2
+    val aY = y
+    (aX,aY)
+  end getAxAyfromXY
+
+  // convert from array xy to embedded qrs
+  def getQRSfromAxAy(aX: Int, aY: Int) : (Int, Int, Int) = 
+    val q = (2 * aX) + (aY & 1)
+    val r = ((aY - (aY&1))/2) - aX
+    val s = -q -r
+    (q,r,s)
+  end getQRSfromAxAy
+
+  // convert from embedded qrs to array xy
+  def getAxAyfromQRS(q: Int, r: Int, s:Int) : (Int, Int) =
+    val aX = (q -  (q&1))/2
+    val aY = q + (2*r)
+    (aX,aY)
+  end getAxAyfromQRS
+
+
+
+
+
+
+
   scribe.debug("@@@ Class HexBoard3 Finish")
 
 
