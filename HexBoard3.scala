@@ -40,32 +40,24 @@ case class HexBoard3():
     * first four rows of the hexArray grid looks like this (so this is the top left hand corner with structure
     * abbrievated)...
     *
-    * HH(0,0,c,0,0,0,xP,yP),   HH(2,0,c,2,-1,-1,xP,yP),   HH(4,0,c,4,-2,-2,xP,yP),   HH(6,0,c,6,-3,-3,xP,yP)
-    *            HH(1,1,c,1,0,-1,xP,yP),  HH(3,1,c,3,-1,-2,xP,yP),   HH(5,1,c,5,-2,-3,xP,yP),   HH(7,1,c,7,-3,-4,xP,yP)
-    * HH(0,2,c,0,1,-1,xP,yP),  HH(2,2,c,2,0,-2,xP,yP),    HH(4,2,c,4,-1,-3,xP,yP),   HH(6,2,c,6,-2,-4,xP,yP)
-    *            HH(1,3,c,1,1,-2,xP,yP),  HH(3,3,c,3,0,-3,xP,yP),    HH(5,3,c,5,-1,-4,xP,yP),   HH(7,3,c,7,-2,-5,xP,yP)
-    * HH(0,4,c,0,2,-2,xP,yP),  HH(2,4,c,2,1,-3,xP,yP),    HH(4,4,c,4,0,-4,xP,yP),    HH(6,4,c,6,-1,-5,xP,yP)
+    * HH3(0,0,c,0,0,0,xP,yP),   HH3(2,0,c,2,-1,-1,xP,yP),   HH3(4,0,c,4,-2,-2,xP,yP),   HH3(6,0,c,6,-3,-3,xP,yP)
+    *            HH3(1,1,c,1,0,-1,xP,yP),  HH3(3,1,c,3,-1,-2,xP,yP),   HH3(5,1,c,5,-2,-3,xP,yP),   HH3(7,1,c,7,-3,-4,xP,yP)
+    * HH3(0,2,c,0,1,-1,xP,yP),  HH3(2,2,c,2,0,-2,xP,yP),    HH3(4,2,c,4,-1,-3,xP,yP),   HH3(6,2,c,6,-2,-4,xP,yP)
+    *            HH3(1,3,c,1,1,-2,xP,yP),  HH3(3,3,c,3,0,-3,xP,yP),    HH3(5,3,c,5,-1,-4,xP,yP),   HH3(7,3,c,7,-2,-5,xP,yP)
+    * HH3(0,4,c,0,2,-2,xP,yP),  HH3(2,4,c,2,1,-3,xP,yP),    HH3(4,4,c,4,0,-4,xP,yP),    HH3(6,4,c,6,-1,-5,xP,yP)
     *
     * NB The storage for this snippet would be HexArray(4,5) ... even though the xy coords range from (0,0) to (7,4)
     */
 // format : on
 
-
-  //###val gHex = GameAssets.gHex // The Hex graphic used to paint the grid
-
-  // The hexagons are aligned such that they have a flat bottom and top
-  // The board is aligned such that it has pointy bottom and top, in terms of flat bottom hexagons
-  // Note there is an interleaving edge between neighbouring hexagons, that comes from the rows above and below
-
-  //###var hexBoardUpdated = true // set true when paint needs to recalculate the board image
-  //###var hexFragsCombined = SceneUpdateFragment.empty // holds the latest calculations from the paint routine
-
-  // The number of hexagonal rings (ring of 6 with centre) composing one side of the board
-  //###val sZ = boardCfg.getSideSize()                     // forcing sZ=3
-  //###val borderlessArrayWidth = 6 * (sZ - 1) + 3         // forcing borderlessArrayWidth=15
-  //###val borderlessArrayHeight = 12 * (sZ - 1) + 6       // forcing borderlessArrayHeight=30
-  //###val arrayWidth = (borderlessArrayWidth + 1 + 2) / 2 // forcing arrayWidth=9
-  //###val arrayHeight = borderlessArrayHeight + 4         // forcing arrayHeight=34
+/*
+...... w is arrayWidth, the number of columns in "hexArray"
+...... h is arrayHight, the number of rows in "hexArray"
+...... aX,aY are coords used to access the cells of "hexArray"
+...... x,y are cartesian coords of hex cell
+...... q,r,s are cubic coords of hex cell
+...... xP,yP are display coords for cell (and these are the coords that are scaled)
+*/
 
   val arrayWidth = 9 // ................ forcing arrayWidth=9 (calculated from sZ=3)
   val arrayHeight = 34 // .............. forcing arrayHeight=34 (calculated from sZ=3)
@@ -231,18 +223,6 @@ case class HexBoard3():
   end fillVerticalBorder
 
   /*
-  qrsFromXY generates the cubic coordinates (q,r,s) from the cartesian coordinates (x,y)
-   */
-  def qrsFromXY(x: Int, y: Int): (Int, Int, Int) =
-    (x, (y - x) / 2, (-y - x) / 2)
-
-  /*
-  xyFromQRS generates the cartesian coordinates (x,y) from the cubic coordinates (q,r,s)
-   */
-  def xyFromQRS(q: Int, r: Int, s: Int): (Int, Int) =
-    (q, (2 * r) + q)
-
-  /*
   getQRSofTopCentreHex supplies the cubic cordinates of the top centre hex
    */
   def getQRSofTopCentreHex(width: Int, height: Int): (Int, Int, Int) =
@@ -339,14 +319,48 @@ case class HexBoard3():
     pResult
   end getXpYp
 
-  def isThisHexBlack(hexPosn: Point) : Boolean =
-    (hexArray(hexPosn.x)(hexPosn.y).c == CK)
-      
+  // detected a valid hex (ie is it part of the board) using Array Coordinates (as a point)
+  def isThisHexValid(pAxAy: Point) : Boolean = 
+    (hexArray(pAxAy.x)(pAxAy.y).c != CX)
+  end isThisHexValid
+
+  // detected a valid hex (ie is it part of the board) using Cubic Coordinates
+  def isThisHexValid(q: Int, r: Int, s: Int) : Boolean =
+    val aXaY = getAxAyfromQRS(q,r,s)
+    val pAxAy = Point(aXaY._1, aXaY._2)
+    isThisHexValid(pAxAy)
+  end isThisHexValid
+
+  // detecting a black hex using Array Coordinates (as a point)
+  def isThisHexBlack(pAxAy: Point) : Boolean =
+    (hexArray(pAxAy.x)(pAxAy.y).c == CK)
+  end isThisHexBlack
+
+  // detecting a black hex using Cubic Coordinates (q,r,s)
+  def isThisHexBlack(q: Int, r: Int, s: Int) : Boolean =
+    val aXaY = getAxAyfromQRS(q,r,s)
+    val pAxAy = Point(aXaY._1, aXaY._2)
+    isThisHexBlack(pAxAy)
+  end isThisHexBlack
+
+  // detect an occupied hex using Array Coordinates (as a point)
+  def isThisHexFree(pAxAy: Point, vPieces: Vector[Piece]) : Boolean = 
+    vPieces.find(p=>p.pCurPos == pAxAy) match
+      case Some(piece) => false
+      case None => true
+  end isThisHexFree
+
+// detect an occupied hex using Cubic Coordinates (q,r,s)
+  def isThisHexFree(q: Int, r: Int, s: Int, vPieces: Vector[Piece]) : Boolean = 
+    val aXaY = getAxAyfromQRS(q,r,s)
+    val pAxAy = Point(aXaY._1, aXaY._2)
+    isThisHexFree(pAxAy, vPieces)
+  end isThisHexFree
+
   /*
   paint supplies the "SceneUpdateFragment" that contains all the graphics required to paint the hexboard
   Experience shows that this routine is time critical, so optimisation is key
    */
-
   
   def paint(model: FlicFlacGameModel, dSF: Double): SceneUpdateFragment =
     var hexFragsCombined = SceneUpdateFragment.empty // start this combination with an empty update
@@ -373,12 +387,12 @@ case class HexBoard3():
 
 
   /*
-  hexXYCoordsFromDisplayXY takes the mouse display coordinates (pDs) and converts them
+  getAxAyFromDisplayXY takes the mouse display coordinates (pDs) and converts them
   to a Point containing the X,Y indices into the underlying hex that matches pDs
-  At the moment, if there is no underlying hex, then the resulting point defaults to (0,0)
+  There is either Some(Point) or None
    */
 
-  def hexXYCoordsFromDisplayXY(pDs: Point, fS: Double): Option[Point] =
+  def getAxAyFromDisplayXY(pDs: Point, fS: Double): Option[Point] =
     //scribe.debug("hexXYFromDisplayXY START:" + pDs)
     val GWIDTH = graphicWidth // ................................... The Hex graphic width without overlap of one pixel
     val GHEIGHT = graphicHeight // ................................. The Hex graphic height without overlap of one pixel
@@ -408,10 +422,10 @@ case class HexBoard3():
       //scribe.debug("hexXYFromDisplayXY OFFSETS X/Y " + offsetX + ":" + offsetY + " POS X/Y " + x + ":" + y + " W:" + xWidth + " H:" + yHeight)
 
       val c = hexArray(x / 2)(y).c
-      if (c != CX) then                       // exclude hexes from display if color is CX
-        val hexXYCoords = Point(x / 2, y)     // x/2 because hexArray has even/odd columns
+      if (c != CX) then // ...................... exclude hexes from display if color is CX
+        val pAxAy = Point(x / 2, y) // .......... x/2 because hexArray has even/odd columns
         // scribe.debug("hexXYFromDisplayXY FINISH:" + hexXYCoords)
-        Some(hexXYCoords)
+        Some(pAxAy)
       else 
         // scribe.debug("hexXYFromDisplayXY FINISHES with NONE (non-displayable hex)")    
         None
@@ -420,7 +434,7 @@ case class HexBoard3():
       // scribe.debug("hexXYFromDisplayXY FINISHES with NONE (outside detection grid)")    
       None
     end if
-  end hexXYCoordsFromDisplayXY
+  end getAxAyFromDisplayXY
 
 
   def getCylinderHomePos(id: Int): Point =

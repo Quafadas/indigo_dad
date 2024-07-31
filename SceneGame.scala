@@ -37,7 +37,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
     case e: PointerEvent.PointerDown =>
       val clickPoint = e.position
-      val hexPosn = model.hexBoard3.hexXYCoordsFromDisplayXY(clickPoint, model.scalingFactor)
+      val hexPosn = model.hexBoard3.getAxAyFromDisplayXY(clickPoint, model.scalingFactor)
       hexPosn match
         case Some(pos) =>
           // Pointer Down, Pos on Grid
@@ -112,7 +112,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
     case e: PointerEvent.PointerUp =>
       val clickPoint = e.position
-      val hexPosn = model.hexBoard3.hexXYCoordsFromDisplayXY(clickPoint, model.scalingFactor)
+      val hexPosn = model.hexBoard3.getAxAyFromDisplayXY(clickPoint, model.scalingFactor)
       hexPosn match
         case Some(pos) =>
           // Pointer Up, Pos on Grid
@@ -216,7 +216,11 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
     case ButtonTurnEvent =>
       scribe.debug("@@@ ButtonTurnEvent")
-      Outcome(model)
+      if (model.gameState == GameState.CYLINDER_TURN) then 
+        Outcome(model.copy(gameState = GameState.BLOCK_TURN))
+      else 
+        Outcome(model.copy(gameState = GameState.CYLINDER_TURN))
+      end if 
 
     case _ =>
 
@@ -318,11 +322,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val rRight = Rectangle(Point(iLeftWidth,0), Size(iRightWidth,iHeight))
     val rCorners = Rectangle(Point(iLeftWidth,0), Size(iRightWidth+model.hexBoard3.pBase.x,iHeight))
 
-    // Testing Spot ...
-      val layer = GameAssets.gSpot(dSF)
-      val pPos = model.hexBoard3.getXpYp(Point(5,5))
-      val spotLayer = Layer(layer.moveTo(model.hexBoard3.pBase.x + pPos.x, model.hexBoard3.pBase.y + pPos.y))
-
     Outcome(
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Cyan)))
         |+| SceneUpdateFragment(Shape.Box(rLeft, Fill.Color(RGBA.White)))      
@@ -339,10 +338,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(viewModel.minusButton.draw)
         |+| SceneUpdateFragment(viewModel.turnButton.draw)
         |+| model.hexBoard3.paint(model, dSF)
-
-        |+| SceneUpdateFragment(spotLayer)
         |+| model.possibleMoveSpots.paint(model)
-
         |+| model.highLighter.paint(model, dSF)
         |+| model.pieces.paint(model, dSF, viewModel.optDragPos)
     )

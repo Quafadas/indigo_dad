@@ -40,13 +40,7 @@ final case class Spots(
   end calculateSpots
 
   def spotify (model: FlicFlacGameModel, piece: Piece) : Spots =
-    val s0 : Spots =  Spots(Set.empty)
-
-
-    // FIX HOME POSITION Set
-
-    // Inner Ring
-    // (0,-1,1) (1,-1,-0) (1, 0, -1) (0, 1, -1) (-1, 1, -0) (-1, 0, 1)
+    val vPieces = model.pieces.modelPieces
 
     val ax = piece.pCurPos.x
     val ay = piece.pCurPos.y
@@ -55,7 +49,38 @@ final case class Spots(
     val r = qrs._2
     val s = qrs._3
 
-    val ss1 = Set(
+    if piece.pCurPos == piece.pHomePos then
+
+      var ss1 = Set.empty[(Int, Int)]
+
+      // we have a piece in the home position so display unoccupied starting places
+      piece.pieceShape match
+        case CYLINDER => 
+          if piece.pieceIdentity == CB || piece.pieceIdentity == CR || piece.pieceIdentity == CY then
+            ss1 = Set((0,9),(1,8),(1,7),(2,6),(2,5),(3,4),(3,3),(4,2))
+          else 
+            ss1 = Set((4,30),(4,29),(5,28),(5,27),(6,26),(6,25),(7,24),(7,23))
+          end if 
+        case BLOCK =>
+          if piece.pieceIdentity == CB || piece.pieceIdentity == CR || piece.pieceIdentity == CY then
+            ss1 = Set((0,23),(1,24),(1,25),(2,26),(2,27),(3,28),(3,29),(4,30))
+          else 
+            ss1 = Set((4,2),(4,3),(5,4),(5,5),(6,6),(6,7),(7,8),(7,9))
+          end if
+
+        case _ => // this cannot happen
+          ss1 = Set.empty[(Int, Int)]
+
+      val ss2 = ss1.filter { case (aX,aY) => model.hexBoard3.isThisHexFree(Point(aX,aY),vPieces)}
+      scribe.debug("@@@ spotify Home free hex count: " + ss2.size)
+      Spots(ss2)
+
+    else
+      // we have a piece on the board so calculate valid moves from Ring1,Ring2,Ring3
+      // Inner Ring1
+      // (0,-1,1) (1,-1,-0) (1, 0, -1) (0, 1, -1) (-1, 1, -0) (-1, 0, 1)
+
+      val ss1 = Set(
               (q+0,r-1,s+1),
               (q+1,r-1,s+0),
               (q+1,r+0,s-1),
@@ -63,20 +88,23 @@ final case class Spots(
               (q-1,r+1,s+0),
               (q-1,r+0,s+1))
 
-    var ss2 = Set((ax,ay))
+      var ss2 = Set.empty[(Int, Int)]
 
-    ss1.foreach{ case (qq,rr,ss) =>  
-      val entry = model.hexBoard3.getAxAyfromQRS(qq,rr,ss)
-      ss2 = ss2 + entry
-      }
+      ss1.foreach{ case (qq,rr,ss) =>  
+        val entry = model.hexBoard3.getAxAyfromQRS(qq,rr,ss)
+        if model.hexBoard3.isThisHexValid(qq,rr,ss) && model.hexBoard3.isThisHexFree(qq,rr,ss,vPieces) then
+          ss2 = ss2 + entry
+        end if
+        }
 
-    val ss3 = Spots(ss2)
-    ss3
+      scribe.debug("@@@ spotify Ring1 free hex count: " + ss2.size)
+      val ss3 = Spots(ss2)
+      ss3
 
-    // Middle Ring
+      // Middle Ring
 
-    // Outer Ring
-
+      // Outer Ring
+    end if
 
   end spotify
 
