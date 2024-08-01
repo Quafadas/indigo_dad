@@ -65,7 +65,13 @@ object Piece:
   end setCaptured
 
   def setPosition(p: Piece, pPos: Point): Piece =
-    p.copy(pCurPos = pPos)
+    if p.pCurPos == pPos then
+      p
+    else if pPos == p.pTurnStartPos then
+      p.copy(pCurPos = pPos, bMoved = false) // ... returning to turn start position cancels bMoved
+    else
+      p.copy(pCurPos = pPos, bMoved = true) // .... a new position activates bMoved
+    end if
   end setPosition
 
   def moveToHome(p: Piece): Piece =

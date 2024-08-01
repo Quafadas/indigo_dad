@@ -216,10 +216,14 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
     case ButtonTurnEvent =>
       scribe.debug("@@@ ButtonTurnEvent")
+
+      val newPieces = model.pieces.newTurn(model)
       if (model.gameState == GameState.CYLINDER_TURN) then 
-        Outcome(model.copy(gameState = GameState.BLOCK_TURN))
+        scribe.debug("@@@ BLOCK TURN @@@")
+        Outcome(model.copy(gameState = GameState.BLOCK_TURN, pieces = newPieces))
       else 
-        Outcome(model.copy(gameState = GameState.CYLINDER_TURN))
+        scribe.debug("@@@ CYLINDER TURN @@@")
+        Outcome(model.copy(gameState = GameState.CYLINDER_TURN, pieces = newPieces))
       end if 
 
     case _ =>

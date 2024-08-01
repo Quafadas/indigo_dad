@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>My Game</title>
+    <!-- FIXME the indigo-container canvas was giving error "do not use empty rules sets" so JP added padding and margin-->
     <style>
       body {
         padding: 0px;
@@ -21,6 +22,8 @@
         height: 100vh;
       }
       #indigo-container canvas {
+        padding: 0px;
+        margin: 0px;
       }
     </style>
     <link rel="stylesheet/less" type="text/css" href="index.less" />

@@ -6,10 +6,10 @@ import indigo.*
 final case class Spots( 
   indices: Set[(Int,Int)]
 ):
-  scribe.debug("@@@ case class Spots Start")
+  //scribe.debug("@@@ case class Spots Start")
 
   def calculatePossibleMoves(model: FlicFlacGameModel) : Spots = 
-    scribe.debug("@@@ case Spots calculatePossibleMoves")
+    scribe.debug("@@@ Spots calculatePossibleMoves")
 
     val resultingSpots : Spots = Spots(Set.empty)
     FlicFlacGameModel.findPieceSelected(model) match
@@ -23,6 +23,7 @@ final case class Spots(
   end calculatePossibleMoves
 
   def calculateSpots(model: FlicFlacGameModel, piece: Piece) : Spots =
+    scribe.debug("@@@ Spots calculateSpots start")
     val bBlocks = ((piece.pieceShape == BLOCK) && (model.gameState == GameState.BLOCK_TURN))
     val bCylinders = ((piece.pieceShape == CYLINDER) && (model.gameState == GameState.CYLINDER_TURN))
     if (bBlocks || bCylinders) then
@@ -40,6 +41,7 @@ final case class Spots(
   end calculateSpots
 
   def spotify (model: FlicFlacGameModel, piece: Piece) : Spots =
+
     val vPieces = model.pieces.modelPieces
 
     val ax = piece.pCurPos.x
@@ -51,9 +53,11 @@ final case class Spots(
 
     if piece.pCurPos == piece.pHomePos then
 
-      var ss1 = Set.empty[(Int, Int)]
+      scribe.debug("@@@ Spotify TP1")
 
       // we have a piece in the home position so display unoccupied starting places
+      var ss1 = Set.empty[(Int, Int)]
+
       piece.pieceShape match
         case CYLINDER => 
           if piece.pieceIdentity == CB || piece.pieceIdentity == CR || piece.pieceIdentity == CY then
@@ -68,15 +72,20 @@ final case class Spots(
             ss1 = Set((4,2),(4,3),(5,4),(5,5),(6,6),(6,7),(7,8),(7,9))
           end if
 
-        case _ => // this cannot happen
-          ss1 = Set.empty[(Int, Int)]
-
       val ss2 = ss1.filter { case (aX,aY) => model.hexBoard3.isThisHexFree(Point(aX,aY),vPieces)}
       scribe.debug("@@@ spotify Home free hex count: " + ss2.size)
       Spots(ss2)
 
+    else if (piece.bMoved)
+      scribe.debug("@@@ Spotify TP2")
+      // we have a piece that has already moved this turn
+      val ss1 = Set((piece.pTurnStartPos.x, piece.pTurnStartPos.y))
+      Spots(ss1)
+
     else
-      // we have a piece on the board so calculate valid moves from Ring1,Ring2,Ring3
+      scribe.debug("@@@ Spotify TP3")
+
+      // we have a piece on the board trying to move so calculate valid moves from Ring1,Ring2,Ring3
       // Inner Ring1
       // (0,-1,1) (1,-1,-0) (1, 0, -1) (0, 1, -1) (-1, 1, -0) (-1, 0, 1)
 
@@ -123,7 +132,7 @@ final case class Spots(
     }
     frag
 
-  scribe.debug("@@@ case class Spots Finish")
+  //scribe.debug("@@@ case class Spots Finish")
 end Spots
 
 

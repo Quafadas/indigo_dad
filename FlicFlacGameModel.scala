@@ -130,7 +130,6 @@ object FlicFlacGameModel:
 
   def modifyPossibleMoves(previousModel : FlicFlacGameModel) : FlicFlacGameModel = 
     val newSpots = previousModel.possibleMoveSpots.calculatePossibleMoves(previousModel)
-
     previousModel.copy(possibleMoveSpots = newSpots)
   end modifyPossibleMoves
 

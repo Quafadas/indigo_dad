@@ -39,6 +39,19 @@ final case class Pieces(
 ):
   scribe.debug("@@@ Pieces Start")
 
+  def newTurn(model: FlicFlacGameModel) : Pieces =
+    var newModelPieces = Vector.empty[Piece]
+    for p1 <- model.pieces.modelPieces do
+      val pCurPos = p1.pCurPos
+      val p2 = p1.copy( bMoved = false, pTurnStartPos = pCurPos )
+      newModelPieces = newModelPieces :+ p2
+    end for
+
+    // FIXME ... newTurn needs if (captured) then reposition and clear
+
+    Pieces(newModelPieces)
+  end newTurn
+
   /* paint draws the 12 pieces
    */
   def paint(model: FlicFlacGameModel, fS: Double, optDragPos: Option[Point]): SceneUpdateFragment =
