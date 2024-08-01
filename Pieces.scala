@@ -13,7 +13,7 @@ val CO = 3 // CY for Orange
 val CR = 4 // CO for Red
 val CP = 5 // CP for Purple
 //-----------------------------------------------------
-val CK = 6 // CK for Black
+val CK = 6 // CK for Black (and CK=6 is used for Captured/Killed)
 val CW = 7 // CW for White
 val CC = 8 // CC for Cyan is a test color
 val CM = 9 // CM for Magenta is a test color
@@ -42,13 +42,12 @@ final case class Pieces(
   def newTurn(model: FlicFlacGameModel) : Pieces =
     var newModelPieces = Vector.empty[Piece]
     for p1 <- model.pieces.modelPieces do
-      val pCurPos = p1.pCurPos
-      val p2 = p1.copy( bMoved = false, pTurnStartPos = pCurPos )
+      val pNewCurPos = 
+        if p1.bCaptured then p1.pHomePos // if captured, return home & clear bCaptured flag
+        else p1.pCurPos
+      val p2 = p1.copy( bMoved = false, bCaptured = false, pTurnStartPos = pNewCurPos, pCurPos = pNewCurPos )
       newModelPieces = newModelPieces :+ p2
     end for
-
-    // FIXME ... newTurn needs if (captured) then reposition and clear
-
     Pieces(newModelPieces)
   end newTurn
 
@@ -62,7 +61,10 @@ final case class Pieces(
     // first draw all the unselected pieces ...
 
     for p <- model.pieces.modelPieces do
-      val layer = PieceAssets.getGraphic(p.pieceShape, p.pieceIdentity, p.bFlipped)
+      val id =  if (p.bCaptured) then CK // CK for BLACK = "Captured/Killed"
+                else p.pieceIdentity
+
+      val layer = PieceAssets.getGraphic(p.pieceShape, id, p.bFlipped)
       val pSrc = p.pCurPos
 
       // this is the mechanism for blinking pieces
@@ -72,7 +74,7 @@ final case class Pieces(
                     // these pieces do not blink because it is not their turn
                     true
                   else if (p.bMoved == true)
-                    // these pieces have stopped blinking because they have modef
+                    // this piece has stop blinking because it has moved
                     true
                   else 
                     // this piece has not moved so blink 
