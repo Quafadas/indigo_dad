@@ -26,6 +26,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
   def subSystems = Set(SSGame("SubSystemGame"))
 
+  var bBlinkOn = true
   var iFrameTick = 0
   var iDragTick = 0
   var dMsg = "-----"
@@ -224,23 +225,16 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       else 
         scribe.debug("@@@ CYLINDER TURN @@@")
         Outcome(model.copy(gameState = GameState.CYLINDER_TURN, pieces = newPieces))
-      end if 
+      end if
 
+    case FrameTick => 
+      val t = System.currentTimeMillis/100  // this is 10ths of a second
+      val bNewBlinkOn = if (t%10) > 1 then true else false
+      if bNewBlinkOn != bBlinkOn then
+        bBlinkOn = bNewBlinkOn
+      end if
+      Outcome(model)
     case _ =>
-
-/*      
-      FlicFlacGameModel.findPieceSelected(model) match
-        case None => Outcome(FlicFlacGameModel.modify(model, None, None))
-        case Some(piece) =>
-          val x = piece.pCurPos.x
-          val y = piece.pCurPos.y
-          val q = model.hexBoard3.hexArray(x)(y).q
-          val r = model.hexBoard3.hexArray(x)(y).r
-          val s = model.hexBoard3.hexArray(x)(y).s
-          scribe.debug("@@@ (x:y) (q:r:s)==>(" + x +":" + y +") (" + q +":" + r +":" + s +")")
-
-        Outcome(model.copy(possibleMoveSpots = model.possibleMoveSpots.calculatePossibleMoves(model) ))
-*/
       Outcome(model)
   }
 
@@ -344,7 +338,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| model.hexBoard3.paint(model, dSF)
         |+| model.possibleMoveSpots.paint(model)
         |+| model.highLighter.paint(model, dSF)
-        |+| model.pieces.paint(model, dSF, viewModel.optDragPos)
+        |+| model.pieces.paint(model, dSF, bBlinkOn, viewModel.optDragPos)
     )
   end present
 end SceneGame

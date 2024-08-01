@@ -54,7 +54,7 @@ final case class Pieces(
 
   /* paint draws the 12 pieces
    */
-  def paint(model: FlicFlacGameModel, fS: Double, optDragPos: Option[Point]): SceneUpdateFragment =
+  def paint(model: FlicFlacGameModel, fS: Double, bBlinkOn: Boolean, optDragPos: Option[Point]): SceneUpdateFragment =
     var frag = SceneUpdateFragment.empty
     
     val pB = model.hexBoard3.pBase // extract GridBasePoint for later
@@ -65,12 +65,26 @@ final case class Pieces(
       val layer = PieceAssets.getGraphic(p.pieceShape, p.pieceIdentity, p.bFlipped)
       val pSrc = p.pCurPos
 
-      if Piece.selected(p) == false then
+      // this is the mechanism for blinking pieces
+
+      val bShow = if (p.pieceShape == CYLINDER && model.gameState == GameState.BLOCK_TURN)
+                  || (p.pieceShape == BLOCK && model.gameState == GameState.CYLINDER_TURN) then
+                    // these pieces do not blink because it is not their turn
+                    true
+                  else if (p.bMoved == true)
+                    // these pieces have stopped blinking because they have modef
+                    true
+                  else 
+                    // this piece has not moved so blink 
+                    bBlinkOn
+
+      if Piece.selected(p) == false && bShow == true then
         val pPos = model.hexBoard3.getXpYp(pSrc)
         val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS)))
         frag = frag |+| newFrag
       end if
     end for
+
     // second draw the selected piece if it exists
     // ... (only expecting one for now, but perhaps game might allow more in future)
 
