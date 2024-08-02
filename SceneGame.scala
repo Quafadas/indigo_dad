@@ -129,17 +129,19 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                   val updatedPiece = Piece.setPosFlipDeselect(piece, pos)
                   Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
                 else
-                  // FIXME test code for capture scenario
+// FIXME test code for capture scenario
+/*                  
                   val updatedPiece1 = 
                     if pos == Point(4,14) then Piece.setCaptured(piece, true)
                     else if pos == piece.pTurnStartPos then Piece.setCaptured(piece, false)
                     else piece
                     end if
                   val updatedPiece = Piece.setPosDeselect(updatedPiece1, pos)
-
+*/
                   // --- end of test code but uncomment next line
-                  //val updatedPiece = Piece.setPosDeselect(piece, pos)
-
+                  val updatedPiece = Piece.setPosDeselect(piece, pos)
+                  // FIXME experimental call to melee, might also be needed elsewhere
+                  Melee(model).step1()
                   Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
                 end if
               else

@@ -119,7 +119,7 @@ object PieceAssets:
     Vector("Cyldr", "Block")
 
   val pieceNames: Vector[String] = // Piece Names %6
-    Vector("Blue", "Green", "Yellow", "Orange", "Red", "Purple", "Grey")
+    Vector("Blue  ", "Green ", "Yellow", "Orange", "Red   ", "Purple", "Grey  ")
 
   def getGraphic(shape: Int, id: Int, flipped: Boolean): Graphic[Material.ImageEffects] =
     val safeId = id % (6 + 1) // there are six main colours + 1 is for grey (the captured color)
