@@ -141,7 +141,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                   // --- end of test code but uncomment next line
                   val updatedPiece = Piece.setPosDeselect(piece, pos)
                   // FIXME experimental call to melee, might also be needed elsewhere
-                  Melee(model).step1()
+                  Melee(model).combat()
                   Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
                 end if
               else
