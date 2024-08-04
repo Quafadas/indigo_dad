@@ -2,6 +2,7 @@ package game
 
 import indigo.*
 import cats.instances.double
+import game.PieceAssets.pieceNames
 
 final case class Melee(model: FlicFlacGameModel):
 
@@ -9,7 +10,7 @@ final case class Melee(model: FlicFlacGameModel):
 
     // Step 1 ... get a set of all conflicts by determining which blocks are next to each cylinder
 
-    val cylinders = Set(
+    val cylinders = List(
       model.pieces.modelPieces(0),
       model.pieces.modelPieces(1),
       model.pieces.modelPieces(2),
@@ -18,7 +19,7 @@ final case class Melee(model: FlicFlacGameModel):
       model.pieces.modelPieces(5)
     )
 
-    val blocks = Set(
+    val blocks = List(
       model.pieces.modelPieces(6),
       model.pieces.modelPieces(7),
       model.pieces.modelPieces(8),
@@ -97,24 +98,169 @@ final case class Melee(model: FlicFlacGameModel):
         }
       scribe.debug("@@@ ==")
     }
+
+    // Step 3 ... form a list of meleePieces 
+    scribe.debug("@@@ === STEP 3")
+
+    scribe.debug("@@@ All Melee Pieces:")
+    var allMeleePieces = Set.empty[Piece]
+    cylinderConflicts.foreach { case setConflicts =>
+      setConflicts.foreach { case (c, b) =>
+        allMeleePieces = allMeleePieces + c
+        allMeleePieces = allMeleePieces + b
+      }
+    }
+
+    allMeleePieces.foreach { p =>
+      val shape = PieceAssets.pieceTypes(p.pieceShape)
+      val color = PieceAssets.pieceNames(p.pieceIdentity)
+      scribe.debug("@@@ " + shape + ":" + color)
+    }
     scribe.debug("@@@ ====")
 
-    // Step 3 ... form a list of melees 
+    scribe.debug("@@@ MeleeSets:")
+    var allMeleeSets = List.empty[Set[(Piece)]]
+    var processedPieces = Set.empty[Piece]
+    cylinders.foreach { case cy =>
+      if processedPieces.contains(cy) == false then
+        val meleeSet = meleeBuilder(Set.empty[Piece], Set(cy), allConflicts)._2
+        if meleeSet.isEmpty == false then
+          allMeleeSets = allMeleeSets :+ meleeSet
+        end if
+        processedPieces = processedPieces.union(meleeSet)
+      end if
+    }
 
-    scribe.debug("@@@ MeleeSet:")
-    cylinders.foreach { case cy =>  // FIXME this is not the way to iterate through the melees ???
-      val meleeSet = meleeBuilder(Set.empty[Piece], Set(cy), allConflicts)._2
+    allMeleeSets.foreach { case meleeSet =>
       meleeSet.foreach { case p =>
         val shape = PieceAssets.pieceTypes(p.pieceShape)
         val color = PieceAssets.pieceNames(p.pieceIdentity)
         scribe.debug("@@@ " + shape + ":" + color)
       }
-      scribe.debug("@@@ ****")
+      scribe.debug("@@@ **")
+    }
+    scribe.debug("@@@ ****")
+
+    val listAllPieces = cylinders ++ blocks
+    // Step 4 ... generate heath points according to flying colors, empowered and conflicts
+
+    listAllPieces.foreach {case defendersPiece =>
+        if allMeleePieces.contains(defendersPiece) then
+          var iHealth = 0
+          val justConflicts = 
+            if defendersPiece.pieceShape == CYLINDER then
+              cylinderConflicts.flatMap(set => set)
+            else
+              reversedBlockConflicts.flatMap(set => set)
+            end if
+
+          val activeConflicts = justConflicts.filter((d,a) => d == defendersPiece)
+          activeConflicts.foreach { case (d,a) =>
+            // d is defender
+            // a is attacker
+            val attackersBodyColor = a.pieceIdentity
+            val attackersFlyingColor1 = if a.bFlipped then (a.pieceIdentity + 4) % 6 else (a.pieceIdentity + 1) % 6
+            val attackersFlyingColor2 = if a.bFlipped then (a.pieceIdentity + 5) % 6 else (a.pieceIdentity + 2) % 6
+            val defendersBodyColor = d.pieceIdentity
+            val defendersFlyingColor1 = if d.bFlipped then (d.pieceIdentity + 4) % 6 else (d.pieceIdentity + 1) % 6
+            val defendersFlyingColor2 = if d.bFlipped then (d.pieceIdentity + 5) % 6 else (d.pieceIdentity + 2) % 6
+
+            // Evaluating Attack calculate FlyingColors, Empowered and Outnumbered
+            if attackersFlyingColor1 == defendersBodyColor
+            || attackersFlyingColor2 == defendersBodyColor then
+              // the attacking piece is flying the correct colors so incurr damage              
+              if model.hexBoard3.getHexColor(a.pCurPos) == attackersBodyColor then
+                scribe.debug("@@@ Attacked - 2")
+                iHealth = iHealth - 2 // the attacker is empowered
+              else
+                scribe.debug("@@@ Attacked - 1")
+                iHealth = iHealth - 1 // the attacker is non-empowered
+              end if
+
+              allMeleeSets.find(meleeSet => meleeSet.contains(a)) match
+                case Some(meleeSet) =>
+                  //scribe.debug("@@@ meleeSet: " + meleeSet)
+                  val iAttackers = (meleeSet.filter(p => p.pieceShape == a.pieceShape)).size
+                  val iDefenders = meleeSet.size - iAttackers
+                  val iOutNumbered = if iAttackers > iDefenders then 
+                    scribe.debug("@@@ Outnumbered A>D so -1")
+                    iHealth = iHealth - 1
+
+                case None => 
+                  ; // should not happen as we know piece is inside allMeleePieces
+            end if
+
+            // Evaluating Defense calculate FlyingColors, Empowered and Outnumbered
+            if defendersFlyingColor1 == attackersBodyColor
+            || defendersFlyingColor2 == attackersBodyColor then 
+              if model.hexBoard3.getHexColor(d.pCurPos) == defendersBodyColor then 
+                scribe.debug("@@@ Defended + 2")
+                iHealth = iHealth + 2 // the defender is empowered
+              else
+                scribe.debug("@@@ Defended + 1")
+                iHealth = iHealth + 1 // the defender is non-empowered
+              end if
+
+              allMeleeSets.find(meleeSet => meleeSet.contains(d)) match
+                case Some(meleeSet) =>
+                  //scribe.debug("@@@ meleeSet: " + meleeSet)
+                  val iDefenders = (meleeSet.filter(p => p.pieceShape == d.pieceShape)).size
+                  val iAttackers = meleeSet.size - iDefenders
+                  val iOutNumbered = if iDefenders > iAttackers then 
+                    scribe.debug("@@@ Outnumbered D>A so +1")
+                    iHealth = iHealth + 1
+
+                case None => 
+                  ; // should not happen as we know piece is inside allMeleePieces
+            end if
+
+            val shape = PieceAssets.pieceTypes(defendersPiece.pieceShape)
+            val color = PieceAssets.pieceNames(defendersPiece.pieceIdentity)
+            scribe.debug("@@@ " + shape + ":" + color + " Health:" + iHealth)
+          }
+        else 
+          val shape = PieceAssets.pieceTypes(defendersPiece.pieceShape)
+          val color = PieceAssets.pieceNames(defendersPiece.pieceIdentity)
+          scribe.debug("@@@ " + shape + ":" + color + " Restful")
+        end if
     }
 
 
-    val melee1 = List.empty[Set[(Piece, Piece)]]
-    
+    // Step 5 ... generate a damage point for each outnumbered piece
+    scribe.debug("@@@ Step 5 ... Damage Points")
+    listAllPieces.foreach {case targetPiece =>
+        if allMeleePieces.contains(targetPiece) then
+          allMeleeSets.find(meleeSet => meleeSet.contains(targetPiece)) match
+            case Some(meleeSet) =>
+              //scribe.debug("@@@ meleeSet: " + meleeSet)
+              val iFriend = (meleeSet.filter(p => p.pieceShape == targetPiece.pieceShape)).size
+              val iEnemy = meleeSet.size - iFriend
+              val iDamage = if iEnemy > iFriend then 1 else 0
+              val shape = PieceAssets.pieceTypes(targetPiece.pieceShape)
+              val color = PieceAssets.pieceNames(targetPiece.pieceIdentity)
+              scribe.trace("@@@ " + shape + ":" + color + " $$" + iDamage)
+
+            case None => 
+              ; // should not happen as we know piece is inside allMeleePieces
+
+        end if
+      }
+    scribe.trace("@@@ *****")
+
+
+    /*
+    so far we have ...
+    cylinders Set[Piece] ... (c)
+    blocks Set[Piece] ... (b)
+    allConflicts Set[Piece,Piece] ... (c,b)
+    cylinderConflicts List[Set[Piece,Piece]] ... (c,b)
+    blockConflicts List[Set[Piece,Piece]] ... (c,b)
+    reversedBlockConflicts List[Set[Piece,Piece]] ... (b,c)
+    allMeleePieces Set[Piece]
+    allMeleeSets List[Set[Piece]]
+    */
+
+
   end combat
 
   def reverseConflictsList[A, B](list: List[Set[(A, B)]]): List[Set[(B, A)]] = {
@@ -155,8 +301,6 @@ final case class Melee(model: FlicFlacGameModel):
       }
       meleeBuilder(s3,s4,s9)
   end meleeBuilder
-
-        // val conflicts = allConflicts.filter((ccc,bbb) => (ccc == c))
 
 object Melee {}
 

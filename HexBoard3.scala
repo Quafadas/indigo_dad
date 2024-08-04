@@ -357,6 +357,11 @@ case class HexBoard3():
     isThisHexFree(pAxAy, vPieces)
   end isThisHexFree
 
+// retrieve color of this hex
+  def getHexColor(pos: Point) : Int = 
+    hexArray(pos.x)(pos.y).c
+  end getHexColor
+
   /*
   paint supplies the "SceneUpdateFragment" that contains all the graphics required to paint the hexboard
   Experience shows that this routine is time critical, so optimisation is key

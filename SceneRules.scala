@@ -61,7 +61,7 @@ object SceneRules extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlac
 
     val width = viewModel.viewPortWidth
     val height = viewModel.viewPortHeight
-    scribe.debug("@@@ DANGER SCALE FACTOR !")   // FIXME
+    // FIXME probably remove this scala file once HTML is up and running
     val scaleFactor = 1.0 // FlicFlacGame().GetScaleFactor(width, height, GameAssets.SplashSceneDimensions)
     val sFactor = ((10*scaleFactor).toInt).toString()
 
