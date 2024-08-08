@@ -14,9 +14,10 @@ final case class Piece(
 
     // parameters below required for model, but not for creation
 
-    bFlipped: Boolean = false, // .......... piece normal is f, piece flipped is 1
+    bFlipped: Boolean = false, // .......... piece normal is false, piece flipped is true
     bSelected: Boolean = false, // ......... piece is selected
     bCaptured: Boolean = false, // ......... piece is captured (or not)
+    bCaptor: Boolean = false, // ........... piece has made a capture this turn
     bMoved: Boolean = false // ............. piece has moved this turn
 ) derives Encoder.AsObject,
       Decoder
@@ -36,6 +37,10 @@ object Piece:
   def captured(p: Piece): Boolean =
     p.bCaptured
   end captured
+
+  def captor(p: Piece): Boolean =
+    p.bCaptor
+  end captor
 
   def moved(p: Piece): Boolean =
     p.bMoved
@@ -64,11 +69,23 @@ object Piece:
     p.copy(bCaptured = b)
   end setCaptured
 
+  def setCaptor(p: Piece, b: Boolean): Piece = 
+      p.copy( bCaptor = b)
+  end setCaptor
+
+  def setMoved(p: Piece, b: Boolean): Piece = 
+    p.copy(bMoved = b)
+  end setMoved
+
+  def setTurnStartPos(p: Piece, pPos: Point): Piece = 
+    p.copy(pTurnStartPos = pPos)
+  end setTurnStartPos
+
   def setPosition(p: Piece, pPos: Point): Piece =
     if p.pCurPos == pPos then
       p
     else if pPos == p.pTurnStartPos then
-      p.copy(pCurPos = pPos, bMoved = false) // ... returning to turn start position cancels bMoved
+      p.copy(pCurPos = pPos, bMoved = false, bCaptor = false) // ... returning to turn start position cancels bMoved and bCaptor
     else
       p.copy(pCurPos = pPos, bMoved = true) // .... a new position activates bMoved
     end if

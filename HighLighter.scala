@@ -8,8 +8,6 @@ final case class HighLighter(
   val currentPos: Point
 ):
 
-  scribe.debug("@@@ Class HighLighter Start")
-
   /*
   setPos repositions the highlighter hex as appropriate
    */
@@ -38,7 +36,5 @@ final case class HighLighter(
     end if
     frag
   end paint
-
-  scribe.debug("@@@ Class HighLighter Finish")
 
 end HighLighter

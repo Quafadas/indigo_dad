@@ -6,215 +6,192 @@ import game.PieceAssets.pieceNames
 
 final case class Melee(model: FlicFlacGameModel):
 
-  def combat() : Unit = 
+  def combat(model: FlicFlacGameModel) : Pieces = 
 
-    // Step 1 ... get a set of all conflicts by determining which blocks are next to each cylinder
+    // Step A ... get 4 sets of links
 
-    val cylinders = List(
-      model.pieces.modelPieces(0),
-      model.pieces.modelPieces(1),
-      model.pieces.modelPieces(2),
-      model.pieces.modelPieces(3),
-      model.pieces.modelPieces(4),
-      model.pieces.modelPieces(5)
-    )
+    val allPieces = model.pieces.modelPieces
+    var vectorHealth : Array[Int] = Array(0,0,0,0,0,0,0,0,0,0,0,0)
+    
+    val (cylinders, blocks) = allPieces splitAt 6 // Cylinders are 0...5 & blocks are 6...11
 
-    val blocks = List(
-      model.pieces.modelPieces(6),
-      model.pieces.modelPieces(7),
-      model.pieces.modelPieces(8),
-      model.pieces.modelPieces(9),
-      model.pieces.modelPieces(10),
-      model.pieces.modelPieces(11)
-    )
-
-    var allConflicts = Set.empty[(Piece, Piece)]
-
-    model.pieces.modelPieces.foreach { case (p) =>
-      val qrs = model.hexBoard3.getQRSfromAxAy(p.pCurPos.x, p.pCurPos.y)
-      val setQRS = model.possibleMoveSpots.spotRingQRS(qrs._1,qrs._2,qrs._3)
-      if (p.pieceShape == CYLINDER) then
-        blocks.foreach { case (b) => 
-          val blk = model.hexBoard3.getQRSfromAxAy(b.pCurPos.x, b.pCurPos.y)
-          if setQRS.contains(blk) then 
-            allConflicts = allConflicts + ((p, b))
-        }
-      end if
-    }
-
-    scribe.debug("@@@ ---- STEP 1")
-    allConflicts.foreach { case (c,b) =>
-        val pC = PieceAssets.pieceNames(c.pieceIdentity)
-        val pB = PieceAssets.pieceNames(b.pieceIdentity)
-        scribe.debug("@@@ Cylinder " + pC + " <=> Block " + pB)
-      }
-    scribe.debug("@@@ ----")
-
-    // Step 2 ... get a cylinder list and a block list for conflicts
-    // ... each list to contain a set of conflicts for each piece in combat
-
-    var cylinderConflicts = List.empty[Set[(Piece, Piece)]]
-
-    allConflicts.foreach { case (c,b) =>
-      val justConflicts = cylinderConflicts.flatMap(set => set)
-      val cylinderConflictsRecorded = justConflicts.find {case (cc,bb) => cc == c}
-      if cylinderConflictsRecorded == None then
-        val conflicts = allConflicts.filter((ccc,bbb) => (ccc == c))
-        cylinderConflicts = cylinderConflicts :+ conflicts
-      end if
-    }
-
-    var blockConflicts = List.empty[Set[(Piece, Piece)]]
-
-    allConflicts.foreach { case (c,b) =>
-      val justConflicts = blockConflicts.flatMap(set => set)
-      val blockConflictsRecorded = justConflicts.find { case (cc,bb) => bb == b }
-      if blockConflictsRecorded == None then
-        val conflicts = allConflicts.filter((ccc,bbb) => (bbb == b))
-        blockConflicts = blockConflicts :+ conflicts
-      end if
-    }
-
-    val reversedBlockConflicts = reverseConflictsList(blockConflicts)
-
-    scribe.debug("@@@ ==== STEP 2")
-    cylinderConflicts.foreach { case (s) =>
-      s.foreach { case (c,b) =>
-          val shape1 = PieceAssets.pieceTypes(c.pieceShape)
-          val color1 = PieceAssets.pieceNames(c.pieceIdentity)
-          val shape2 = PieceAssets.pieceTypes(b.pieceShape)
-          val color2 = PieceAssets.pieceNames(b.pieceIdentity)
-          scribe.debug("@@@ " + shape1 +":" + color1 + " <=> " + shape2 +":" + color2)
-        }
-      scribe.debug("@@@ ==")
-    }
-    reversedBlockConflicts.foreach { case (s) =>
-      s.foreach { case (c,b) =>
-          val shape1 = PieceAssets.pieceTypes(c.pieceShape)
-          val color1 = PieceAssets.pieceNames(c.pieceIdentity)
-          val shape2 = PieceAssets.pieceTypes(b.pieceShape)
-          val color2 = PieceAssets.pieceNames(b.pieceIdentity)
-          scribe.debug("@@@ " + shape1 +":" + color1 + " <=> " + shape2 +":" + color2)
-        }
-      scribe.debug("@@@ ==")
-    }
-
-    val listAllPieces = cylinders ++ blocks
-    // Step 4 ... generate heath points according to flying colors and empowered
-
-    listAllPieces.foreach { case defendersPiece =>
-      var iHealth = 0
-      val justConflicts = 
-        if defendersPiece.pieceShape == CYLINDER then
-          cylinderConflicts.flatMap(set => set)
-        else
-          reversedBlockConflicts.flatMap(set => set)
-        end if
-
-      val activeConflicts = justConflicts.filter((d,a) => d == defendersPiece)
-      if activeConflicts.size > 0 then
-        activeConflicts.foreach { case (d,a) =>
-          // d is defender
-          // a is attacker
-          val attackersBodyColor = a.pieceIdentity
-          val attackersFlyingColor1 = if a.bFlipped then (a.pieceIdentity + 4) % 6 else (a.pieceIdentity + 1) % 6
-          val attackersFlyingColor2 = if a.bFlipped then (a.pieceIdentity + 5) % 6 else (a.pieceIdentity + 2) % 6
-          val defendersBodyColor = d.pieceIdentity
-          val defendersFlyingColor1 = if d.bFlipped then (d.pieceIdentity + 4) % 6 else (d.pieceIdentity + 1) % 6
-          val defendersFlyingColor2 = if d.bFlipped then (d.pieceIdentity + 5) % 6 else (d.pieceIdentity + 2) % 6
-
-          // Evaluating Attack calculate FlyingColors, Empowered and Outnumbered
-          if attackersFlyingColor1 == defendersBodyColor
-          || attackersFlyingColor2 == defendersBodyColor then
-            // the attacking piece is flying the correct colors so incurr damage              
-            if model.hexBoard3.getHexColor(a.pCurPos) == attackersBodyColor then
-              scribe.debug("@@@ Attacked - 2")
-              iHealth = iHealth - 2 // the attacker is empowered
-            else
-              scribe.debug("@@@ Attacked - 1")
-              iHealth = iHealth - 1 // the attacker is non-empowered
-            end if
-          end if
-
-          // Evaluating Defense calculate FlyingColors, Empowered and Outnumbered
-          if defendersFlyingColor1 == attackersBodyColor
-          || defendersFlyingColor2 == attackersBodyColor then 
-            if model.hexBoard3.getHexColor(d.pCurPos) == defendersBodyColor then 
-              scribe.debug("@@@ Defended + 2")
-              iHealth = iHealth + 2 // the defender is empowered
-            else
-              scribe.debug("@@@ Defended + 1")
-              iHealth = iHealth + 1 // the defender is non-empowered
-            end if
-          end if
-
-          val shape = PieceAssets.pieceTypes(defendersPiece.pieceShape)
-          val color = PieceAssets.pieceNames(defendersPiece.pieceIdentity)
-          scribe.debug("@@@ " + shape + ":" + color + " Health:" + iHealth)
-        }
-      else
-        val shape = PieceAssets.pieceTypes(defendersPiece.pieceShape)
-        val color = PieceAssets.pieceNames(defendersPiece.pieceIdentity)
-        scribe.debug("@@@ " + shape + ":" + color + " Resting")
+    var allPiecesQRS = Vector.empty[(Int,Int,Int)]    
+    var allPiecesEmpowered = Vector.empty[(Boolean)]
+    allPieces.foreach { piece =>
+      val qrs = model.hexBoard3.getQRSfromAxAy(piece.pCurPos.x, piece.pCurPos.y)
+      allPiecesQRS = allPiecesQRS :+ qrs
+      if model.hexBoard3.getHexColor(piece.pCurPos) == piece.pieceIdentity then
+        allPiecesEmpowered = allPiecesEmpowered :+ true
+      else 
+        allPiecesEmpowered = allPiecesEmpowered :+ false
       end if 
     }
 
-    scribe.trace("@@@ *****")
+    allPieces.foreach { p1 =>
+      val index1 = (p1.pieceShape * 6) + p1.pieceIdentity
+      val color1 = (PieceAssets.pieceNames(index1%6)).trim
+      val qrs1 = allPiecesQRS(index1)
+      val setQRS1 = model.possibleMoveSpots.spotRingQRS(qrs1._1,qrs1._2,qrs1._3)
+      allPieces.foreach { p2 => 
+        val index2 = (p2.pieceShape * 6) + p2.pieceIdentity
+        val color2 = (PieceAssets.pieceNames(index2%6)).trim
+        val qrs2 = allPiecesQRS(index2)
+        if setQRS1.contains(qrs2) then
+          val p1BodyColor = p1.pieceIdentity
+          val p1FlyingColor1 = if p1.bFlipped then (p1.pieceIdentity + 4) % 6 else (p1.pieceIdentity + 1) % 6
+          val p1FlyingColor2 = if p1.bFlipped then (p1.pieceIdentity + 5) % 6 else (p1.pieceIdentity + 2) % 6
+          val p2BodyColor = p2.pieceIdentity
+          val p2FlyingColor1 = if p2.bFlipped then (p2.pieceIdentity + 4) % 6 else (p2.pieceIdentity + 1) % 6
+          val p2FlyingColor2 = if p2.bFlipped then (p2.pieceIdentity + 5) % 6 else (p2.pieceIdentity + 2) % 6
 
+          if p1BodyColor == p2FlyingColor1
+          || p1BodyColor == p2FlyingColor2 then 
+            (p1.pieceShape, p2.pieceShape) match {
+              case (CYLINDER, CYLINDER) =>
+                if allPiecesEmpowered(index2) == true then
+                  vectorHealth(index1) += 2
+                  vectorHealth(index1) += 1
+                  scribe.info("@@@ {Cyldr" + color1 +":" + 1 + "} {Cyldr" + color2 + "}")
+              case (BLOCK, BLOCK) =>
+                if allPiecesEmpowered(index2) == true then
+                  vectorHealth(index1) += 2
+                  scribe.info("@@@ {Block" + color1 +":" + 2 + "} {Block" + color2 + "}")
+                else
+                  vectorHealth(index1) += 1
+                  scribe.info("@@@ {Block" + color1 +":" + 1 + "} {Block" + color2 + "}")
 
-    /*
-    so far we have ...
-    cylinders Set[Piece] ... (c)
-    blocks Set[Piece] ... (b)
-    allConflicts Set[Piece,Piece] ... (c,b)
-    cylinderConflicts List[Set[Piece,Piece]] ... (c,b)
-    blockConflicts List[Set[Piece,Piece]] ... (c,b)
-    reversedBlockConflicts List[Set[Piece,Piece]] ... (b,c)
-    allMeleePieces Set[Piece]
-    allMeleeSets List[Set[Piece]]
-    */
+              case (CYLINDER, BLOCK) =>
+                if allPiecesEmpowered(index2) == true then
+                  vectorHealth(index1) -= 2
+                  vectorHealth(index2) += 2
+                  scribe.info("@@@ <Cyldr" + color1 + ":" + (-2) + "> <Block" + color2 +":" + 2 + ">")
+                else
+                  vectorHealth(index1) -= 1
+                  vectorHealth(index2) += 1
+                  scribe.info("@@@ <Cyldr" + color1 + ":" + (-1) + "> <Block" + color2 +":" + 1 + ">")
+              case (BLOCK, CYLINDER) =>
+                if allPiecesEmpowered(index2) == true then
+                  vectorHealth(index1) -= 2
+                  vectorHealth(index2) += 2
+                  scribe.info("@@@ <Block" + color1 + ":" + (-2) + "> <Cyldr" + color2 +":" + 2 + ">")
+                else
+                  vectorHealth(index1) -= 1
+                  vectorHealth(index2) += 1
+                  scribe.info("@@@ <Block" + color1 + ":" + (-1) + "> <Cyldr" + color2 +":" + 1 + ">")
+            }
+          end if
+        end if
+      }
+    }
+    scribeCombat(allPieces, vectorHealth)
 
+    val piecesWithCaptures = captured(allPieces, vectorHealth)
+    (piecesWithCaptures)
 
   end combat
 
-  def reverseConflictsList[A, B](list: List[Set[(A, B)]]): List[Set[(B, A)]] = {
-    list.map { set =>
-      set.map { case (a, b) =>
-        (b, a)
-      }
-    }
-  }
-  end reverseConflictsList
-
-  /* meleeBuilder
-   * s1 starts as Set.empty[Piece] and changes through recursion
-   * s2 starts as Set(TargetPiece) and changes through recursion
-   * s9 is allConflicts and does not change
+  /*  captured is used during the turn to mark unhealthy pieces as captured
    */
 
-  def meleeBuilder(s1: Set[Piece], s2: Set[Piece], s9: Set[(Piece, Piece)]) : (Set[Piece], Set[Piece]) =
-    if s1.size == s2.size then 
-      if s1.size <= 1 then
-        val s0 = Set.empty[Piece]
-        (s0, s0) // return empty because there are no other pieces in conflict
+  def captured(allPieces: Vector[Piece], vectorHealth: Array[Int]) : Pieces = 
+    var newPieces = Vector.empty[(Piece)]
+    allPieces.foreach { piece =>
+      val index = (piece.pieceShape * 6) + piece.pieceIdentity
+      val newPiece = 
+        if vectorHealth(index) < 0 then 
+          Piece.setCaptured(piece, true)
+        else
+          Piece.setCaptured(piece, false)
+        end if
+      newPieces = newPieces :+ newPiece
+    }
+    Pieces(newPieces )
+  end captured
+
+  /* detectCaptors is used at the end of a turn to revisits all captives to ...
+  .. calculate the set of captors. If there has been no captures this turn ...
+  .. an empty set is generated indicating it is ok to transition the next move ...
+  .. to opponent
+   */
+
+  def detectCaptors(model: FlicFlacGameModel) : Set[(Piece)] =
+    val allPieces = model.pieces.modelPieces
+    val vPrisoners = allPieces.filter(p => p.bCaptured == true)
+    var setCaptors = Set.empty[(Piece)]
+    
+    vPrisoners.foreach { p =>
+      val qrs = model.hexBoard3.getQRSfromAxAy(p.pCurPos.x, p.pCurPos.y)
+      val spotQRS = model.possibleMoveSpots.spotRingQRS(qrs._1, qrs._2, qrs._3)
+      val prisonerColor = p.pieceIdentity
+      allPieces.foreach { pp =>
+        val qrs1 = model.hexBoard3.getQRSfromAxAy(pp.pCurPos.x, pp.pCurPos.y)
+        if spotQRS.contains(qrs1) then
+          val captorColor1 = if pp.bFlipped then (pp.pieceIdentity + 4) % 6 else (pp.pieceIdentity + 1) % 6
+          val captorColor2 = if pp.bFlipped then (pp.pieceIdentity + 5) % 6 else (pp.pieceIdentity + 2) % 6
+          if prisonerColor == captorColor1 || prisonerColor == captorColor2 then
+            setCaptors = setCaptors + pp
+          end if 
+        end if
+      }
+    }
+    (setCaptors)
+  end detectCaptors
+
+  /* rewardCaptors is used at the end of the turn to reset the captors so that they ...
+  .. can move again. It marks all other pieces as moved (even if they not moved)
+  .. If a piece (including a captor) is captured then it returns to home position.
+  
+   */
+
+  def rewardCaptors(model: FlicFlacGameModel, setCaptors: Set[(Piece)]) : Pieces =
+    var allPieces = Vector.empty[(Piece)]
+    model.pieces.modelPieces.foreach { p=>
+      if setCaptors.contains(p) then
+        val p1 = Piece.setCaptor(p, false)
+        val p2 = Piece.setMoved(p1, false)
+        if Piece.captured(p2) then
+          val p3 = Piece.moveToHome(p2)
+          val p4 = Piece.setTurnStartPos(p3, p3.pCurPos)
+          allPieces = allPieces :+ p4        
+        else
+          val p3 = Piece.setTurnStartPos(p2, p2.pCurPos)
+          allPieces = allPieces :+ p3
+        end if
       else
-        (s1, s2)
-      end if 
-    else
-      var s3 = Set.empty[Piece] ++ s2 // the previous set
-      var s4 = Set.empty[Piece] ++ s2 // the new set calculated below
-      s2.foreach { case (p) =>
-        val s5 = s9.filter((c,b) => p==c)
-        val s6 = s5.map((c,b) => b)
-        s4 = s4.union(s6)
-      }
-      s2.foreach { case (p) =>
-        val s7 = s9.filter((c,b) => p==b)
-        val s8 = s7.map((c,b) => c)
-        s4 = s4.union(s8)
-      }
-      meleeBuilder(s3,s4,s9)
-  end meleeBuilder
+        val p1 = Piece.setMoved(p, true)
+        if Piece.captured(p1) then
+          val p2 = Piece.moveToHome(p1)
+          val p3 = Piece.setTurnStartPos(p2, p2.pCurPos)
+          allPieces = allPieces :+ p3
+        else
+          allPieces = allPieces :+ p
+        end if
+      end if
+    }
+    Pieces(allPieces)
+    
+  end rewardCaptors
+
+
+  def scribeCombat(allPieces: Vector[Piece], vectorHealth: Array[Int]) : Unit = 
+    val (cylinders, blocks) = allPieces splitAt 6 // Cylinders are 0...5 & blocks are 6...11
+    var str1 = "Cyldrs "
+    cylinders.foreach { p =>
+      val color = PieceAssets.pieceNames(p.pieceIdentity)
+      val index = (p.pieceShape * 6) + p.pieceIdentity
+      str1 = str1 + "<" + color.trim + ":" + vectorHealth(index) + ">"
+    }
+    scribe.debug("@@@ " + str1)
+
+    var str2 = "Blocks "
+    blocks.foreach { p =>
+      val color = PieceAssets.pieceNames(p.pieceIdentity)
+      val index = (p.pieceShape * 6) + p.pieceIdentity
+      str2 = str2 + "<" + color.trim + ":" + vectorHealth(index) + ">"
+    }
+    scribe.debug("@@@ " + str2)
+
+  end scribeCombat
 
 object Melee {}
 
