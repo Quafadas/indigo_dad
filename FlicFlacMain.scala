@@ -87,7 +87,7 @@ case class FlicFlacGame(
 
   def initialScene(flicFlacBootData: FlicFlacBootData): Option[SceneName] =
     scribe.debug("@@@ FlicFlacMain-initialScene()")
-    Some(SceneSplash.name)
+    Some(SceneGame.name)
   end initialScene
 
   // JP 30/06/24

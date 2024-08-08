@@ -86,8 +86,10 @@ object TyrianApp extends TyrianIOApp[Msg, TyrianModel]:
   def view(model: TyrianModel): Html[Msg] =
     if model.renderUi then
       div(id := "myapp")(
-        h1("Flic Flac!"),
+        h1("FIXME - Start Game button sizing issues !!!"),
+        /*--- h1("Flic Flac!"),
         p("Start the game - beware all ye who enter here!"),
+        ---*/
         button(onClick(Msg.RunGame))("Start Game")
       )
     else div(id := "indigo-container")()
