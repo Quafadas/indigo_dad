@@ -69,18 +69,18 @@ object FlicFlacGameModel:
     val bk6 = hexBoard3.getBlockHomePos(CP)
 
     val startingModelPieces: Vector[Piece] = Vector(
-      Piece(CYLINDER, CB, cy1, cy1, cy1),
-      Piece(CYLINDER, CG, cy2, cy2, cy2),
-      Piece(CYLINDER, CY, cy3, cy3, cy3),
-      Piece(CYLINDER, CO, cy4, cy4, cy4),
-      Piece(CYLINDER, CR, cy5, cy5, cy5),
-      Piece(CYLINDER, CP, cy6, cy6, cy6),
-      Piece(BLOCK, CB, bk1, bk1, bk1),
-      Piece(BLOCK, CG, bk2, bk2, bk2),
-      Piece(BLOCK, CY, bk3, bk3, bk3),
-      Piece(BLOCK, CO, bk4, bk4, bk4),
-      Piece(BLOCK, CR, bk5, bk5, bk5),
-      Piece(BLOCK, CP, bk6, bk6, bk6)
+      Piece(CYLINDER, CB, cy1, cy1, cy1, false),
+      Piece(CYLINDER, CG, cy2, cy2, cy2, false),
+      Piece(CYLINDER, CY, cy3, cy3, cy3, false),
+      Piece(CYLINDER, CO, cy4, cy4, cy4, false),
+      Piece(CYLINDER, CR, cy5, cy5, cy5, false),
+      Piece(CYLINDER, CP, cy6, cy6, cy6, false),
+      Piece(BLOCK, CB, bk1, bk1, bk1, false),
+      Piece(BLOCK, CG, bk2, bk2, bk2, false),
+      Piece(BLOCK, CY, bk3, bk3, bk3, false),
+      Piece(BLOCK, CO, bk4, bk4, bk4, false),
+      Piece(BLOCK, CR, bk5, bk5, bk5, false),
+      Piece(BLOCK, CP, bk6, bk6, bk6, false)
     )
     Pieces(startingModelPieces)
   end summonPieces

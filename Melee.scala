@@ -116,6 +116,7 @@ final case class Melee(model: FlicFlacGameModel):
 
   def detectCaptors(model: FlicFlacGameModel) : Set[(Piece)] =
     val allPieces = model.pieces.modelPieces
+    val (cylinders, blocks) = allPieces.splitAt(6)
     val vPrisoners = allPieces.filter(p => p.bCaptured == true)
     var setCaptors = Set.empty[(Piece)]
     
@@ -123,7 +124,9 @@ final case class Melee(model: FlicFlacGameModel):
       val qrs = model.hexBoard3.getQRSfromAxAy(p.pCurPos.x, p.pCurPos.y)
       val spotQRS = model.possibleMoveSpots.spotRingQRS(qrs._1, qrs._2, qrs._3)
       val prisonerColor = p.pieceIdentity
-      allPieces.foreach { pp =>
+      val possibleCaptors = if model.gameState == GameState.CYLINDER_TURN then cylinders else blocks
+
+      possibleCaptors.foreach { pp =>
         val qrs1 = model.hexBoard3.getQRSfromAxAy(pp.pCurPos.x, pp.pCurPos.y)
         if spotQRS.contains(qrs1) then
           val captorColor1 = if pp.bFlipped then (pp.pieceIdentity + 4) % 6 else (pp.pieceIdentity + 1) % 6
@@ -146,22 +149,36 @@ final case class Melee(model: FlicFlacGameModel):
   def rewardCaptors(model: FlicFlacGameModel, setCaptors: Set[(Piece)]) : Pieces =
     var allPieces = Vector.empty[(Piece)]
     model.pieces.modelPieces.foreach { p=>
-      if setCaptors.contains(p) then
-        val p1 = Piece.setCaptor(p, false)
-        val p2 = Piece.setMoved(p1, false)
-        if Piece.captured(p2) then
-          val p3 = Piece.moveToHome(p2)
-          val p4 = Piece.setTurnStartPos(p3, p3.pCurPos)
-          allPieces = allPieces :+ p4        
+      if (p.pieceShape == CYLINDER && model.gameState == GameState.CYLINDER_TURN)
+      || (p.pieceShape == BLOCK && model.gameState == GameState.BLOCK_TURN) then
+        if setCaptors.contains(p) then
+          val p1 = Piece.setCaptor(p, false)
+          val p2 = Piece.setMoved(p1, false)
+          if Piece.captured(p2) then
+            val p3 = Piece.moveToHome(p2)
+            val p4 = Piece.setTurnStartPos(p3, p3.pCurPos)
+            val p5 = Piece.setCaptured(p4, false)
+            allPieces = allPieces :+ p5        
+          else
+            val p3 = Piece.setTurnStartPos(p2, p2.pCurPos)
+            allPieces = allPieces :+ p3
+          end if
         else
-          val p3 = Piece.setTurnStartPos(p2, p2.pCurPos)
-          allPieces = allPieces :+ p3
+          val p1 = Piece.setMoved(p, true)
+          if Piece.captured(p1) then
+            val p2 = Piece.moveToHome(p1)
+            val p3 = Piece.setTurnStartPos(p2, p2.pCurPos)
+            val p4 = Piece.setCaptured(p3, false)
+            allPieces = allPieces :+ p4
+          else
+            allPieces = allPieces :+ p1
+          end if
         end if
       else
-        val p1 = Piece.setMoved(p, true)
-        if Piece.captured(p1) then
-          val p2 = Piece.moveToHome(p1)
-          val p3 = Piece.setTurnStartPos(p2, p2.pCurPos)
+        if Piece.captured(p) then
+          val p1 = Piece.moveToHome(p)
+          val p2 = Piece.setTurnStartPos(p1, p1.pCurPos)
+          val p3 = Piece.setCaptured(p2, false)
           allPieces = allPieces :+ p3
         else
           allPieces = allPieces :+ p

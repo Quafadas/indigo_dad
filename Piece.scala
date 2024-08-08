@@ -11,6 +11,7 @@ final case class Piece(
     pCurPos: Point, // ..................... current position (in hexArrayCoords)
     pHomePos: Point, // .................... starting/home position (in hexArrayCoords)
     pTurnStartPos: Point, // ............... piece position at start of turn
+    bTurnStartFlipState: Boolean, // ....... false if normal orientation at start of turn, true if flipped
 
     // parameters below required for model, but not for creation
 
@@ -62,7 +63,7 @@ object Piece:
   end setSelected
 
   def setToggleFlip(p: Piece): Piece =
-    p.copy(bFlipped = (if p.bFlipped then false else true))
+    p.copy(bFlipped = if p.bFlipped then false else true)
   end setToggleFlip
 
   def setCaptured(p: Piece, b: Boolean): Piece =
@@ -78,16 +79,16 @@ object Piece:
   end setMoved
 
   def setTurnStartPos(p: Piece, pPos: Point): Piece = 
-    p.copy(pTurnStartPos = pPos)
+    p.copy(pTurnStartPos = pPos, bTurnStartFlipState = p.bFlipped)
   end setTurnStartPos
 
   def setPosition(p: Piece, pPos: Point): Piece =
     if p.pCurPos == pPos then
       p
     else if pPos == p.pTurnStartPos then
-      p.copy(pCurPos = pPos, bMoved = false, bCaptor = false) // ... returning to turn start position cancels bMoved and bCaptor
+      p.copy(pCurPos = pPos, bMoved = false, bCaptor = false, bFlipped = p.bTurnStartFlipState) 
     else
-      p.copy(pCurPos = pPos, bMoved = true) // .... a new position activates bMoved
+      p.copy(pCurPos = pPos, bMoved = true)
     end if
   end setPosition
 

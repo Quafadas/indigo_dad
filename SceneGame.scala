@@ -238,18 +238,18 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     case ButtonTurnEvent =>
       scribe.debug("@@@ ButtonTurnEvent")
 
+      val newScore = model.pieces.extraTurnScoring(model)
       val captors = Melee(model).detectCaptors(model)
       if captors.isEmpty then
         val newPieces = model.pieces.newTurn(model)
         if (model.gameState == GameState.CYLINDER_TURN) then 
           scribe.debug("@@@ BLOCK TURN @@@")
-          Outcome(model.copy(gameState = GameState.BLOCK_TURN, pieces = newPieces))
+          Outcome(model.copy(gameState = GameState.BLOCK_TURN, pieces = newPieces, gameScore = newScore))
         else 
           scribe.debug("@@@ CYLINDER TURN @@@")
-          Outcome(model.copy(gameState = GameState.CYLINDER_TURN, pieces = newPieces))
+          Outcome(model.copy(gameState = GameState.CYLINDER_TURN, pieces = newPieces, gameScore = newScore))
         end if
       else
-        val newScore = model.pieces.extraTurnScoring(model)
         val newPieces = Melee(model).rewardCaptors(model, captors)
         Outcome(model.copy(pieces = newPieces, gameScore = newScore))
       end if 

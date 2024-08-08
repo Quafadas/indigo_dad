@@ -48,7 +48,8 @@ final case class Pieces(
         bCaptured = false, 
         bCaptor = false, 
         bMoved = false, 
-        pTurnStartPos = pNewCurPos, 
+        pTurnStartPos = pNewCurPos,
+        bTurnStartFlipState = p1.bFlipped, 
         pCurPos = pNewCurPos )
       newModelPieces = newModelPieces :+ p2
     end for
@@ -60,9 +61,9 @@ final case class Pieces(
     for p <- model.pieces.modelPieces do
       if Piece.captured(p) then
         if p.pieceShape == CYLINDER then
-          additionalScore = (additionalScore._1 + 1, additionalScore._2)
-        else
           additionalScore = (additionalScore._1, additionalScore._2 + 1)
+        else
+          additionalScore = (additionalScore._1 + 1, additionalScore._2)
         end if 
       end if
     end for
