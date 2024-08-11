@@ -28,8 +28,12 @@ final case class Spots(
     val bCylinders = ((piece.pieceShape == CYLINDER) && (model.gameState == GameState.CYLINDER_TURN))
     if (bBlocks || bCylinders) then
       if Piece.moved(piece) then 
-        scribe.debug("@@@ calculateSpots piece moved")
-        Spots(Set((piece.pTurnStartPos.x, piece.pTurnStartPos.y)))  // starting position only
+        scribe.debug("@@@ calculateSpots piece moved")        
+        model.pieces.modelPieces.find(p=>(p.pCurPos == piece.pTurnStartPos)) match
+          case Some(p) => 
+            Spots(Set.empty)
+          case None => 
+            Spots(Set((piece.pTurnStartPos.x, piece.pTurnStartPos.y)))  // starting position only
       else
         scribe.debug("@@@ calculateSpots piece not moved @ " + piece.pCurPos)
         spotify(model: FlicFlacGameModel, piece: Piece)

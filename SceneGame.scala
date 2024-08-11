@@ -149,7 +149,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                   dMsg = "##I## Up|Grid|Sel|=="
                   scribe.debug("@@@ PointerEvent " + dMsg)
                   val newHL = model.highLighter.shine(model.highLighter, false)
-                  val updatedPiece = Piece.setPosDeselect(piece, piece.pTurnStartPos)
+                  val updatedPiece = Piece.setPosDeselect(piece, piece.pCurPos)
                   val updatedModel = FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL))
                   val newPieces = Melee(updatedModel).combat(updatedModel)
                   Outcome(FlicFlacGameModel.modifyPieces(updatedModel, newPieces))
@@ -186,7 +186,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               dMsg = "##K## Up|Void|Sel"
               scribe.debug("@@@ PointerEvent " + dMsg)
               val newHL = model.highLighter.shine(model.highLighter, false)
-              val updatedPiece = Piece.setPosDeselect(piece, piece.pTurnStartPos)
+              val updatedPiece = Piece.setPosDeselect(piece, piece.pCurPos)
               val updatedModel = FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL))
               val newPieces = Melee(updatedModel).combat(updatedModel)
               Outcome(FlicFlacGameModel.modifyPieces(updatedModel, newPieces))
