@@ -15,18 +15,11 @@ object GameAssets:
   val cyAssetPath = "assets/Cylinders.png"
   val blAssetName = "blocks"
   val blAssetPath = "assets/Blocks.png"
-  val spAssetName = "splashBg"
-  val spAssetPath = "assets/FlicFlacV4.png"
   val cnAssetName = "corners"
   val cnAssetPath = "assets/Corners.png"
-  val rlAssetName = "rules"
-  val rlAssetPath = "assets/Rules.png"
-
 
   scribe.debug("@@@ Object GameAssets START")
 
-  val SplashSceneDimensions = Rectangle(0, 0, 1920,1080)
-  val RulesSceneDimensions = Rectangle(0, 0, 1700, 1250)
   /* Calculating the game rectangle was non-trivial (and not perfect)...
   ... factors taking into consideration were ...
   1) HexBoard3.pBase = Point(260,0)
@@ -34,7 +27,7 @@ object GameAssets:
   3) additional margins for half hex in both directions
   Tested on the scale Factors 1.0, 0.9, 0.8, 0.75, 0.5, 0.33, 0.25
   */
-  val GameSceneDimensions = Rectangle(0,0,1580,1450)      
+  val GameSceneDimensions = Rectangle(0,0,1580,1400)      
   
   def get(): Set[AssetType] =
     Set(
@@ -42,9 +35,7 @@ object GameAssets:
       AssetType.Image(AssetName(bnAssetName), AssetPath(bnAssetPath)),
       AssetType.Image(AssetName(cyAssetName), AssetPath(cyAssetPath)),
       AssetType.Image(AssetName(blAssetName), AssetPath(blAssetPath)),
-      AssetType.Image(AssetName(spAssetName), AssetPath(spAssetPath)),
-      AssetType.Image(AssetName(cnAssetName), AssetPath(cnAssetPath)),
-      AssetType.Image(AssetName(rlAssetName), AssetPath(rlAssetPath)))
+      AssetType.Image(AssetName(cnAssetName), AssetPath(cnAssetPath)))
 
   def gHex(sf: Double): Graphic[Material.ImageEffects] =
     if (sf < 0.25) || (sf > 1.0) then               // FIXME we should not need this trap in the end
@@ -114,9 +105,6 @@ object GameAssets:
     val down = Graphic(0, 0, 90, 80, 6, Material.Bitmap(AssetName(bnAssetName))).withCrop(1050, 160, 90, 80).scaleBy(sf,sf)
     ButtonAssets(up, over, down)
 
-  def splashBg: Graphic[Material.ImageEffects] =
-    Graphic(SplashSceneDimensions, 2, Material.ImageEffects(AssetName(spAssetName)))
-
   def cornerTopLeft: Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 20, 20), 2, Material.ImageEffects(AssetName(cnAssetName)))
 
@@ -147,9 +135,6 @@ object GameAssets:
 
     Batch(layerC1, layerC2, layerC3, layerC4)
   end cornerLayers
-
-  def rulesBg: Graphic[Material.ImageEffects] =
-    Graphic(RulesSceneDimensions, 2, Material.ImageEffects(AssetName(rlAssetName)))
 
   def scaleButtonBounds(r: Rectangle, sf: Double): Rectangle = 
     val iXpos = (r.position.x * sf).toInt

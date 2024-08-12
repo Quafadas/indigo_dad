@@ -356,10 +356,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Magenta)))
         |+| SceneUpdateFragment(TextBox(sFactor,50,20).withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(0,0))
         |+| SceneUpdateFragment(textGame)
-        |+| SceneUpdateFragment(viewModel.rulesButton.draw)
         |+| SceneUpdateFragment(viewModel.newGameButton.draw)
-        |+| SceneUpdateFragment(viewModel.resultsButton.draw)
-        |+| SceneUpdateFragment(viewModel.splashButton.draw)
         |+| SceneUpdateFragment(viewModel.plusButton.draw)
         |+| SceneUpdateFragment(viewModel.minusButton.draw)
         |+| SceneUpdateFragment(viewModel.turnButton.draw)
@@ -374,43 +371,27 @@ end SceneGame
 final case class GameSceneViewModel(
     var optDragPos: Option[Point],
     gameViewport: GameViewport,
-    rulesButton: Button,
     newGameButton: Button,
-    resultsButton: Button,
-    splashButton: Button,
     plusButton: Button,
     minusButton: Button,
     turnButton: Button,
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[GameSceneViewModel] =
     for
-      bn1 <- rulesButton.updateFromPointers(pointers)
-      bn2 <- newGameButton.updateFromPointers(pointers)
-      bn3 <- resultsButton.updateFromPointers(pointers)
-      bn4 <- splashButton.updateFromPointers(pointers)
-      bn5 <- plusButton.updateFromPointers(pointers)
-      bn6 <- minusButton.updateFromPointers(pointers)
-      bn7 <- turnButton.updateFromPointers(pointers)
+      bn1 <- newGameButton.updateFromPointers(pointers)
+      bn2 <- plusButton.updateFromPointers(pointers)
+      bn3 <- minusButton.updateFromPointers(pointers)
+      bn4 <- turnButton.updateFromPointers(pointers)
       
-    yield this.copy(  rulesButton = bn1, 
-                      newGameButton = bn2, 
-                      resultsButton = bn3, 
-                      splashButton = bn4, 
-                      plusButton = bn5,
-                      minusButton = bn6,
-                      turnButton = bn7
+    yield this.copy(  newGameButton = bn1, 
+                      plusButton = bn2,
+                      minusButton = bn3,
+                      turnButton = bn4
                     )
 
   def changeButtonBoundaries( model : FlicFlacGameModel, gvp : GameViewport ) : GameSceneViewModel =
     val dSF = model.scalingFactor
     scribe.debug("@@@ dSF:"+dSF)
-
-    val newRulesButton =       
-      Button(
-        buttonAssets = GameAssets.buttonRulesAssets(dSF),
-        bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.rulesBounds, dSF),
-        depth = Depth(6)
-      ).withUpActions(ButtonRulesEvent)
 
     val newNewGameButton =       
       Button(
@@ -418,20 +399,6 @@ final case class GameSceneViewModel(
         bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.newGameBounds, dSF),
         depth = Depth(6)
       ).withUpActions(ButtonNewGameEvent)
-
-    val newResultsButton =       
-      Button(
-        buttonAssets = GameAssets.buttonResultsAssets(dSF),
-        bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.resultsBounds, dSF),
-        depth = Depth(6)
-      ).withUpActions(ButtonResultsEvent)
-
-    val newSplashButton =       
-      Button(
-        buttonAssets = GameAssets.buttonSplashAssets(dSF),
-        bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.splashBounds, dSF),
-        depth = Depth(6)
-      ).withUpActions(ButtonSplashEvent)
 
     val newPlusButton =       
       Button(
@@ -457,10 +424,7 @@ final case class GameSceneViewModel(
 
     this.copy( // scalingFactor
                // optDragPos
-                rulesButton = newRulesButton,
                 newGameButton = newNewGameButton,
-                resultsButton = newResultsButton,
-                splashButton = newSplashButton,
                 plusButton = newMinusButton,
                 minusButton = newMinusButton,
                 turnButton = newTurnButton
@@ -471,40 +435,21 @@ final case class GameSceneViewModel(
 end GameSceneViewModel
 
 object GameSceneViewModel:
-  val rulesBounds = Rectangle(20, 40, 240, 80)
-  val newGameBounds = Rectangle(20, 140, 240, 80)
-  val resultsBounds = Rectangle(20, 240, 240, 80)
-  val splashBounds = Rectangle(20, 340, 240, 80)
-  val plusBounds = Rectangle(20, 440, 90, 80)
-  val minusBounds = Rectangle(170, 440, 90, 80)
-  val turnBounds = Rectangle(20, 540, 90, 80)
+  val newGameBounds = Rectangle(20, 40, 240, 80)
+  val plusBounds = Rectangle(20, 140, 90, 80)
+  val minusBounds = Rectangle(170, 140, 90, 80)
+  val turnBounds = Rectangle(20, 240, 90, 80)
     
   val initial: GameSceneViewModel =
     GameSceneViewModel(
       None, // ... we have no last position of the pointer recorded
 
       GameViewport(1920,1080),
-
-      Button(
-        buttonAssets = GameAssets.buttonRulesAssets(1.0),
-        bounds = rulesBounds,
-        depth = Depth(6)
-      ).withUpActions(ButtonRulesEvent),
       Button(
         buttonAssets = GameAssets.buttonNewGameAssets(1.0),
         bounds = newGameBounds,
         depth = Depth(6)
       ).withUpActions(ButtonNewGameEvent),
-      Button(
-        buttonAssets = GameAssets.buttonResultsAssets(1.0),
-        bounds = resultsBounds,
-        depth = Depth(6)
-      ).withUpActions(ButtonResultsEvent),
-      Button(
-        buttonAssets = GameAssets.buttonSplashAssets(1.0),
-        bounds = splashBounds,
-        depth = Depth(6)
-      ).withUpActions(ButtonSplashEvent),
       Button(
         buttonAssets = GameAssets.buttonPlusAssets(1.0),
         bounds = plusBounds,

@@ -98,7 +98,7 @@ case class FlicFlacGame(
       flicFlacBootData: FlicFlacBootData
   ): NonEmptyList[Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]] =
     scribe.debug("@@@ FlicFlacMain-scenes()")
-    NonEmptyList(SceneSplash, SceneRules, SceneGame, SceneResults)
+    NonEmptyList(SceneGame)
   end scenes
 
   def boot(flags: Map[String, String]): Outcome[BootResult[FlicFlacBootData, FlicFlacGameModel]] =
@@ -135,11 +135,7 @@ case class FlicFlacGame(
     Outcome(
       FlicFlacViewModel(
         staticAssets,
-        SplashSceneViewModel.initial,
-        RulesSceneViewModel.initial,
         GameSceneViewModel.initial,
-        ResultsSceneViewModel.initial,
-        ParamsSceneViewModel.initial,
         flicFlacStartupData.flicFlacBootData.gameViewPort,
       )
     )
@@ -164,29 +160,12 @@ case class FlicFlacGame(
       // flicFlacGameModel.hexBoard3.calculateXpYp(1.0) // FIXME this needs to be immutable!!!
       Outcome(flicFlacViewModel.copy(theGameViewPort = gameViewPort))
 
-    case ButtonSplashEvent =>
-      scribe.debug("@@@ Main-ButtonSplashEvent")
-      Outcome(flicFlacViewModel)
-        .addGlobalEvents(SceneEvent.JumpTo(SceneSplash.name))
-        .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
-
-    case ButtonRulesEvent =>
-      scribe.debug("@@@ Main-ButtonRulesEvent")
-      Outcome(flicFlacViewModel)
-        .addGlobalEvents(SceneEvent.JumpTo(SceneRules.name))
-        .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
-
     case ButtonPlayEvent =>
       scribe.debug("@@@ Main-ButtonGameEvent")
       Outcome(flicFlacViewModel)
         .addGlobalEvents(SceneEvent.JumpTo(SceneGame.name))
         .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
 
-    case ButtonResultsEvent =>
-      scribe.debug("@@@ Main-ButtonResultsEvent")
-      Outcome(flicFlacViewModel)
-        .addGlobalEvents(SceneEvent.JumpTo(SceneResults.name))
-        .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
 
     case _ =>
       if kount3 > 0 then
@@ -248,12 +227,8 @@ end GetScaleFactor
 //final case class ViewModel()
 final case class FlicFlacViewModel(
     staticAssets: StaticAssets,
-    splashScene: SplashSceneViewModel,
-    rulesScene: RulesSceneViewModel,
     gameScene: GameSceneViewModel,
-    resultsScene: ResultsSceneViewModel,
-    paramsScene: ParamsSceneViewModel,
-    theGameViewPort: GameViewport,
+    theGameViewPort: GameViewport
 )
 
 case object ButtonSplashEvent extends GlobalEvent
