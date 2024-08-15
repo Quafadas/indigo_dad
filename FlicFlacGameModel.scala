@@ -8,6 +8,17 @@ import io.circe.parser.decode
 import game.Piece.pieceShape
 
 final case class FlicFlacGameModel(
+    configLocalIpAddr: String, // ..... default 127.0.0.1
+    configLocalPort: Int, // .......... default 3000
+    configLocalShape: Int, // ..... ... default 0 = cylinder
+    configRemoteIpAddr: String, // .... default 0.0.0.0
+    configRemotePort: Int, // ......... default 3000
+    configRemoteShape: Int, // ........ default 1 = block
+    configScoreToWin: Int, // ......... default 11
+    configTurnTime: Int, // ........... default 10 seconds
+    configCaptorsTime: Int, // ........ default 5 seconds
+    configRandEventProb: Int, // ...... default 1 (in 100)
+
     gameState : GameState,
     gameScore : (Int, Int),
     turnTimeRemaining : Int,
@@ -36,6 +47,18 @@ object FlicFlacGameModel:
 
   def creation(center: Point): FlicFlacGameModel =
     scribe.debug("@@@ FlicFlacGameModel creation")
+
+    val cfgLocalIpAddr = "127.0.0.1"
+    val cfgLocalPort = 3000
+    val cfgLocalShape = CYLINDER
+    val cfgRemoteIpAddr = "0.0.0.0"
+    val cfgRemotePort = 3000
+    val cfgRemoteShape = BLOCK
+    val cfgScoreToWin = 11
+    val cfgTurnTime = 10
+    val cfgCaptorsTime = 5
+    val cfgRandEventProb = 1
+
     val startingGameState = GameState.CYLINDER_TURN   // FIXME
     val score = (0,0)
     val startingTurnTime = 90  // 10ths of a second FIXME we need this configurable
@@ -43,7 +66,19 @@ object FlicFlacGameModel:
     val hexBoard3 = HexBoard3()
     val highLighter = HighLighter(hexBoard3, false, Point(0,0))
     val startingSpots : Spots = Spots(Set.empty)
-    FlicFlacGameModel(  startingGameState,
+    FlicFlacGameModel(  
+                        cfgLocalIpAddr,
+                        cfgLocalPort,
+                        cfgLocalShape,
+                        cfgRemoteIpAddr,
+                        cfgRemotePort,
+                        cfgRemoteShape,
+                        cfgScoreToWin,
+                        cfgTurnTime,
+                        cfgCaptorsTime,
+                        cfgRandEventProb,
+            
+                        startingGameState,
                         score,
                         startingTurnTime,
                         defaultScalingFactor, 
@@ -144,14 +179,37 @@ object FlicFlacGameModel:
 
   def reset(previousModel: FlicFlacGameModel): FlicFlacGameModel =
     scribe.debug("@@@ Reset model")
+
+    val cfgLocalIpAddr = previousModel.configLocalIpAddr
+    val cfgLocalPort = previousModel.configLocalPort
+    val cfgLocalShape = previousModel.configLocalShape
+    val cfgRemoteIpAddr = previousModel.configRemoteIpAddr
+    val cfgRemotePort = previousModel.configRemotePort
+    val cfgRemoteShape = previousModel.configRemoteShape
+    val cfgScoreToWin = previousModel.configScoreToWin
+    val cfgTurnTime = previousModel.configTurnTime
+    val cfgCaptorsTime = previousModel.configCaptorsTime
+    val cfgRandEventProb = previousModel.configRandEventProb
+
     val resetGameState = GameState.CYLINDER_TURN
     val score = (0,0)
-    val resetTime = 0
+    val resetTime = previousModel.configTurnTime
     val defaultSF = 1.0
     val hexBoard3 = HexBoard3()
     val highLighter = HighLighter(hexBoard3, false, Point(0,0))
     val emptySpots : Spots = Spots(Set.empty)
-    FlicFlacGameModel(  resetGameState,
+    FlicFlacGameModel(  
+                        cfgLocalIpAddr,
+                        cfgLocalPort,
+                        cfgLocalShape,
+                        cfgRemoteIpAddr,
+                        cfgRemotePort,
+                        cfgRemoteShape,
+                        cfgScoreToWin,
+                        cfgTurnTime,
+                        cfgCaptorsTime,
+                        cfgRandEventProb,
+                        resetGameState,
                         score,
                         resetTime,
                         defaultSF,

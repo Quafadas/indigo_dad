@@ -16,11 +16,12 @@
   <p> If configured, random events may occur at the end of any turn with a probability that is configured at the start
     of the game. Such events might include:
   <ul>
-  <li>"Windy Flip" ... all pieces on the board are flipped</li>
-  <li>"Blue Recall" ... both blue pieces are returned home (blue is just an example)</li>
-  <li>"Yellow Sink Holes" ... all pieces on a yellow hexagon are returned home (yellow is just an example)</li>
-  <li>"Cylinder Power" ... all cylinders gain +1 attacking or defending for that turn (cylinder is just an example)</li>
+  <li>&quot;Windy Flip&quot; ... all pieces on the board are flipped</li>
+  <li>&quot;Blue Recall&quot; ... both blue pieces are returned home (blue is just an example)</li>
+  <li>&quot;Yellow Sink Holes&quot; ... all pieces on a yellow hexagon are returned home (yellow is just an example)</li>
+  <li>&quot;Cylinder Power&quot; ... all cylinders gain +1 attacking or defending for that turn (cylinder is just an example)</li>
   </ul>
+  To disable random events configure a proability of 0.
   </p>
 
   <h2 style="color: red; text-align: center;"><b><i>
@@ -29,6 +30,27 @@
   
 <a href="./Rules4.html">
   <button class="myRulesButton"> << </button></a>
+<br>
+<br>
+
+<button class="myRulesButton" style="font-size: 20px;" onclick = "LocalStorageRead()"> READ </button>
+<button class="myRulesButton" style="font-size: 20px;" onclick = "LocalStorageWrite()"> WRITE </button>
+
+<h3 id="ReadResult"></h3>
+
+<script>
+
+function LocalStorageRead() {
+  var s1 = window.localStorage.getItem("Harry-Key");
+  console.log("*** " + s1 + " ***");
+  document.getElementById("ReadResult").innerHTML = s1;
+}
+
+function LocalStorageWrite() {
+  window.localStorage.setItem("Harry-Key", "Hello Harry");
+}
+
+</script>
 
 </body>
 </html>
