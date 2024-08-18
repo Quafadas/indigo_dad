@@ -20,3 +20,7 @@ format:
 ## JP 24/06/2024 added "clean", sometimes help with browser synchronisation with build
 clean:
   scala-cli clean .
+
+copyAssets:
+  cp -r {{justfile_directory()}}/static/. {{outDir}}
+  
