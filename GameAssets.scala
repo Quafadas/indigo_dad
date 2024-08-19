@@ -20,13 +20,10 @@ object GameAssets:
 
   scribe.debug("@@@ Object GameAssets START")
 
-  /* Calculating the game rectangle was non-trivial (and not perfect)...
-  ... factors taking into consideration were ...
-  1) HexBoard3.pBase = Point(260,0)
-  2) hh(8)(33) Point(.xR & .yR)=Point(1190,1320) ... watch out 1320 is the x coord
-  3) additional margins for half hex in both directions
-  Tested on the scale Factors 1.0, 0.9, 0.8, 0.75, 0.5, 0.33, 0.25
-  */
+  /* Game rectangle found by experimentation
+     This rectangle dimensions also laid out in html file
+     Previous Rectangle was (0,0,1580,1400) */
+
   val GameSceneDimensions = Rectangle(0,0,1580,1400)      
   
   def get(): Set[AssetType] =

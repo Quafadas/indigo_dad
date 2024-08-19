@@ -89,17 +89,19 @@ final case class Pieces(
 
       // this is the mechanism for blinking pieces
 
-      val bShow = if (p.pieceShape == CYLINDER && model.gameState == GameState.BLOCK_TURN)
-                  || (p.pieceShape == BLOCK && model.gameState == GameState.CYLINDER_TURN) then
-                    // these pieces do not blink because it is not their turn
-                    true
-                  else if (p.bMoved == true)
-                    // this piece has stop blinking because it has moved
-                    true
-                  else 
-                    // this piece has not moved so blink 
-                    bBlinkOn
+      val bPotentialBlinker = (p.pieceShape, model.gameState) match
+        case (CYLINDER, GameState.CYLINDER_TURN) => true
+        case (BLOCK, GameState.BLOCK_TURN) => true
+        case (_,_) => false
 
+      val bShow = if (bPotentialBlinker) then
+        if (p.bMoved == true) then
+          true // true for steady, this piece has moved
+        else
+          bBlinkOn // this might be true or false depending on the blink timer
+      else
+        true // true for steady, it is not the turn of this piece
+      
       if Piece.selected(p) == false && bShow == true then
         val pPos = model.hexBoard3.getXpYp(pSrc)
         val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS)))
@@ -114,15 +116,15 @@ final case class Pieces(
       if Piece.selected(p) == true then
         val layer = PieceAssets.getGraphic(p.pieceShape, p.pieceIdentity, p.bFlipped)
         val pSrc = p.pCurPos
-        optDragPos match
+        optDragPos match    // watch out ... somehow optDragPos has already been scaled
           case Some(pos) =>
-            val pC = Point(PieceAssets.gWidth / 2, PieceAssets.gHeight / 2)
+            val pC = Point(((PieceAssets.gWidth * fS) / 2).toInt, ((PieceAssets.gHeight * fS) / 2).toInt)
             val pPos = pos - pC
-            val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pPos).scaleBy(fS, fS)))
+            val newFrag = SceneUpdateFragment(Layer(layer.scaleBy(fS, fS).moveTo(pPos)))
             frag = frag |+| newFrag
           case None =>
             val pPos = model.hexBoard3.getXpYp(pSrc)
-            val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS)))
+            val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB+pPos).scaleBy(fS, fS)))
             frag = frag |+| newFrag
         end match
     end for

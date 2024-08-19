@@ -3,15 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <title>FlicFlac</title>
-    <!-- FIXME the indigo-container canvas was giving error "do not use empty rules sets" so JP added padding and margin-->
-    <style>
+    <!-- 
       body {
         padding: 0px;
-        margin: 20px;
-        overflow-x: hidden;
-        overflow-y: hidden;
-        width: 100vw;
-        height: 100vh;
+        margin: 0px;
+        overflow: auto;
+        width: 1580px;
+        height: 2000px;
         background-image: url('rules/FlicFlacV4.png');
         background-size: 100vw 100vh;
         background-color: black;
@@ -20,16 +18,46 @@
       }
       #indigo-container {
         display: flex;
-        align-items: center;
-        justify-content: center;
+        align-items: start;
+        justify-content: left;
         padding: 0px;
         margin: 0px;
-        width: 100vw;
-        height: 100vh;
+        width: 1580px;
+        height: 1400px;
+        overflow: auto;
       }
       #indigo-container canvas {
         padding: 0px;
         margin: 0px;
+      }
+         
+    -->
+    <style>
+      body {
+        padding: 0px;
+        margin: 0px;
+        overflow: auto;
+        width: 1580px;
+        height: 1400px;
+        background-image: url('rules/FlicFlacV4.png');
+        background-size: 100vw 100vh;
+        background-color: black;
+        font-family: arial;
+        font-size: 20px;
+      }
+      #indigo-container {
+        align-items: start;
+        justify-content: left;
+        padding: 0px;
+        margin: 0px;
+        width: 1580px;
+        height: 1400px;
+        
+      }
+      #indigo-container-canvas {
+        padding: 0px;
+        margin: 0px;
+        overflow: auto;
       }
 
     </style>
@@ -37,7 +65,7 @@
   </head>
   <body>
     <!-- This div's id is hardcoded, and several parts of this reference implementation look for it. -->
-
+    <br>
     <div id="myapp"></div>
 
     <script type="text/javascript" src="scripts/indigo-support.js"></script>
@@ -69,12 +97,5 @@
     <script>
       // less.watch();
     </script>
-
-    <div id="RulesToHtml" class="myDiv">
-      <br>
-      <a href = "./Rules1.html">
-        <button class="myButton">Rules</button>
-      </a>
-    </div>
   </body>
 </html>

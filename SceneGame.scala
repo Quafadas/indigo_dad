@@ -174,8 +174,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                    + x + "," + y + " : " + q + "," + r + "," + s)
               Outcome(FlicFlacGameModel.modify(model, None, None))
 
-
-
           end match // findPieceSelected
 
         case None =>
@@ -225,12 +223,22 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       Outcome(newModel)
 
     case ViewportResize(gameViewPort) =>
-      val w = gameViewPort.width - model.hexBoard3.pBase.x
-      val h = gameViewPort.height - model.hexBoard3.pBase.y
-      val dSF = GetScaleFactor(w,h,GameAssets.GameSceneDimensions)
-      scribe.debug("@@@ updateModel ViewportResize w:h->s " + w + ":" + h + "->" + dSF)
+      var dSF = 1.0
+      if (model.gameState == GameState.START){
+        scribe.debug("@@@ ViewPortResize from scratch")
+        val w = gameViewPort.width - model.hexBoard3.pBase.x
+        val h = gameViewPort.height - model.hexBoard3.pBase.y
+        dSF = GetScaleFactor(w,h,GameAssets.GameSceneDimensions)
+        scribe.debug("@@@ updateModel ViewportResize w:h->s " + w + ":" + h + "->" + dSF)
+      }
+      else {
+        dSF = model.scalingFactor
+        scribe.debug("@@@ ViewPortResize from previous model sf="+dSF)
+      }     
+
       val newHexBoard3 = model.hexBoard3.calculateXpYp(dSF, model.hexBoard3)
-      val newModel = model.copy(scalingFactor = dSF, hexBoard3 = newHexBoard3)
+      // FIXME ... should the cylinders always have the fiest move?
+      val newModel = model.copy(scalingFactor = dSF, hexBoard3 = newHexBoard3, gameState=GameState.CYLINDER_TURN)
       val asJson = newModel.asJson.noSpaces
       org.scalajs.dom.window.localStorage.setItem("FlicFlacStats", asJson)
       Outcome(newModel)
@@ -349,7 +357,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val rCorners = Rectangle(Point(iLeftWidth,0), Size(iRightWidth+model.hexBoard3.pBase.x,iHeight))
 
     Outcome(
-      SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Cyan)))
+      SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Black)))
         |+| SceneUpdateFragment(Shape.Box(rLeft, Fill.Color(RGBA.White)))      
         |+| SceneUpdateFragment(Shape.Box(rRight, Fill.Color(RGBA.White)))
         |+| SceneUpdateFragment(GameAssets.cornerLayers(rCorners, 1.0, RGBA.Magenta))

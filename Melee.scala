@@ -50,34 +50,38 @@ final case class Melee(model: FlicFlacGameModel):
               case (CYLINDER, CYLINDER) =>
                 if allPiecesEmpowered(index2) == true then
                   vectorHealth(index1) += 2
+                  scribe.trace("@@@ {Cyldr" + color1 +":" + 2 + "} {Cyldr" + color2 + "}")
+                else
                   vectorHealth(index1) += 1
-                  scribe.info("@@@ {Cyldr" + color1 +":" + 1 + "} {Cyldr" + color2 + "}")
+                  scribe.trace("@@@ {Cyldr" + color1 +":" + 1 + "} {Cyldr" + color2 + "}")
+
               case (BLOCK, BLOCK) =>
                 if allPiecesEmpowered(index2) == true then
                   vectorHealth(index1) += 2
-                  scribe.info("@@@ {Block" + color1 +":" + 2 + "} {Block" + color2 + "}")
+                  scribe.trace("@@@ {Block" + color1 +":" + 2 + "} {Block" + color2 + "}")
                 else
                   vectorHealth(index1) += 1
-                  scribe.info("@@@ {Block" + color1 +":" + 1 + "} {Block" + color2 + "}")
+                  scribe.trace("@@@ {Block" + color1 +":" + 1 + "} {Block" + color2 + "}")
 
               case (CYLINDER, BLOCK) =>
                 if allPiecesEmpowered(index2) == true then
                   vectorHealth(index1) -= 2
                   vectorHealth(index2) += 2
-                  scribe.info("@@@ <Cyldr" + color1 + ":" + (-2) + "> <Block" + color2 +":" + 2 + ">")
+                  scribe.trace("@@@ <Cyldr" + color1 + ":" + (-2) + "> <Block" + color2 +":" + 2 + ">")
                 else
                   vectorHealth(index1) -= 1
                   vectorHealth(index2) += 1
-                  scribe.info("@@@ <Cyldr" + color1 + ":" + (-1) + "> <Block" + color2 +":" + 1 + ">")
+                  scribe.trace("@@@ <Cyldr" + color1 + ":" + (-1) + "> <Block" + color2 +":" + 1 + ">")
+
               case (BLOCK, CYLINDER) =>
                 if allPiecesEmpowered(index2) == true then
                   vectorHealth(index1) -= 2
                   vectorHealth(index2) += 2
-                  scribe.info("@@@ <Block" + color1 + ":" + (-2) + "> <Cyldr" + color2 +":" + 2 + ">")
+                  scribe.trace("@@@ <Block" + color1 + ":" + (-2) + "> <Cyldr" + color2 +":" + 2 + ">")
                 else
                   vectorHealth(index1) -= 1
                   vectorHealth(index2) += 1
-                  scribe.info("@@@ <Block" + color1 + ":" + (-1) + "> <Cyldr" + color2 +":" + 1 + ">")
+                  scribe.trace("@@@ <Block" + color1 + ":" + (-1) + "> <Cyldr" + color2 +":" + 1 + ">")
             }
           end if
         end if

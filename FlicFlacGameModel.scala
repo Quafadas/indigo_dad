@@ -37,7 +37,7 @@ object FlicFlacGameModel:
   def creation(center: Point): FlicFlacGameModel =
     scribe.debug("@@@ FlicFlacGameModel creation")
 
-    val startingGameState = GameState.CYLINDER_TURN   // FIXME
+    val startingGameState = GameState.START
     val score = (0,0)
     val startingTurnTime = 90  // 10ths of a second FIXME we need this configurable
     val defaultScalingFactor = 1.0
@@ -147,7 +147,7 @@ object FlicFlacGameModel:
   def reset(previousModel: FlicFlacGameModel): FlicFlacGameModel =
     scribe.debug("@@@ Reset model")
     
-    val resetGameState = GameState.CYLINDER_TURN
+    val resetGameState = GameState.START
     val score = (0,0)
     val resetTurnTime = 0
     val defaultSF = 1.0
