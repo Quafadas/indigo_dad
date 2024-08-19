@@ -133,39 +133,45 @@
     <script>
     
     function LocalStorageRead() {
-      const sFlicFlac = window.localStorage.getItem("FlicFlac");
-      const oFlicFlac = JSON.parse(sFlicFlac)
+      const sFlicFlacPlayParams = window.localStorage.getItem("FlicFlacPlayerParams");
+      if (sFlicFlacPlayParams != null) {
+        /* We have the object decoded so display on parameters panel */
+        const oFlicFlac = JSON.parse(sFlicFlacPlayParams)
+        document.getElementById("readResults").style.border="4px solid blue"
 
-      document.getElementById("readResults").style.border="4px solid blue"
-
-      
-      console.log("*** " + sFlicFlac + " ***");
-      if (oFlicFlac.configLocalShape == 1) {
-          document.getElementById("blockShape").checked=true
+        if (oFlicFlac.playPamsLocalShape == 1) {
+            document.getElementById("blockShape").checked=true
+          }
+        else{
+          document.getElementById("cylinderShape").checked=true
         }
-      else{
-        document.getElementById("cylinderShape").checked=true
+
+        document.getElementById("localIp").defaultValue = oFlicFlac.playPamsLocalIpAddr
+        document.getElementById("localPort").defaultValue = oFlicFlac.playPamsLocalPort
+        document.getElementById("remoteIp").defaultValue = oFlicFlac.playPamsRemoteIpAddr
+        document.getElementById("remotePort").defaultValue = oFlicFlac.playPamsRemotePort
+        document.getElementById("scoreToWin").defaultValue = oFlicFlac.playPamsScoreToWin
+        document.getElementById("turnTime").defaultValue = oFlicFlac.playPamsTurnTime
+        document.getElementById("captorsTime").defaultValue = oFlicFlac.playPamsCaptorsTime
+        document.getElementById("randEventProb").defaultValue = oFlicFlac.playPamsRandEventProb      
       }
-
-      document.getElementById("localIp").defaultValue = oFlicFlac.configLocalIpAddr
-      document.getElementById("localPort").defaultValue = oFlicFlac.configLocalPort
-      document.getElementById("remoteIp").defaultValue = oFlicFlac.configRemoteIpAddr
-      document.getElementById("remotePort").defaultValue = oFlicFlac.configRemotePort
-      document.getElementById("scoreToWin").defaultValue = oFlicFlac.configScoreToWin
-      document.getElementById("turnTime").defaultValue = oFlicFlac.configTurnTime
-      document.getElementById("captorsTime").defaultValue = oFlicFlac.configCaptorsTime
-      document.getElementById("randEventProb").defaultValue = oFlicFlac.configRandEventProb
-
-      console.log("IP Result1:" + isValidIP(oFlicFlac.configLocalIpAddr))
-      
+      else      
+      {
+        /* no json object found so leave parameters panel blank */
+        console.log("@@@ Cache for PlayParams not found")
+      }
     }
     
     function LocalStorageWrite() {
-      // reread the old cache entry
-      const sFlicFlac = window.localStorage.getItem("FlicFlac");
-      var oFlicFlac = JSON.parse(sFlicFlac);
-
       // validate the new parameters
+      var localShape = 0
+      var remoteShape = 0
+      if (document.getElementById("blockShape").value) (
+        localShape = 1
+      )
+      else (
+        remoteShape = 1
+      )
 
       var localIp = document.getElementById("localIp").value
       var localPort = document.getElementById("localPort").value
@@ -219,26 +225,30 @@
 
       if (invalidParams == true) {
         // leave error message(s) showing if one or more paramters invalid
-        document.getElementById("readResults").style.border="4px solid red"
+        document.getElementById("readResults").style.border="4px solid red";
         return;
       }
       else {
-        document.getElementById("readResults").style.border="4px solid blue"
+        document.getElementById("readResults").style.border="4px solid blue";
 
-        // infuse new settings into object
+        // infuse new settings into a new PlayParams object
 
-        oFlicFlac.configLocalIpAddr = localIp;
-        oFlicFlac.configLocalPort = localPort;
-        oFlicFlac.configRemoteIpAddr = remoteIp;
-        oFlicFlac.configRemotePort = remotePort;
-        oFlicFlac.configScoreToWin = scoreToWin;
-        oFlicFlac.configTurnTime = turnTime;
-        oFlicFlac.configCaptorsTime = captorsTime;
-        oFlicFlac.configRandEventProb = randEventProb;
+        var oPlayParams = {
+          playPamsLocalShape: localShape,
+          playPamsLocalIpAddr: localIp,
+          playPamsLocalPort: localPort,
+          playPamsRemoteShape: remoteShape,
+          playPamsRemoteIpAddr: remoteIp,
+          playPamsRemotePort: remotePort,
+          playPamsScoreToWin: scoreToWin,
+          playPamsTurnTime: turnTime,
+          playPamsCaptorsTime: captorsTime,
+          playPamsRandEventProb: randEventProb
+        }
 
         // create new string to write as new cache
-        const sNewFlicFlac = JSON.stringify(oFlicFlac);      
-        window.localStorage.setItem("FlicFlac", sNewFlicFlac);
+        const sNewFlicFlacPlayParams = JSON.stringify(oPlayParams);      
+        window.localStorage.setItem("FlicFlacPlayerParams", sNewFlicFlacPlayParams);
 
         // relocate to indigo environment
         window.location.href = './index2.html';

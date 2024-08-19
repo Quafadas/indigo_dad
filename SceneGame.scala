@@ -211,7 +211,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       val newHexBoard3 = model.hexBoard3.calculateXpYp(newSF, model.hexBoard3)
       val newModel = model.copy(scalingFactor=newSF, hexBoard3 = newHexBoard3)
       val asJson = newModel.asJson.noSpaces
-      org.scalajs.dom.window.localStorage.setItem("FlicFlac", asJson)
+      org.scalajs.dom.window.localStorage.setItem("FlicFlacStats", asJson)
       Outcome(newModel)
 
     case ButtonMinusEvent =>
@@ -221,7 +221,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       val newHexBoard3 = model.hexBoard3.calculateXpYp(newSF, model.hexBoard3)
       val newModel = model.copy(scalingFactor=newSF, hexBoard3 = newHexBoard3)
       val asJson = newModel.asJson.noSpaces
-      org.scalajs.dom.window.localStorage.setItem("FlicFlac", asJson)
+      org.scalajs.dom.window.localStorage.setItem("FlicFlacStats", asJson)
       Outcome(newModel)
 
     case ViewportResize(gameViewPort) =>
@@ -232,7 +232,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       val newHexBoard3 = model.hexBoard3.calculateXpYp(dSF, model.hexBoard3)
       val newModel = model.copy(scalingFactor = dSF, hexBoard3 = newHexBoard3)
       val asJson = newModel.asJson.noSpaces
-      org.scalajs.dom.window.localStorage.setItem("FlicFlac", asJson)
+      org.scalajs.dom.window.localStorage.setItem("FlicFlacStats", asJson)
       Outcome(newModel)
 
     case ButtonTurnEvent =>

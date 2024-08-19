@@ -72,16 +72,7 @@ case class FlicFlacGame(
 
   def initialModel(flicFlacStartupData: FlicFlacStartupData): Outcome[FlicFlacGameModel] =
     scribe.debug("@@@ FlicFlacMain-initialModel()")
-
-    val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlac")) match
-
-      case Right(model: FlicFlacGameModel) =>
-        scribe.debug("@@@ Restored model")
-        model
-      case Left(_) =>
-        scribe.debug("@@@ Created model")
-        FlicFlacGameModel.creation(Point(0, 0))
-
+    val cacheOrNew = FlicFlacGameModel.retrieve()
     Outcome(cacheOrNew)
   end initialModel
 

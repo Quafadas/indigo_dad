@@ -8,17 +8,6 @@ import io.circe.parser.decode
 import game.Piece.pieceShape
 
 final case class FlicFlacGameModel(
-    configLocalIpAddr: String, // ..... default 127.0.0.1
-    configLocalPort: Int, // .......... default 3000
-    configLocalShape: Int, // ..... ... default 0 = cylinder
-    configRemoteIpAddr: String, // .... default 0.0.0.0
-    configRemotePort: Int, // ......... default 3000
-    configRemoteShape: Int, // ........ default 1 = block
-    configScoreToWin: Int, // ......... default 11
-    configTurnTime: Int, // ........... default 10 seconds
-    configCaptorsTime: Int, // ........ default 5 seconds
-    configRandEventProb: Int, // ...... default 1 (in 100)
-
     gameState : GameState,
     gameScore : (Int, Int),
     turnTimeRemaining : Int,
@@ -48,17 +37,6 @@ object FlicFlacGameModel:
   def creation(center: Point): FlicFlacGameModel =
     scribe.debug("@@@ FlicFlacGameModel creation")
 
-    val cfgLocalIpAddr = "127.0.0.1"
-    val cfgLocalPort = 3000
-    val cfgLocalShape = CYLINDER
-    val cfgRemoteIpAddr = "0.0.0.0"
-    val cfgRemotePort = 3000
-    val cfgRemoteShape = BLOCK
-    val cfgScoreToWin = 11
-    val cfgTurnTime = 10
-    val cfgCaptorsTime = 5
-    val cfgRandEventProb = 1
-
     val startingGameState = GameState.CYLINDER_TURN   // FIXME
     val score = (0,0)
     val startingTurnTime = 90  // 10ths of a second FIXME we need this configurable
@@ -67,17 +45,6 @@ object FlicFlacGameModel:
     val highLighter = HighLighter(hexBoard3, false, Point(0,0))
     val startingSpots : Spots = Spots(Set.empty)
     FlicFlacGameModel(  
-                        cfgLocalIpAddr,
-                        cfgLocalPort,
-                        cfgLocalShape,
-                        cfgRemoteIpAddr,
-                        cfgRemotePort,
-                        cfgRemoteShape,
-                        cfgScoreToWin,
-                        cfgTurnTime,
-                        cfgCaptorsTime,
-                        cfgRandEventProb,
-            
                         startingGameState,
                         score,
                         startingTurnTime,
@@ -135,7 +102,7 @@ object FlicFlacGameModel:
     val m2 = modifyHighLighter(m1, possibleHighLighter)
     val m3 = modifyPossibleMoves(m2)
     val asJson = m3.asJson.noSpaces
-    org.scalajs.dom.window.localStorage.setItem("FlicFlac", asJson)
+    org.scalajs.dom.window.localStorage.setItem("FlicFlacStats", asJson)
     m3
   end modify
 
@@ -179,39 +146,18 @@ object FlicFlacGameModel:
 
   def reset(previousModel: FlicFlacGameModel): FlicFlacGameModel =
     scribe.debug("@@@ Reset model")
-
-    val cfgLocalIpAddr = previousModel.configLocalIpAddr
-    val cfgLocalPort = previousModel.configLocalPort
-    val cfgLocalShape = previousModel.configLocalShape
-    val cfgRemoteIpAddr = previousModel.configRemoteIpAddr
-    val cfgRemotePort = previousModel.configRemotePort
-    val cfgRemoteShape = previousModel.configRemoteShape
-    val cfgScoreToWin = previousModel.configScoreToWin
-    val cfgTurnTime = previousModel.configTurnTime
-    val cfgCaptorsTime = previousModel.configCaptorsTime
-    val cfgRandEventProb = previousModel.configRandEventProb
-
+    
     val resetGameState = GameState.CYLINDER_TURN
     val score = (0,0)
-    val resetTime = previousModel.configTurnTime
+    val resetTurnTime = 0
     val defaultSF = 1.0
     val hexBoard3 = HexBoard3()
     val highLighter = HighLighter(hexBoard3, false, Point(0,0))
     val emptySpots : Spots = Spots(Set.empty)
     FlicFlacGameModel(  
-                        cfgLocalIpAddr,
-                        cfgLocalPort,
-                        cfgLocalShape,
-                        cfgRemoteIpAddr,
-                        cfgRemotePort,
-                        cfgRemoteShape,
-                        cfgScoreToWin,
-                        cfgTurnTime,
-                        cfgCaptorsTime,
-                        cfgRandEventProb,
                         resetGameState,
                         score,
-                        resetTime,
+                        resetTurnTime,
                         defaultSF,
                         summonPieces(hexBoard3),
                         emptySpots, 
@@ -221,7 +167,12 @@ object FlicFlacGameModel:
   end reset
 
   def retrieve(): FlicFlacGameModel =
-    val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlac")) match
+
+    // FIXME reading PlayerParams here is just a test
+    val playerParams = FlicFlacPlayerParams.retrieve()
+    scribe.debug("@@@ ScoreToWin: " + playerParams.playPamsScoreToWin)
+
+    val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlacStats")) match
       case Right(model: FlicFlacGameModel) =>
         // FIXME we should check for version number here and goto create if mismatch
         scribe.debug("@@@ Restored model")
