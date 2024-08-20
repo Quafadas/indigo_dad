@@ -24,7 +24,7 @@ object GameAssets:
      This rectangle dimensions also laid out in html file
      Previous Rectangle was (0,0,1580,1400) */
 
-  val GameSceneDimensions = Rectangle(0,0,1580,1400)      
+  val GameSceneDimensions = Rectangle(0,0,1580,1300)      
   
   def get(): Set[AssetType] =
     Set(

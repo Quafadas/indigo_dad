@@ -320,6 +320,19 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       end match
       Outcome(viewModel)
 
+    case ButtonPlusEvent =>
+      val newViewModel = viewModel.changeButtonBoundaries( model, viewModel.gameViewport)
+      Outcome(newViewModel)
+
+
+    case ButtonMinusEvent =>
+      val newViewModel = viewModel.changeButtonBoundaries( model, viewModel.gameViewport)
+      Outcome(newViewModel)
+
+    case ViewportResize(gameViewPort) => 
+      val newViewModel = viewModel.changeButtonBoundaries( model, gameViewPort)
+      Outcome(newViewModel)
+
     case _ =>
       Outcome(viewModel)
   end updateViewModel
@@ -333,18 +346,24 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-//    val textGame = TextBox("Game Scene")
-    val textGame = TextBox(dMsg + " Score:" + model.gameScore, 400, 40)
+    val dSF = model.scalingFactor
+    val sFactor = ((10*dSF).toInt).toString()
+
+    val fontSize = (math.round((30*dSF))).toInt
+    val textDiag = TextBox(dMsg, 200, 40)  // FIXME 200,40 just some convenient numbers for text box size
       .withColor(RGBA.Black)
-      .withFontSize(Pixels(20))
-      .moveTo(20, 0)
+      .withFontSize(Pixels(fontSize))
+      .moveTo(0, 20)
+    val textScore = TextBox("Score:" + model.gameScore, 200, 40) // FIXME 200,40 just some convenient numbers for text box size
+      .withColor(RGBA.Black)
+      .withFontSize(Pixels(fontSize))
+      .moveTo(0, 40)
+
 
     val bootData = context.frameContext.startUpData.flicFlacBootData  // FIXME width and height from wrong source
     val width = bootData.pixelWidth
     val height = bootData.pixelHeight
 
-    val dSF = model.scalingFactor
-    val sFactor = ((10*dSF).toInt).toString()
     val iHeight = (math.round(GameAssets.GameSceneDimensions.height * dSF)).toInt
     val iLeftWidth = model.hexBoard3.pBase.x
     val iRightWidth = (math.round(GameAssets.GameSceneDimensions.right - model.hexBoard3.pBase.x)*dSF).toInt
@@ -359,7 +378,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(GameAssets.cornerLayers(rCorners, 1.0, RGBA.Magenta))
         |+| SceneUpdateFragment(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Magenta)))
         |+| SceneUpdateFragment(TextBox(sFactor,50,20).withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(0,0))
-        |+| SceneUpdateFragment(textGame)
+        |+| SceneUpdateFragment(textDiag)
+        |+| SceneUpdateFragment(textScore)
         |+| SceneUpdateFragment(viewModel.newGameButton.draw)
         |+| SceneUpdateFragment(viewModel.plusButton.draw)
         |+| SceneUpdateFragment(viewModel.minusButton.draw)
@@ -429,7 +449,7 @@ final case class GameSceneViewModel(
     this.copy( // scalingFactor
                // optDragPos
                 newGameButton = newNewGameButton,
-                plusButton = newMinusButton,
+                plusButton = newPlusButton,
                 minusButton = newMinusButton,
                 turnButton = newTurnButton
                 )
@@ -439,16 +459,16 @@ final case class GameSceneViewModel(
 end GameSceneViewModel
 
 object GameSceneViewModel:
-  val newGameBounds = Rectangle(20, 40, 240, 80)
-  val plusBounds = Rectangle(20, 140, 90, 80)
-  val minusBounds = Rectangle(170, 140, 90, 80)
-  val turnBounds = Rectangle(20, 240, 90, 80)
+  val turnBounds = Rectangle(20, 140, 90, 80)
+  val newGameBounds = Rectangle(20, 340, 240, 80)
+  val plusBounds = Rectangle(20, 440, 90, 80)
+  val minusBounds = Rectangle(170, 440, 90, 80)
     
   val initial: GameSceneViewModel =
     GameSceneViewModel(
       None, // ... we have no last position of the pointer recorded
 
-      GameViewport(1920,1080),
+      GameViewport(1580,1900),
       Button(
         buttonAssets = GameAssets.buttonNewGameAssets(1.0),
         bounds = newGameBounds,

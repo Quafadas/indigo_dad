@@ -63,7 +63,7 @@ case class HexBoard3():
   val arrayHeight = 34 // .............. forcing arrayHeight=34 (calculated from sZ=3)
   val graphicWidth = 90 // ............. the width of the graphic crop for each hex
   val graphicHeight = 80 // ............ the width of the graphic crop for each hex
-  val pBase = Point(260,30) // ......... coords of invisible left hand corner
+  val pBase = Point(260,0) // .......... coords of invisible left hand corner
   val xWidth = 70 // ................... amount to add to a hex centre x coord to reach the vertical line of the next column
   val yHeight = 40 // .................. half the amount to add to a hex centre y coord to reach the next hexagon below
   val xHalfway = 10 // ................. xcoord of halfway along the top left diagonal line of first hex
