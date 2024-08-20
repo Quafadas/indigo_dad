@@ -448,12 +448,12 @@ case class HexBoard3():
     val p3 = Point(0, arrayHeight-3)
     val p4 = Point(arrayWidth-2, arrayHeight-3)
     id match
-        case CB => p1 + Point(0,0)  // Blue
-        case CR => p1 + Point(0,2)  // Red
-        case CY => p1 + Point(1,1)  // Yellow
-        case CO => p4 + Point(0,0)  // Orange
-        case CG => p4 + Point(0,-2) // Green
-        case CP => p4 + Point(0,-1) // Purple
+        case CB => p1 + Point(1,3)  // Blue
+        case CR => p1 + Point(1,2)  // Red
+        case CY => p1 + Point(2,1)  // Yellow
+        case CO => p4 + Point(-1,-1)  // Orange
+        case CG => p4 + Point(-1,-2) // Green
+        case CP => p4 + Point(0,-3) // Purple
     end match
   end getCylinderHomePos
 
@@ -463,12 +463,12 @@ case class HexBoard3():
     val p3 = Point(0, arrayHeight-3)
     val p4 = Point(arrayWidth-2, arrayHeight-3)
     id match
-        case CB => p3 + Point(0,0)  // Blue
-        case CR => p3 + Point(0,-2) // Red
-        case CY => p3 + Point(1,-1) // Yellow
-        case CO => p2 + Point(0,0)  // Orange
-        case CG => p2 + Point(0,2)  // Green
-        case CP => p2 + Point(0,1)  // Purple
+        case CB => p3 + Point(1,-3)  // Blue
+        case CR => p3 + Point(1,-2) // Red
+        case CY => p3 + Point(2,-1) // Yellow
+        case CO => p2 + Point(-1,1)  // Orange
+        case CG => p2 + Point(-1,2)  // Green
+        case CP => p2 + Point(0,3)  // Purple
     end match
   end getBlockHomePos
 
