@@ -58,14 +58,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                 dMsg = "##B## Down|Grid|Sel|!="
                 scribe.debug("@@@ PointerEvent " + dMsg)
                 val newHL = model.highLighter.shine(model.highLighter, false)
-                val modelB1 = model.copy(highLighter = newHL)
-                if modelB1.hexBoard3.isThisHexBlack(pos) == true then
-                  val updatedPiece = Piece.setPosFlipDeselect(piece, pos)
-                  Outcome(FlicFlacGameModel.modify(modelB1, Some(updatedPiece), None))
-                else
-                  val updatedPiece = Piece.setPosDeselect(piece, pos)
-                  Outcome(FlicFlacGameModel.modify(modelB1, Some(updatedPiece), None))
-                end if
+                Outcome(model.copy(highLighter = newHL))
               end if
 
             case None =>
