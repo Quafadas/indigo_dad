@@ -139,8 +139,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                   // Pointer Up, Pos on Grid, Piece Selected, No Move
                   dMsg = "##H## Up|Grid|Sel|=="
                   scribe.debug("@@@ PointerEvent " + dMsg)
-                  val newHL = model.highLighter.shine(model.highLighter, false)
-                  val updatedPiece = Piece.setSelected(piece, false)
+                  val newHL = model.highLighter.shine(model.highLighter, true)
+                  val updatedPiece = Piece.setSelected(piece, true)
                   val updatedModel = FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL))
                   val newPieces = Melee(updatedModel).combat(updatedModel)
                   Outcome(FlicFlacGameModel.modifyPieces(updatedModel, newPieces))
