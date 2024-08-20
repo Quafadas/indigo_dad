@@ -27,8 +27,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   def subSystems = Set(SSGame("SubSystemGame"))
 
   var bBlinkOn = true
-  var iFrameTick = 0
-  var iDragTick = 0
   var dMsg = "-----"
 
   def updateModel(
@@ -47,7 +45,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               // Pointer Down, Pos on Grid, Piece Selected
               if piece.pCurPos == pos then
                 // Pointer Down, Pos on Grid, Piece Selected, PiecePos=PointerPos <<##A##>>
-                dMsg = "##A## Down|Grid|Sel|=="
+                dMsg = "##A##"
                 scribe.debug("@@@ PointerEvent " + dMsg)
                 val newHL = model.highLighter.setPosAndShine(model.highLighter, pos)
                 val modelA1 = model.copy(highLighter = newHL)
@@ -55,7 +53,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                 Outcome(FlicFlacGameModel.modify(modelA1, Some(updatedPiece), None))
               else
                 // Pointer Down, Pos on Grid, Piece Selected, PiecePos!=PointerPos <<##B##>>
-                dMsg = "##B## Down|Grid|Sel|!="
+                dMsg = "##B##"
                 scribe.debug("@@@ PointerEvent " + dMsg)
                 val newHL = model.highLighter.shine(model.highLighter, false)
                 Outcome(model.copy(highLighter = newHL))
@@ -65,16 +63,23 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               // Pointer Down, Pos on Grid, No Piece Selected
               FlicFlacGameModel.findPieceByPos(model, pos) match
                 case Some(piece) =>
-                  // Pointer Down, Pos on Grid, No Piece Selected, PiecePos=PointerPos <<##C##>>
-                  dMsg = "##C## Down|Grid|Non|=="
-                  scribe.debug("@@@ PointerEvent " + dMsg)
-                  val newHL = model.highLighter.setPosAndShine(model.highLighter, pos)
-                  val updatedPiece = Piece.setSelected(piece, true)
-                  Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
+                  if (((piece.pieceShape == CYLINDER) && (model.gameState == GameState.CYLINDER_TURN))
+                  || ((piece.pieceShape == BLOCK) && (model.gameState == GameState.BLOCK_TURN))) then
+                    // Pointer Down, Pos on Grid, No Piece Selected, PiecePos=PointerPos and correct turn <<##C##>>
+                    dMsg = "##C##"
+                    scribe.debug("@@@ PointerEvent " + dMsg)
+                    val newHL = model.highLighter.setPosAndShine(model.highLighter, pos)
+                    val updatedPiece = Piece.setSelected(piece, true)
+                    Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
+                  else
+                    // Pointer Down, Pos on Grid, No Piece Selected, PiecePos=PointerPos but incorrect turn <<##D##>>
+                    dMsg = "##D##"
+                    scribe.debug("@@@ PointerEvent " + dMsg)
+                    Outcome(model)
 
                 case None =>
-                  // Pointer Down, Pos on Grid, No Piece Selected, No Piece Found <<##D##>>
-                  dMsg = "##D## Down|Grid|Non|!="
+                  // Pointer Down, Pos on Grid, No Piece Selected, No Piece Found <<##E##>>
+                  dMsg = "##E##"
                   scribe.debug("@@@ PointerEvent " + dMsg)
                   val newHL = model.highLighter.setPosAndShine(model.highLighter, pos)
                   Outcome(FlicFlacGameModel.modify(model, None, Some(newHL)))
@@ -86,16 +91,16 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
           // Pointer Down, Pos off Grid
           FlicFlacGameModel.findPieceSelected(model) match
             case Some(piece) =>
-              // Pointer Down, Pos off Grid, Piece Selected <<##E##>>
-              dMsg = "##E## Down|Void|Sel"
+              // Pointer Down, Pos off Grid, Piece Selected <<##F##>>
+              dMsg = "##F##"
               scribe.debug("@@@ PointerEvent " + dMsg)
               val newHL = model.highLighter.shine(model.highLighter, false)
               val updatedPiece = Piece.setPosDeselect(piece, piece.pHomePos)
               Outcome(FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL)))
 
             case None =>
-              // Pointer Down, Pos off Grid, No Piece Selected <<##F>>
-              dMsg = "##F## Down|Void|Non"
+              // Pointer Down, Pos off Grid, No Piece Selected <<##G##>>
+              dMsg = "##G##"
               scribe.debug("@@@ PointerEvent " + dMsg)
               val newHL = model.highLighter.shine(model.highLighter, false)
               Outcome(FlicFlacGameModel.modify(model, None, Some(newHL)))
@@ -112,7 +117,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               // Pointer Up, Pos on Grid, Piece Selected
               if model.possibleMoveSpots.indices((pos.x,pos.y)) then
                 // Pointer Up, Pos on Grid, Piece Selected, Valid Move
-                dMsg = "##G## Up|Grid|Sel|=="
+                dMsg = "##H##"
                 scribe.debug("@@@ PointerEvent " + dMsg)
                 val newHL = model.highLighter.shine(model.highLighter, false)
                 if model.hexBoard3.isThisHexBlack(pos) == true then
@@ -130,7 +135,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                 // Pointer Up, Pos on Grid, Piece Selected
                 if pos == piece.pCurPos then
                   // Pointer Up, Pos on Grid, Piece Selected, No Move
-                  dMsg = "##H## Up|Grid|Sel|=="
+                  dMsg = "##I##"
                   scribe.debug("@@@ PointerEvent " + dMsg)
                   val newHL = model.highLighter.shine(model.highLighter, true)
                   val updatedPiece = Piece.setSelected(piece, true)
@@ -139,7 +144,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                   Outcome(FlicFlacGameModel.modifyPieces(updatedModel, newPieces))
                 else
                   // Pointer Up, Pos on Grid, Piece Selected, Invalid Move
-                  dMsg = "##I## Up|Grid|Sel|=="
+                  dMsg = "##J##"
                   scribe.debug("@@@ PointerEvent " + dMsg)
                   val newHL = model.highLighter.shine(model.highLighter, false)
                   val updatedPiece = Piece.setPosDeselect(piece, piece.pCurPos)
@@ -150,8 +155,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               end if
               
             case None =>
-              // Pointer Up, Pos on Grid, No piece selected <<##I##>>
-              dMsg = "##J## Up|Grid|Non"
+              // Pointer Up, Pos on Grid, No piece selected <<##K##>>
+              dMsg = "##K##"
               scribe.debug("@@@ PointerEvent " + dMsg)
 
               // FIXME 8 test lines to show magenta hex detail follows ...
@@ -174,7 +179,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
           FlicFlacGameModel.findPieceSelected(model) match
             case Some(piece) =>
               // Pointer Up, Pos off Grid, Piece Selected
-              dMsg = "##K## Up|Void|Sel"
+              dMsg = "##L##"
               scribe.debug("@@@ PointerEvent " + dMsg)
               val newHL = model.highLighter.shine(model.highLighter, false)
               val updatedPiece = Piece.setPosDeselect(piece, piece.pCurPos)
@@ -184,7 +189,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
             case None =>
               // Pointer Up, Pos off Grid, No piece selected
-              dMsg = "##L## Up|Void|Non"
+              dMsg = "##M##"
               scribe.debug("@@@ PointerEvent " + dMsg)
               val newHL = model.highLighter.shine(model.highLighter, false)
               Outcome(FlicFlacGameModel.modify(model, None, Some(newHL)))
@@ -302,7 +307,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] =
     case FrameTick =>
-      iFrameTick += 1
       viewModel.update(context.mouse, context.frameContext.inputState.pointers)
 
     case e: PointerEvent.PointerMove =>
@@ -314,7 +318,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         case None =>
           viewModel.optDragPos = None
       end match
-      iDragTick += 1
       Outcome(viewModel)
 
     case _ =>
@@ -331,9 +334,9 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   ): Outcome[SceneUpdateFragment] =
 
 //    val textGame = TextBox("Game Scene")
-    val textGame = TextBox(dMsg + " " + iFrameTick + ":" + iDragTick + " Score:" + model.gameScore, 1000, 40)
+    val textGame = TextBox(dMsg + " Score:" + model.gameScore, 400, 40)
       .withColor(RGBA.Black)
-      .withFontSize(Pixels(30))
+      .withFontSize(Pixels(20))
       .moveTo(20, 0)
 
     val bootData = context.frameContext.startUpData.flicFlacBootData  // FIXME width and height from wrong source
