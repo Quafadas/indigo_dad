@@ -93,7 +93,7 @@ case class HexBoard3():
   trimBoard( arrayWidth, arrayHeight, CX ) 
 
   // establish extra hexes for homepositions of pieces
-  establishHomeHexes( arrayWidth, arrayHeight, CW)
+  establishHomeHexes( arrayWidth, arrayHeight)
 
   // ########################################################
 
@@ -265,19 +265,19 @@ case class HexBoard3():
   /* 
   establishHomeHexes sets up extra black hex for the starting point for cylinder pieces
    */
-  def establishHomeHexes(width: Int, height: Int, color: Int): Unit =
-    setHexColor(getCylinderHomePos(CB), color)
-    setHexColor(getCylinderHomePos(CG), color)
-    setHexColor(getCylinderHomePos(CY), color)
-    setHexColor(getCylinderHomePos(CO), color)
-    setHexColor(getCylinderHomePos(CR), color)
-    setHexColor(getCylinderHomePos(CP), color)
-    setHexColor(getBlockHomePos(CB), color)
-    setHexColor(getBlockHomePos(CG), color)
-    setHexColor(getBlockHomePos(CY), color)
-    setHexColor(getBlockHomePos(CO), color)
-    setHexColor(getBlockHomePos(CR), color)
-    setHexColor(getBlockHomePos(CP), color)
+  def establishHomeHexes(width: Int, height: Int): Unit =
+    setHexColor(getCylinderHomePos(CB), CB)
+    setHexColor(getCylinderHomePos(CG), CG)
+    setHexColor(getCylinderHomePos(CY), CY)
+    setHexColor(getCylinderHomePos(CO), CO)
+    setHexColor(getCylinderHomePos(CR), CR)
+    setHexColor(getCylinderHomePos(CP), CP)
+    setHexColor(getBlockHomePos(CB), CB)
+    setHexColor(getBlockHomePos(CG), CG)
+    setHexColor(getBlockHomePos(CY), CY)
+    setHexColor(getBlockHomePos(CO), CO)
+    setHexColor(getBlockHomePos(CR), CR)
+    setHexColor(getBlockHomePos(CP), CP)
   end establishHomeHexes
 
 
