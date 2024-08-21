@@ -10,8 +10,7 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.math.*
 import io.circe.parser.decode
 import scribe.*
-import scribe.format._
-
+import scribe.format.*
 
 import org.scalajs.dom
 import tyrian.TyrianSubSystem
@@ -37,7 +36,7 @@ case class FlicFlacGame(
 ) extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
   // scribe reporting levels: fatal,error,warn,info,debug,trace
-  //val myFormatter: Formatter = formatter"[$threadName] $positionAbbreviated - $message$newLine"
+  // val myFormatter: Formatter = formatter"[$threadName] $positionAbbreviated - $message$newLine"
   Logger.root
     .clearHandlers()
     .withHandler(formatter = Formatter.simple)
@@ -127,7 +126,7 @@ case class FlicFlacGame(
       FlicFlacViewModel(
         staticAssets,
         GameSceneViewModel.initial,
-        flicFlacStartupData.flicFlacBootData.gameViewPort,
+        flicFlacStartupData.flicFlacBootData.gameViewPort
       )
     )
   end initialViewModel
@@ -156,7 +155,6 @@ case class FlicFlacGame(
       Outcome(flicFlacViewModel)
         .addGlobalEvents(SceneEvent.JumpTo(SceneGame.name))
         .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
-
 
     case _ =>
       if kount3 > 0 then
@@ -196,7 +194,6 @@ case class FlicFlacGame(
   scribe.debug("@@@ FlicFlacMain class FlicFlacGame Finish")
 end FlicFlacGame
 
-
 def GetScaleFactor(viewWidth: Int, viewHeight: Int, sceneDimensions: Rectangle): Double =
   val dsfx: Double = viewWidth.toDouble / sceneDimensions.width
   val dsfy: Double = viewHeight.toDouble / sceneDimensions.height
@@ -209,11 +206,10 @@ def GetScaleFactor(viewWidth: Int, viewHeight: Int, sceneDimensions: Rectangle):
     else if dToCheck >= 0.75 then 0.75
     else if dToCheck >= 0.67 then 0.67
     else if dToCheck >= 0.5 then 0.5
-     else if dToCheck >= 0.33 then 0.33
+    else if dToCheck >= 0.33 then 0.33
     else 0.25
   dSF
 end GetScaleFactor
-
 
 //final case class ViewModel()
 final case class FlicFlacViewModel(
@@ -232,4 +228,3 @@ case object ButtonPlusEvent extends GlobalEvent
 case object ButtonMinusEvent extends GlobalEvent
 case object ButtonTurnEvent extends GlobalEvent
 case object SubSysGameUpdate extends GlobalEvent
-

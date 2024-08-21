@@ -70,24 +70,27 @@ object Piece:
     p.copy(bCaptured = b)
   end setCaptured
 
-  def setCaptor(p: Piece, b: Boolean): Piece = 
-      p.copy( bCaptor = b)
+  def setCaptor(p: Piece, b: Boolean): Piece =
+    p.copy(bCaptor = b)
   end setCaptor
 
-  def setMoved(p: Piece, b: Boolean): Piece = 
+  def setMoved(p: Piece, b: Boolean): Piece =
     p.copy(bMoved = b)
   end setMoved
 
-  def setTurnStartPos(p: Piece, pPos: Point): Piece = 
+  def setTurnStartPos(p: Piece, pPos: Point): Piece =
     p.copy(pTurnStartPos = pPos, bTurnStartFlipState = p.bFlipped)
   end setTurnStartPos
 
   def setPosition(p: Piece, pPos: Point): Piece =
     if p.pCurPos == pPos then
+      // no change
       p
     else if pPos == p.pTurnStartPos then
-      p.copy(pCurPos = pPos, bMoved = false, bCaptor = false, bFlipped = p.bTurnStartFlipState) 
+      // piece taking back move
+      p.copy(pCurPos = pPos, bMoved = false, bCaptor = false, bFlipped = p.bTurnStartFlipState)
     else
+      // normal move
       p.copy(pCurPos = pPos, bMoved = true)
     end if
   end setPosition
@@ -147,6 +150,5 @@ object PieceAssets:
     val pieceGraphic = Graphic(pieceRect, 4, Material.ImageEffects(pieceAssetName)) // Pieces on Layer 4
     pieceGraphic
   end getGraphic
-
 
 end PieceAssets

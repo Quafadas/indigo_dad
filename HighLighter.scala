@@ -3,16 +3,16 @@ package game
 import indigo.*
 
 final case class HighLighter(
-  val hexBoard3: HexBoard3,
-  val displayOn: Boolean,
-  val currentPos: Point
+    val hexBoard3: HexBoard3,
+    val displayOn: Boolean,
+    val currentPos: Point
 ):
 
   /*
   setPos repositions the highlighter hex as appropriate
    */
   def setPosAndShine(highLighter: HighLighter, newPos: Point): HighLighter =
-    highLighter.copy(displayOn=true, currentPos = newPos)
+    highLighter.copy(displayOn = true, currentPos = newPos)
   end setPosAndShine
 
   /*

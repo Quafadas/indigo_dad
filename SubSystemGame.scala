@@ -10,9 +10,10 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
   val id: SubSystemId = SubSystemId("SubSystemGame")
 
   val eventFilter: GlobalEvent => Option[EventType] = {
-    case e: GlobalEvent => 
-      if (e==SubSysGameUpdate) then Some(e)
+    case e: GlobalEvent =>
+      if e == SubSysGameUpdate then Some(e)
       else None
+      end if
     case null => None
   }
 
@@ -26,8 +27,8 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
       message: String
   ): EventType => Outcome[String] = {
 
-    case SubSysGameUpdate =>  Outcome(message)
-    case _ => Outcome(message)
+    case SubSysGameUpdate => Outcome(message)
+    case _                => Outcome(message)
   }
 
   def present(

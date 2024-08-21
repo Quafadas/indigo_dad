@@ -15,7 +15,7 @@ case class HH3(
     s: Int, // .... cubic s Coord (-ve to +ve = bottom right to top left)
     xR: Int, // ... original copy of xS (ie with scale factor 1)
     yR: Int, // ... original copy of yS (ie with scale factor 1)
-    xS: Int, // ... pixel x scaled offset from base point for origin of png to paint this hex 
+    xS: Int, // ... pixel x scaled offset from base point for origin of png to paint this hex
     yS: Int // .... pixel y scaled offset from base point for origin of png to paint this hex
 )
 

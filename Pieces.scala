@@ -35,54 +35,59 @@ def mix(i: Int): RGBA =
     case _  => RGBA.fromHexString("#FF00FFFF") // Magenta
 
 final case class Pieces(
-    modelPieces: Vector[Piece],
+    modelPieces: Vector[Piece]
 ):
-  def newTurn(model: FlicFlacGameModel) : Pieces =
+  def newTurn(model: FlicFlacGameModel): Pieces =
     var newModelPieces = Vector.empty[Piece]
     for p1 <- model.pieces.modelPieces do
-      val pNewCurPos = 
+      val pNewCurPos =
         if p1.bCaptured then p1.pHomePos // if captured, return home & clear bCaptured flag
         else p1.pCurPos
-      val p2 = p1.copy( 
+      val p2 = p1.copy(
         bSelected = false,
-        bCaptured = false, 
-        bCaptor = false, 
-        bMoved = false, 
+        bCaptured = false,
+        bCaptor = false,
+        bMoved = false,
         pTurnStartPos = pNewCurPos,
-        bTurnStartFlipState = p1.bFlipped, 
-        pCurPos = pNewCurPos )
+        bTurnStartFlipState = p1.bFlipped,
+        pCurPos = pNewCurPos
+      )
       newModelPieces = newModelPieces :+ p2
     end for
     Pieces(newModelPieces)
   end newTurn
 
-  def extraTurnScoring(model: FlicFlacGameModel) : (Int, Int) = 
-    var additionalScore = (0,0)
+  def extraTurnScoring(model: FlicFlacGameModel): (Int, Int) =
+    var additionalScore = (0, 0)
     for p <- model.pieces.modelPieces do
       if Piece.captured(p) then
         if p.pieceShape == CYLINDER then
+          // blocks make capture
           additionalScore = (additionalScore._1, additionalScore._2 + 1)
         else
+          // cylinders make capture
           additionalScore = (additionalScore._1 + 1, additionalScore._2)
-        end if 
+        end if
       end if
     end for
-    (model.gameScore._1 + additionalScore._1, model.gameScore._2 + additionalScore._2)   
+    (model.gameScore._1 + additionalScore._1, model.gameScore._2 + additionalScore._2)
   end extraTurnScoring
-
 
   /* paint draws the 12 pieces
    */
   def paint(model: FlicFlacGameModel, fS: Double, bBlinkOn: Boolean, optDragPos: Option[Point]): SceneUpdateFragment =
     var frag = SceneUpdateFragment.empty
-    
+
     val pB = model.hexBoard3.pBase // extract GridBasePoint for later
 
     // first draw all the unselected pieces ...
 
     for p <- model.pieces.modelPieces do
-      val id =  if (p.bCaptured) then CK // CK for BLACK = "Captured/Killed"
-                else p.pieceIdentity
+      val id =
+        if p.bCaptured then CK // CK for BLACK = "Captured/Killed"
+        else p.pieceIdentity
+        end if
+      end id
 
       val layer = PieceAssets.getGraphic(p.pieceShape, id, p.bFlipped)
       val pSrc = p.pCurPos
@@ -91,24 +96,29 @@ final case class Pieces(
 
       val bPotentialBlinker = (p.pieceShape, model.gameState) match
         case (CYLINDER, GameState.CYLINDER_TURN) => true
-        case (BLOCK, GameState.BLOCK_TURN) => true
-        case (_,_) => false
+        case (BLOCK, GameState.BLOCK_TURN)       => true
+        case (_, _)                              => false
 
-      val bShow = if (bPotentialBlinker) then
-        if (p.bMoved == true) then
-          true // true for steady, this piece has moved
+      val bShow =
+        if bPotentialBlinker then
+          if p.bMoved == true then
+            // true for steady, this piece has moved
+            true
+          else
+            // this might be true or false depending on the blink timer
+            bBlinkOn
         else
-          bBlinkOn // this might be true or false depending on the blink timer
-      else
-        true // true for steady, it is not the turn of this piece
-      
+          // true for steady, it is not the turn of this piece
+          true
+        end if
+      end bShow
+
       if Piece.selected(p) == false && bShow == true then
         val pPos = model.hexBoard3.getXpYp(pSrc)
         val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS)))
         frag = frag |+| newFrag
       end if
     end for
-
     // second draw the selected piece if it exists
     // ... (only expecting one for now, but perhaps game might allow more in future)
 
@@ -116,7 +126,7 @@ final case class Pieces(
       if Piece.selected(p) == true then
         val layer = PieceAssets.getGraphic(p.pieceShape, p.pieceIdentity, p.bFlipped)
         val pSrc = p.pCurPos
-        optDragPos match    // watch out ... somehow optDragPos has already been scaled
+        optDragPos match // watch out ... somehow optDragPos has already been scaled
           case Some(pos) =>
             val pC = Point(((PieceAssets.gWidth * fS) / 2).toInt, ((PieceAssets.gHeight * fS) / 2).toInt)
             val pPos = pos - pC
@@ -124,7 +134,7 @@ final case class Pieces(
             frag = frag |+| newFrag
           case None =>
             val pPos = model.hexBoard3.getXpYp(pSrc)
-            val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB+pPos).scaleBy(fS, fS)))
+            val newFrag = SceneUpdateFragment(Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS)))
             frag = frag |+| newFrag
         end match
     end for

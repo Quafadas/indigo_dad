@@ -63,8 +63,9 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               // Pointer Down, Pos on Grid, No Piece Selected
               FlicFlacGameModel.findPieceByPos(model, pos) match
                 case Some(piece) =>
-                  if (((piece.pieceShape == CYLINDER) && (model.gameState == GameState.CYLINDER_TURN))
-                  || ((piece.pieceShape == BLOCK) && (model.gameState == GameState.BLOCK_TURN))) then
+                  if ((piece.pieceShape == CYLINDER) && (model.gameState == GameState.CYLINDER_TURN))
+                    || ((piece.pieceShape == BLOCK) && (model.gameState == GameState.BLOCK_TURN))
+                  then
                     // Pointer Down, Pos on Grid, No Piece Selected, PiecePos=PointerPos and correct turn <<##C##>>
                     dMsg = "##C##"
                     scribe.debug("@@@ PointerEvent " + dMsg)
@@ -115,7 +116,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
           FlicFlacGameModel.findPieceSelected(model) match
             case Some(piece) =>
               // Pointer Up, Pos on Grid, Piece Selected
-              if model.possibleMoveSpots.indices((pos.x,pos.y)) then
+              if model.possibleMoveSpots.indices((pos.x, pos.y)) then
                 // Pointer Up, Pos on Grid, Piece Selected, Valid Move
                 dMsg = "##H##"
                 scribe.debug("@@@ PointerEvent " + dMsg)
@@ -153,7 +154,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                   Outcome(FlicFlacGameModel.modifyPieces(updatedModel, newPieces))
                 end if
               end if
-              
+
             case None =>
               // Pointer Up, Pos on Grid, No piece selected <<##K##>>
               dMsg = "##K##"
@@ -164,12 +165,14 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               val w = pos.x
               val h = pos.y
               val x = model.hexBoard3.hexArray(w)(h).x
-              val y = model.hexBoard3.hexArray(w)(h).y              
+              val y = model.hexBoard3.hexArray(w)(h).y
               val q = model.hexBoard3.hexArray(w)(h).q
               val r = model.hexBoard3.hexArray(w)(h).r
               val s = model.hexBoard3.hexArray(w)(h).s
-              scribe.debug("@@@ Magenta hexboard3: (w,h) x,y,q,r,s = ("+ w + "," + h + ") : "
-                   + x + "," + y + " : " + q + "," + r + "," + s)
+              scribe.debug(
+                "@@@ Magenta hexboard3: (w,h) x,y,q,r,s = (" + w + "," + h + ") : "
+                  + x + "," + y + " : " + q + "," + r + "," + s
+              )
               Outcome(FlicFlacGameModel.modify(model, None, None))
 
           end match // findPieceSelected
@@ -205,7 +208,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       val oldSF = model.scalingFactor
       val newSF = increaseScaleFactor(oldSF)
       val newHexBoard3 = model.hexBoard3.calculateXpYp(newSF, model.hexBoard3)
-      val newModel = model.copy(scalingFactor=newSF, hexBoard3 = newHexBoard3)
+      val newModel = model.copy(scalingFactor = newSF, hexBoard3 = newHexBoard3)
       val asJson = newModel.asJson.noSpaces
       org.scalajs.dom.window.localStorage.setItem("FlicFlacStats", asJson)
       Outcome(newModel)
@@ -215,28 +218,27 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       val oldSF = model.scalingFactor
       val newSF = decreaseScaleFactor(oldSF)
       val newHexBoard3 = model.hexBoard3.calculateXpYp(newSF, model.hexBoard3)
-      val newModel = model.copy(scalingFactor=newSF, hexBoard3 = newHexBoard3)
+      val newModel = model.copy(scalingFactor = newSF, hexBoard3 = newHexBoard3)
       val asJson = newModel.asJson.noSpaces
       org.scalajs.dom.window.localStorage.setItem("FlicFlacStats", asJson)
       Outcome(newModel)
 
     case ViewportResize(gameViewPort) =>
       var dSF = 1.0
-      if (model.gameState == GameState.START){
+      if model.gameState == GameState.START then
         scribe.debug("@@@ ViewPortResize from scratch")
         val w = gameViewPort.width - model.hexBoard3.pBase.x
         val h = gameViewPort.height - model.hexBoard3.pBase.y
-        dSF = GetScaleFactor(w,h,GameAssets.GameSceneDimensions)
+        dSF = GetScaleFactor(w, h, GameAssets.GameSceneDimensions)
         scribe.debug("@@@ updateModel ViewportResize w:h->s " + w + ":" + h + "->" + dSF)
-      }
-      else {
+      else
         dSF = model.scalingFactor
-        scribe.debug("@@@ ViewPortResize from previous model sf="+dSF)
-      }     
+        scribe.debug("@@@ ViewPortResize from previous model sf=" + dSF)
+      end if
 
       val newHexBoard3 = model.hexBoard3.calculateXpYp(dSF, model.hexBoard3)
       // FIXME ... should the cylinders always have the fiest move?
-      val newModel = model.copy(scalingFactor = dSF, hexBoard3 = newHexBoard3, gameState=GameState.CYLINDER_TURN)
+      val newModel = model.copy(scalingFactor = dSF, hexBoard3 = newHexBoard3, gameState = GameState.CYLINDER_TURN)
       val asJson = newModel.asJson.noSpaces
       org.scalajs.dom.window.localStorage.setItem("FlicFlacStats", asJson)
       Outcome(newModel)
@@ -248,23 +250,24 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       val captors = Melee(model).detectCaptors(model)
       if captors.isEmpty then
         val newPieces = model.pieces.newTurn(model)
-        if (model.gameState == GameState.CYLINDER_TURN) then 
+        if model.gameState == GameState.CYLINDER_TURN then
           scribe.debug("@@@ BLOCK TURN @@@")
           Outcome(model.copy(gameState = GameState.BLOCK_TURN, pieces = newPieces, gameScore = newScore))
-        else 
+        else
           scribe.debug("@@@ CYLINDER TURN @@@")
           Outcome(model.copy(gameState = GameState.CYLINDER_TURN, pieces = newPieces, gameScore = newScore))
         end if
       else
         val newPieces = Melee(model).rewardCaptors(model, captors)
         Outcome(model.copy(pieces = newPieces, gameScore = newScore))
-      end if 
+      end if
 
-    case FrameTick => 
+    case FrameTick =>
       // FIXME perhaps the blink rate should be configurable
-      val t = System.currentTimeMillis/100  // this is 10ths of a second
-      val bNewBlinkOn = if (t%10) > 0 then true else false
+      val t = System.currentTimeMillis / 100 // this is 10ths of a second
+      val bNewBlinkOn = if (t % 10) > 0 then true else false
       if bNewBlinkOn != bBlinkOn then
+        // update the global bBlinkOn
         bBlinkOn = bNewBlinkOn
       end if
       Outcome(model)
@@ -283,7 +286,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       else if oldSF >= 0.5 then 0.67
       else if oldSF >= 0.33 then 0.5
       else 0.33
-    scribe.debug("@@@ increaseScaleFactor to:" + newSF )
+    scribe.debug("@@@ increaseScaleFactor to:" + newSF)
     newSF
   end increaseScaleFactor
 
@@ -296,10 +299,9 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       else if oldSF <= 0.8 then 0.75
       else if oldSF <= 0.9 then 0.8
       else 0.9
-    scribe.debug("@@@ decreaseScaleFactor to:" + newSF )
+    scribe.debug("@@@ decreaseScaleFactor to:" + newSF)
     newSF
   end decreaseScaleFactor
-
 
   def updateViewModel(
       context: SceneContext[FlicFlacStartupData],
@@ -321,16 +323,15 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       Outcome(viewModel)
 
     case ButtonPlusEvent =>
-      val newViewModel = viewModel.changeButtonBoundaries( model, viewModel.gameViewport)
+      val newViewModel = viewModel.changeButtonBoundaries(model, viewModel.gameViewport)
       Outcome(newViewModel)
-
 
     case ButtonMinusEvent =>
-      val newViewModel = viewModel.changeButtonBoundaries( model, viewModel.gameViewport)
+      val newViewModel = viewModel.changeButtonBoundaries(model, viewModel.gameViewport)
       Outcome(newViewModel)
 
-    case ViewportResize(gameViewPort) => 
-      val newViewModel = viewModel.changeButtonBoundaries( model, gameViewPort)
+    case ViewportResize(gameViewPort) =>
+      val newViewModel = viewModel.changeButtonBoundaries(model, gameViewPort)
       Outcome(newViewModel)
 
     case _ =>
@@ -347,37 +348,37 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   ): Outcome[SceneUpdateFragment] =
 
     val dSF = model.scalingFactor
-    val sFactor = ((10*dSF).toInt).toString()
+    val sFactor = ((10 * dSF).toInt).toString()
 
-    val fontSize = (math.round((30*dSF))).toInt
-    val textDiag = TextBox(dMsg, 200, 40)  // FIXME 200,40 just some convenient numbers for text box size
+    val fontSize = (math.round((30 * dSF))).toInt
+    val textDiag = TextBox(dMsg, 200, 40) // FIXME 200,40 just some convenient numbers for text box size
       .withColor(RGBA.Black)
       .withFontSize(Pixels(fontSize))
       .moveTo(0, 20)
-    val textScore = TextBox("Score:" + model.gameScore, 200, 40) // FIXME 200,40 just some convenient numbers for text box size
-      .withColor(RGBA.Black)
-      .withFontSize(Pixels(fontSize))
-      .moveTo(0, 40)
+    val textScore =
+      TextBox("Score:" + model.gameScore, 200, 40) // FIXME 200,40 just some convenient numbers for text box size
+        .withColor(RGBA.Black)
+        .withFontSize(Pixels(fontSize))
+        .moveTo(0, 40)
 
-
-    val bootData = context.frameContext.startUpData.flicFlacBootData  // FIXME width and height from wrong source
+    val bootData = context.frameContext.startUpData.flicFlacBootData // FIXME width and height from wrong source
     val width = bootData.pixelWidth
     val height = bootData.pixelHeight
 
     val iHeight = (math.round(GameAssets.GameSceneDimensions.height * dSF)).toInt
     val iLeftWidth = model.hexBoard3.pBase.x
-    val iRightWidth = (math.round(GameAssets.GameSceneDimensions.right - model.hexBoard3.pBase.x)*dSF).toInt
-    val rLeft = Rectangle(0,0,iLeftWidth,iHeight)
-    val rRight = Rectangle(Point(iLeftWidth,0), Size(iRightWidth,iHeight))
-    val rCorners = Rectangle(Point(iLeftWidth,0), Size(iRightWidth+model.hexBoard3.pBase.x,iHeight))
+    val iRightWidth = (math.round(GameAssets.GameSceneDimensions.right - model.hexBoard3.pBase.x) * dSF).toInt
+    val rLeft = Rectangle(0, 0, iLeftWidth, iHeight)
+    val rRight = Rectangle(Point(iLeftWidth, 0), Size(iRightWidth, iHeight))
+    val rCorners = Rectangle(Point(iLeftWidth, 0), Size(iRightWidth + model.hexBoard3.pBase.x, iHeight))
 
     Outcome(
       SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Black)))
-        |+| SceneUpdateFragment(Shape.Box(rLeft, Fill.Color(RGBA.White)))      
+        |+| SceneUpdateFragment(Shape.Box(rLeft, Fill.Color(RGBA.White)))
         |+| SceneUpdateFragment(Shape.Box(rRight, Fill.Color(RGBA.White)))
         |+| SceneUpdateFragment(GameAssets.cornerLayers(rCorners, 1.0, RGBA.Magenta))
         |+| SceneUpdateFragment(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Magenta)))
-        |+| SceneUpdateFragment(TextBox(sFactor,50,20).withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(0,0))
+        |+| SceneUpdateFragment(TextBox(sFactor, 50, 20).withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(0, 0))
         |+| SceneUpdateFragment(textDiag)
         |+| SceneUpdateFragment(textScore)
         |+| SceneUpdateFragment(viewModel.newGameButton.draw)
@@ -398,7 +399,7 @@ final case class GameSceneViewModel(
     newGameButton: Button,
     plusButton: Button,
     minusButton: Button,
-    turnButton: Button,
+    turnButton: Button
 ):
   def update(mouse: Mouse, pointers: Pointers): Outcome[GameSceneViewModel] =
     for
@@ -406,54 +407,49 @@ final case class GameSceneViewModel(
       bn2 <- plusButton.updateFromPointers(pointers)
       bn3 <- minusButton.updateFromPointers(pointers)
       bn4 <- turnButton.updateFromPointers(pointers)
-      
-    yield this.copy(  newGameButton = bn1, 
-                      plusButton = bn2,
-                      minusButton = bn3,
-                      turnButton = bn4
-                    )
+    yield this.copy(newGameButton = bn1, plusButton = bn2, minusButton = bn3, turnButton = bn4)
 
-  def changeButtonBoundaries( model : FlicFlacGameModel, gvp : GameViewport ) : GameSceneViewModel =
+  def changeButtonBoundaries(model: FlicFlacGameModel, gvp: GameViewport): GameSceneViewModel =
     val dSF = model.scalingFactor
-    scribe.debug("@@@ dSF:"+dSF)
+    scribe.debug("@@@ dSF:" + dSF)
 
-    val newNewGameButton =       
+    val newNewGameButton =
       Button(
         buttonAssets = GameAssets.buttonNewGameAssets(dSF),
         bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.newGameBounds, dSF),
         depth = Depth(6)
       ).withUpActions(ButtonNewGameEvent)
 
-    val newPlusButton =       
+    val newPlusButton =
       Button(
         buttonAssets = GameAssets.buttonPlusAssets(dSF),
         bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.plusBounds, dSF),
         depth = Depth(6)
       ).withUpActions(ButtonPlusEvent)
 
-    val newMinusButton =       
+    val newMinusButton =
       Button(
         buttonAssets = GameAssets.buttonMinusAssets(dSF),
         bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.minusBounds, dSF),
         depth = Depth(6)
       ).withUpActions(ButtonMinusEvent)
 
-    val newTurnButton =       
+    val newTurnButton =
       Button(
         buttonAssets = GameAssets.buttonTurnAssets(dSF),
         bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.turnBounds, dSF),
         depth = Depth(6)
       ).withUpActions(ButtonTurnEvent)
 
+    this.copy(
+      // scalingFactor
+      // optDragPos
+      newGameButton = newNewGameButton,
+      plusButton = newPlusButton,
+      minusButton = newMinusButton,
+      turnButton = newTurnButton
+    )
 
-    this.copy( // scalingFactor
-               // optDragPos
-                newGameButton = newNewGameButton,
-                plusButton = newPlusButton,
-                minusButton = newMinusButton,
-                turnButton = newTurnButton
-                )
-    
   end changeButtonBoundaries
 
 end GameSceneViewModel
@@ -463,12 +459,12 @@ object GameSceneViewModel:
   val newGameBounds = Rectangle(20, 340, 240, 80)
   val plusBounds = Rectangle(20, 440, 90, 80)
   val minusBounds = Rectangle(170, 440, 90, 80)
-    
+
   val initial: GameSceneViewModel =
     GameSceneViewModel(
       None, // ... we have no last position of the pointer recorded
 
-      GameViewport(1580,1900),
+      GameViewport(1580, 1900),
       Button(
         buttonAssets = GameAssets.buttonNewGameAssets(1.0),
         bounds = newGameBounds,
