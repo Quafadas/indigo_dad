@@ -5,6 +5,7 @@ import indigo.scenes.*
 import indigoextras.ui.*
 import io.circe.syntax.*
 import io.circe.parser.decode
+import indigo.shared.events.KeyboardEvent.KeyUp
 
 object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
 
@@ -265,6 +266,18 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         Outcome(model.copy(pieces = newPieces, gameScore = newScore))
       end if
 
+    // Keyboard Interface for testing purposes only ...
+    case k: KeyboardEvent.KeyDown =>
+      if (k.keyCode == Key.ADD)
+        Outcome(model).addGlobalEvents(ButtonPlusEvent)
+      else if (k.keyCode == Key.SUBTRACT)
+        Outcome(model).addGlobalEvents(ButtonMinusEvent)
+      else if (k.keyCode == Key.ENTER)
+        Outcome(model).addGlobalEvents(ButtonTurnEvent)
+      else
+        Outcome(model)
+      end if
+
     case FrameTick =>
       // FIXME perhaps the blink rate should be configurable
       val t = System.currentTimeMillis / 100 // this is 10ths of a second
@@ -353,16 +366,25 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val dSF = model.scalingFactor
     val sFactor = ((10 * dSF).toInt).toString()
 
-    val fontSize = (math.round((30 * dSF))).toInt
-    val textDiag = TextBox(dMsg, 200, 40) // FIXME 200,40 just some convenient numbers for text box size
+    val textDiag = TextBox(sFactor + " " + dMsg, 200, 40) // FIXME 200,40 just some convenient numbers for text box size
       .withColor(RGBA.Black)
-      .withFontSize(Pixels(fontSize))
-      .moveTo(0, 20)
-    val textScore =
-      TextBox("Score:" + model.gameScore, 200, 40) // FIXME 200,40 just some convenient numbers for text box size
+      .withFontSize(Pixels(20))
+      .moveTo(0,0)
+    
+    val cylinderScoreX = coordXFromScore(model.gameScore._1)
+    val blockScoreX = coordXFromScore(model.gameScore._2)
+
+    val cylinderScore = 
+      TextBox((model.gameScore._1).toString(), 150, 300)
         .withColor(RGBA.Black)
-        .withFontSize(Pixels(fontSize))
-        .moveTo(0, 40)
+        .withFontSize(Pixels(100))
+        .moveTo(cylinderScoreX, 200)
+    val blockScore = 
+      TextBox((model.gameScore._2).toString(), 150, 300)
+        .withColor(RGBA.Black)
+        .withFontSize(Pixels(100))
+        .moveTo(blockScoreX, 340)
+        
 
     val bootData = context.frameContext.startUpData.flicFlacBootData // FIXME width and height from wrong source
     val width = bootData.pixelWidth
@@ -381,19 +403,26 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(Shape.Box(rRight, Fill.Color(RGBA.White)))
         |+| SceneUpdateFragment(GameAssets.cornerLayers(rCorners, 1.0, RGBA.Magenta))
         |+| SceneUpdateFragment(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Magenta)))
-        |+| SceneUpdateFragment(TextBox(sFactor, 50, 20).withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(0, 0))
         |+| SceneUpdateFragment(textDiag)
-        |+| SceneUpdateFragment(textScore)
         |+| SceneUpdateFragment(viewModel.newGameButton.draw)
         |+| SceneUpdateFragment(viewModel.plusButton.draw)
         |+| SceneUpdateFragment(viewModel.minusButton.draw)
         |+| SceneUpdateFragment(viewModel.turnButton.draw)
+        |+| SceneUpdateFragment(Layer(GameAssets.gScorePanel(1.0).moveTo(0,130)))
+        |+| SceneUpdateFragment(cylinderScore)
+        |+| SceneUpdateFragment(blockScore)
         |+| model.hexBoard3.paint(model, dSF)
         |+| model.possibleMoveSpots.paint(model)
         |+| model.highLighter.paint(model, dSF)
         |+| model.pieces.paint(model, dSF, bBlinkOn, viewModel.optDragPos)
     )
   end present
+
+  def coordXFromScore(score: Int) : Int =
+    if score < 10 then 150
+    else 120
+  end coordXFromScore
+
 end SceneGame
 
 final case class GameSceneViewModel(
@@ -413,8 +442,10 @@ final case class GameSceneViewModel(
     yield this.copy(newGameButton = bn1, plusButton = bn2, minusButton = bn3, turnButton = bn4)
 
   def changeButtonBoundaries(model: FlicFlacGameModel, gvp: GameViewport): GameSceneViewModel =
-    val dSF = model.scalingFactor
-    scribe.debug("@@@ dSF:" + dSF)
+    //val dSF = model.scalingFactor
+    //scribe.debug("@@@ dSF:" + dSF)
+    // Current implementation does not require buttons to scale so we override the scaling factor to 1.0
+    val dSF = 1.0
 
     val newNewGameButton =
       Button(
@@ -458,10 +489,10 @@ final case class GameSceneViewModel(
 end GameSceneViewModel
 
 object GameSceneViewModel:
-  val turnBounds = Rectangle(20, 140, 90, 80)
-  val newGameBounds = Rectangle(20, 340, 240, 80)
-  val plusBounds = Rectangle(20, 440, 90, 80)
-  val minusBounds = Rectangle(170, 440, 90, 80)
+  val turnBounds = Rectangle(10, 30, 90, 80)
+  val plusBounds = Rectangle(10, 500, 90, 80)
+  val minusBounds = Rectangle(160, 500, 90, 80)
+  val newGameBounds = Rectangle(10, 600, 240, 80)
 
   val initial: GameSceneViewModel =
     GameSceneViewModel(

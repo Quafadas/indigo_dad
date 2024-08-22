@@ -30,66 +30,66 @@ final case class Melee(model: FlicFlacGameModel):
     }
 
     allPieces.foreach { p1 =>
-      val index1 = (p1.pieceShape * 6) + p1.pieceIdentity
-      val color1 = (PieceAssets.pieceNames(index1 % 6)).trim
-      val qrs1 = allPiecesQRS(index1)
-      val setQRS1 = model.possibleMoveSpots.spotRingQRS(qrs1._1, qrs1._2, qrs1._3)
-      allPieces.foreach { p2 =>
-        val index2 = (p2.pieceShape * 6) + p2.pieceIdentity
-        val color2 = (PieceAssets.pieceNames(index2 % 6)).trim
-        val qrs2 = allPiecesQRS(index2)
-        if setQRS1.contains(qrs2) then
-          val p1BodyColor = p1.pieceIdentity
-          val p1FlyingColor1 = if p1.bFlipped then (p1.pieceIdentity + 4) % 6 else (p1.pieceIdentity + 1) % 6
-          val p1FlyingColor2 = if p1.bFlipped then (p1.pieceIdentity + 5) % 6 else (p1.pieceIdentity + 2) % 6
-          val p2BodyColor = p2.pieceIdentity
-          val p2FlyingColor1 = if p2.bFlipped then (p2.pieceIdentity + 4) % 6 else (p2.pieceIdentity + 1) % 6
-          val p2FlyingColor2 = if p2.bFlipped then (p2.pieceIdentity + 5) % 6 else (p2.pieceIdentity + 2) % 6
+      if (p1.pCurPos != p1.pHomePos) then
+        // the combat algorithm only applies to those pieces on the board, not to those pieces
+        // that are in their home positions
 
-          if p1BodyColor == p2FlyingColor1
-            || p1BodyColor == p2FlyingColor2
-          then
-            (p1.pieceShape, p2.pieceShape) match
-              case (CYLINDER, CYLINDER) =>
-                if allPiecesEmpowered(index2) == true then
-                  vectorHealth(index1) += 2
-                  scribe.trace("@@@ {Cyldr" + color1 + ":" + 2 + "} {Cyldr" + color2 + "}")
-                else
-                  vectorHealth(index1) += 1
-                  scribe.trace("@@@ {Cyldr" + color1 + ":" + 1 + "} {Cyldr" + color2 + "}")
+        val index1 = (p1.pieceShape * 6) + p1.pieceIdentity
+        val shape1 = PieceAssets.pieceTypes(p1.pieceShape)
+        val color1 = (PieceAssets.pieceNames(index1 % 6)).trim
+        val qrs1 = allPiecesQRS(index1)
+        val setQRS1 = model.possibleMoveSpots.spotRingQRS(qrs1._1, qrs1._2, qrs1._3)
+        allPieces.foreach { p2 =>
+          val index2 = (p2.pieceShape * 6) + p2.pieceIdentity
+          val shape2 = PieceAssets.pieceTypes(p2.pieceShape)
+          val color2 = (PieceAssets.pieceNames(index2 % 6)).trim
+          val qrs2 = allPiecesQRS(index2)
+          if setQRS1.contains(qrs2) then
+            val p1BodyColor = p1.pieceIdentity
+            val p1FlyingColor1 = if p1.bFlipped then (p1.pieceIdentity + 4) % 6 else (p1.pieceIdentity + 1) % 6
+            val p1FlyingColor2 = if p1.bFlipped then (p1.pieceIdentity + 5) % 6 else (p1.pieceIdentity + 2) % 6
+            val p2BodyColor = p2.pieceIdentity
+            val p2FlyingColor1 = if p2.bFlipped then (p2.pieceIdentity + 4) % 6 else (p2.pieceIdentity + 1) % 6
+            val p2FlyingColor2 = if p2.bFlipped then (p2.pieceIdentity + 5) % 6 else (p2.pieceIdentity + 2) % 6
 
-              case (BLOCK, BLOCK) =>
-                if allPiecesEmpowered(index2) == true then
-                  vectorHealth(index1) += 2
-                  scribe.trace("@@@ {Block" + color1 + ":" + 2 + "} {Block" + color2 + "}")
-                else
-                  vectorHealth(index1) += 1
-                  scribe.trace("@@@ {Block" + color1 + ":" + 1 + "} {Block" + color2 + "}")
+            if p1BodyColor == p2FlyingColor1
+              || p1BodyColor == p2FlyingColor2
+            then
+              (p1.pieceShape, p2.pieceShape) match
+                case (CYLINDER, CYLINDER) | (BLOCK, BLOCK) =>
+                  // in this case statement, p1 is the supported, p2 is the supporter
+                  if allPiecesEmpowered(index2) == true then
+                    // thanks from p1, but the supporter p2 gets no health credit
+                    vectorHealth(index1) += 2
+                  else
+                    // thanks from p1, but the supporter p2 gets no health credit
+                    vectorHealth(index1) += 1
+                  end if
 
-              case (CYLINDER, BLOCK) =>
-                if allPiecesEmpowered(index2) == true then
-                  vectorHealth(index1) -= 2
-                  vectorHealth(index2) += 2
-                  scribe.trace("@@@ <Cyldr" + color1 + ":" + (-2) + "> <Block" + color2 + ":" + 2 + ">")
-                else
-                  vectorHealth(index1) -= 1
-                  vectorHealth(index2) += 1
-                  scribe.trace("@@@ <Cyldr" + color1 + ":" + (-1) + "> <Block" + color2 + ":" + 1 + ">")
-
-              case (BLOCK, CYLINDER) =>
-                if allPiecesEmpowered(index2) == true then
-                  vectorHealth(index1) -= 2
-                  vectorHealth(index2) += 2
-                  scribe.trace("@@@ <Block" + color1 + ":" + (-2) + "> <Cyldr" + color2 + ":" + 2 + ">")
-                else
-                  vectorHealth(index1) -= 1
-                  vectorHealth(index2) += 1
-                  scribe.trace("@@@ <Block" + color1 + ":" + (-1) + "> <Cyldr" + color2 + ":" + 1 + ">")
-          end if
-        end if
-      }
+                case (CYLINDER, BLOCK) | (BLOCK, CYLINDER) =>
+                  // in this case statement, p1 is the DEFENDER and p2 is the ATTACKER
+                  if p1FlyingColor1 != p2BodyColor && p1FlyingColor2 != p2BodyColor then
+                    // defender is defenseless so subtract 20 from health to ensure capture
+                    // well done attacker, you are guranteed an extra turn as one of the captors
+                    vectorHealth(index1) -= 20
+                  end if
+                  if allPiecesEmpowered(index2) == true then
+                    // defending piece flying correct colors, but attacker is also empowered
+                    vectorHealth(index1) -= 2
+                    vectorHealth(index2) += 2
+                  else
+                    // defending piece flying correct colors, and attacker is normal
+                    vectorHealth(index1) -= 1
+                    vectorHealth(index2) += 1
+                  end if
+                scribe.debug("@@@ {" + shape1 + color1 + ":" + vectorHealth(index1) + "} {" 
+                                      + shape2 + color2 + ":" + vectorHealth(index2) + "}")
+            end if // p1BodyColor == p2FlyingColor1 || p1BodyColor == p2FlyingColor2
+          end if // setQRS1.contains(qrs2)
+        }
+      end if // p1.pCurPos != p1.pHomePos
     }
-    scribeCombat(allPieces, vectorHealth)
+    //scribeCombat(allPieces, vectorHealth)
 
     val piecesWithCaptures = captured(allPieces, vectorHealth)
     (piecesWithCaptures)

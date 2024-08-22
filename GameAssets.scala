@@ -17,6 +17,9 @@ object GameAssets:
   val blAssetPath = "assets/Blocks.png"
   val cnAssetName = "corners"
   val cnAssetPath = "assets/Corners.png"
+  val spAssetName = "scorePanel"
+  val spAssetPath = "assets/ScorePanelx50.png"
+
 
   scribe.debug("@@@ Object GameAssets START")
 
@@ -32,7 +35,8 @@ object GameAssets:
       AssetType.Image(AssetName(bnAssetName), AssetPath(bnAssetPath)),
       AssetType.Image(AssetName(cyAssetName), AssetPath(cyAssetPath)),
       AssetType.Image(AssetName(blAssetName), AssetPath(blAssetPath)),
-      AssetType.Image(AssetName(cnAssetName), AssetPath(cnAssetPath))
+      AssetType.Image(AssetName(cnAssetName), AssetPath(cnAssetPath)),
+      AssetType.Image(AssetName(spAssetName), AssetPath(spAssetPath))
     )
 
   def gHex(sf: Double): Graphic[Material.ImageEffects] =
@@ -52,6 +56,10 @@ object GameAssets:
     Graphic(Rectangle(0, 0, 91, 81), 3, Material.ImageEffects(AssetName(hxAssetName)))
       .withCrop(100, 0, 91, 81)
       .scaleBy(sf, sf)
+
+  def gScorePanel(sf: Double): Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(0, 0, 250, 350), 3, Material.ImageEffects(AssetName(spAssetName)))
+
 
   // Check FlacFont.txt for details
 
