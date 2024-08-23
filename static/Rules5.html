@@ -33,24 +33,5 @@
 <br>
 <br>
 
-<button class="myRulesButton" style="font-size: 20px;" onclick = "LocalStorageRead()"> READ </button>
-<button class="myRulesButton" style="font-size: 20px;" onclick = "LocalStorageWrite()"> WRITE </button>
-
-<h3 id="ReadResult"></h3>
-
-<script>
-
-function LocalStorageRead() {
-  var s1 = window.localStorage.getItem("Harry-Key");
-  console.log("*** " + s1 + " ***");
-  document.getElementById("ReadResult").innerHTML = s1;
-}
-
-function LocalStorageWrite() {
-  window.localStorage.setItem("Harry-Key", "Hello Harry");
-}
-
-</script>
-
 </body>
 </html>
