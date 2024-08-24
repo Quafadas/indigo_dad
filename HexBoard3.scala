@@ -357,7 +357,7 @@ case class HexBoard3():
     isThisHexFree(pAxAy, vPieces)
   end isThisHexFree
 
-// retrieve color of this hex
+// obtain color of this hex
   def getHexColor(pos: Point) : Int = 
     hexArray(pos.x)(pos.y).c
   end getHexColor

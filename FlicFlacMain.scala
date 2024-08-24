@@ -71,8 +71,13 @@ case class FlicFlacGame(
 
   def initialModel(flicFlacStartupData: FlicFlacStartupData): Outcome[FlicFlacGameModel] =
     scribe.debug("@@@ FlicFlacMain-initialModel()")
-    val cacheOrNew = FlicFlacGameModel.retrieve()
-    Outcome(cacheOrNew)
+    val cachedParamsOrNew = FlicFlacPlayerParams.retrieve()
+    val newTurnTime = cachedParamsOrNew.playPamsTurnTime
+    val newCaptorsTime = cachedParamsOrNew.playPamsCaptorsTime
+    val newTT = TurnTimer(newTurnTime, newCaptorsTime)
+    val cachedGameOrNew = FlicFlacGameModel.retrieve()
+    val updatedGame = cachedGameOrNew.copy(turnTimer = newTT) 
+    Outcome(updatedGame)
   end initialModel
 
   def initialScene(flicFlacBootData: FlicFlacBootData): Option[SceneName] =

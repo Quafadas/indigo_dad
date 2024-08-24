@@ -249,21 +249,22 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
     case ButtonTurnEvent =>
       scribe.debug("@@@ ButtonTurnEvent")
-
       val newScore = model.pieces.extraTurnScoring(model)
       val captors = Melee(model).detectCaptors(model)
       if captors.isEmpty then
+        val newTT = TurnTimer.restartForTurn(model.turnTimer)
         val newPieces = model.pieces.newTurn(model)
         if model.gameState == GameState.CYLINDER_TURN then
           scribe.debug("@@@ BLOCK TURN @@@")
-          Outcome(model.copy(gameState = GameState.BLOCK_TURN, pieces = newPieces, gameScore = newScore))
+          Outcome(model.copy(gameState = GameState.BLOCK_TURN, pieces = newPieces, gameScore = newScore, turnTimer = newTT))
         else
           scribe.debug("@@@ CYLINDER TURN @@@")
-          Outcome(model.copy(gameState = GameState.CYLINDER_TURN, pieces = newPieces, gameScore = newScore))
+          Outcome(model.copy(gameState = GameState.CYLINDER_TURN, pieces = newPieces, gameScore = newScore, turnTimer = newTT))
         end if
       else
+        val newTT = TurnTimer.restartForCaptors(model.turnTimer)
         val newPieces = Melee(model).rewardCaptors(model, captors)
-        Outcome(model.copy(pieces = newPieces, gameScore = newScore))
+        Outcome(model.copy(pieces = newPieces, gameScore = newScore, turnTimer = newTT))
       end if
 
     // Keyboard Interface for testing purposes only ...
@@ -279,14 +280,24 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       end if
 
     case FrameTick =>
-      // FIXME perhaps the blink rate should be configurable
-      val t = System.currentTimeMillis / 100 // this is 10ths of a second
-      val bNewBlinkOn = if (t % 10) > 0 then true else false
+      val t1 = System.currentTimeMillis / 100 // this is 10ths of a second
+      val bNewBlinkOn = if (t1 % 10) > 0 then true else false
       if bNewBlinkOn != bBlinkOn then
         // update the global bBlinkOn
         bBlinkOn = bNewBlinkOn
       end if
-      Outcome(model)
+
+      if TurnTimer.expired(model.turnTimer) then
+        Outcome(model).addGlobalEvents(ButtonTurnEvent)
+      else
+        val possibleTT = TurnTimer.update(model.turnTimer)
+        possibleTT match
+          case Some(tt) =>
+            Outcome(model.copy(turnTimer = tt))
+          case None => 
+            Outcome(model)      
+      end if
+
     case _ =>
       Outcome(model)
   }
@@ -411,6 +422,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(Layer(GameAssets.gScorePanel(1.0).moveTo(0,130)))
         |+| SceneUpdateFragment(cylinderScore)
         |+| SceneUpdateFragment(blockScore)
+        |+| TurnTimer.show(model)
         |+| model.hexBoard3.paint(model, dSF)
         |+| model.possibleMoveSpots.paint(model)
         |+| model.highLighter.paint(model, dSF)

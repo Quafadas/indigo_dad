@@ -10,12 +10,12 @@ import game.Piece.pieceShape
 final case class FlicFlacGameModel(
     gameState: GameState,
     gameScore: (Int, Int),
-    turnTimeRemaining: Int,
     scalingFactor: Double,
     pieces: Pieces,
     possibleMoveSpots: Spots,
     highLighter: HighLighter,
-    hexBoard3: HexBoard3
+    hexBoard3: HexBoard3,
+    turnTimer: TurnTimer
 ) derives Encoder.AsObject,
       Decoder
 
@@ -34,25 +34,27 @@ object FlicFlacGameModel:
   scribe.debug("@@@ Object FlicFlacGameModel Start")
   var iTick = 0
 
-  def creation(center: Point): FlicFlacGameModel =
+  def creation(playerParams: FlicFlacPlayerParams): FlicFlacGameModel =
     scribe.debug("@@@ FlicFlacGameModel creation")
 
     val startingGameState = GameState.START
     val score = (0, 0)
-    val startingTurnTime = 90 // 10ths of a second FIXME we need this configurable
     val defaultScalingFactor = 1.0
     val hexBoard3 = HexBoard3()
     val highLighter = HighLighter(hexBoard3, false, Point(0, 0))
     val startingSpots: Spots = Spots(Set.empty)
+    val turnTime = playerParams.playPamsTurnTime
+    val captorsTime = playerParams.playPamsCaptorsTime
+    val turnTimer = TurnTimer(turnTime, captorsTime)
     FlicFlacGameModel(
       startingGameState,
       score,
-      startingTurnTime,
       defaultScalingFactor,
       summonPieces(hexBoard3),
       startingSpots,
       highLighter,
-      hexBoard3
+      hexBoard3,
+      turnTimer
     )
   end creation
 
@@ -147,20 +149,22 @@ object FlicFlacGameModel:
 
     val resetGameState = GameState.START
     val score = (0, 0)
-    val resetTurnTime = 0
     val defaultSF = 1.0
     val hexBoard3 = HexBoard3()
     val highLighter = HighLighter(hexBoard3, false, Point(0, 0))
     val emptySpots: Spots = Spots(Set.empty)
+    val turnTime = previousModel.turnTimer.iTotalTurnTime
+    val captorsTime = previousModel.turnTimer.iCaptorsTurnTime
+    val turnTimer = TurnTimer(turnTime, captorsTime)
     FlicFlacGameModel(
       resetGameState,
       score,
-      resetTurnTime,
       defaultSF,
       summonPieces(hexBoard3),
       emptySpots,
       highLighter,
-      hexBoard3
+      hexBoard3,
+      turnTimer
     )
   end reset
 
@@ -177,7 +181,7 @@ object FlicFlacGameModel:
         model
       case Left(_) =>
         scribe.debug("@@@ Created model")
-        FlicFlacGameModel.creation(Point(0, 0))
+        FlicFlacGameModel.creation(playerParams)
     cacheOrNew
   end retrieve
 

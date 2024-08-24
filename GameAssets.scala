@@ -19,7 +19,8 @@ object GameAssets:
   val cnAssetPath = "assets/Corners.png"
   val spAssetName = "scorePanel"
   val spAssetPath = "assets/ScorePanelx50.png"
-
+  val tsAssetName = "timeSlider"
+  val tsAssetPath = "assets/TimeSlider.png"
 
   scribe.debug("@@@ Object GameAssets START")
 
@@ -36,7 +37,8 @@ object GameAssets:
       AssetType.Image(AssetName(cyAssetName), AssetPath(cyAssetPath)),
       AssetType.Image(AssetName(blAssetName), AssetPath(blAssetPath)),
       AssetType.Image(AssetName(cnAssetName), AssetPath(cnAssetPath)),
-      AssetType.Image(AssetName(spAssetName), AssetPath(spAssetPath))
+      AssetType.Image(AssetName(spAssetName), AssetPath(spAssetPath)),
+      AssetType.Image(AssetName(tsAssetName), AssetPath(tsAssetPath)),
     )
 
   def gHex(sf: Double): Graphic[Material.ImageEffects] =
@@ -59,6 +61,16 @@ object GameAssets:
 
   def gScorePanel(sf: Double): Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 250, 350), 3, Material.ImageEffects(AssetName(spAssetName)))
+
+  def gTimeSliderBody(sf: Double): Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(0, 0, 50, 1220), 3, Material.ImageEffects(AssetName(tsAssetName)))
+    .withCrop(0,25,50,1195)
+    .scaleBy(sf, sf)
+
+  def gTimeSliderTop(sf: Double): Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(0, 0, 50, 1220), 3, Material.ImageEffects(AssetName(tsAssetName)))
+    .withCrop(0,0,50,25)
+    .scaleBy(sf, sf)
 
 
   // Check FlacFont.txt for details
