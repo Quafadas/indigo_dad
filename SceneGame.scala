@@ -249,6 +249,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
     case ButtonTurnEvent =>
       scribe.debug("@@@ ButtonTurnEvent")
+      val emptySpots = Spots(Set.empty)
       val newScore = model.pieces.extraTurnScoring(model)
       val captors = Melee(model).detectCaptors(model)
       if captors.isEmpty then
@@ -257,18 +258,18 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         if model.gameState == GameState.CYLINDER_TURN then
           scribe.debug("@@@ BLOCK TURN @@@")
           Outcome(
-            model.copy(gameState = GameState.BLOCK_TURN, pieces = newPieces, gameScore = newScore, turnTimer = newTT)
+            model.copy(gameState = GameState.BLOCK_TURN, pieces = newPieces, possibleMoveSpots = emptySpots, gameScore = newScore, turnTimer = newTT)
           )
         else
           scribe.debug("@@@ CYLINDER TURN @@@")
           Outcome(
-            model.copy(gameState = GameState.CYLINDER_TURN, pieces = newPieces, gameScore = newScore, turnTimer = newTT)
+            model.copy(gameState = GameState.CYLINDER_TURN, pieces = newPieces, possibleMoveSpots = emptySpots, gameScore = newScore, turnTimer = newTT)
           )
         end if
       else
         val newTT = TurnTimer.restartForCaptors(model.turnTimer)
         val newPieces = Melee(model).rewardCaptors(model, captors)
-        Outcome(model.copy(pieces = newPieces, gameScore = newScore, turnTimer = newTT))
+        Outcome(model.copy(pieces = newPieces, possibleMoveSpots = emptySpots, gameScore = newScore, turnTimer = newTT))
       end if
 
     // Keyboard Interface for testing purposes only ...
