@@ -64,7 +64,7 @@ object TurnTimer:
     val iSliderXPos = (math.round(scalableX * dSF)).toInt + model.hexBoard3.pBase.x
     val iBodyTop = (math.round(95 * dSF)).toInt
     val iCapTop = (math.round(T * dSF)).toInt
-    val iWidth = (math.round(50 * dSF)).toInt
+    val iWidth = (math.round(52 * dSF)).toInt // changed from 50 to 52 to eliminate sporadic veritcal lines
 
     val frag1 = SceneUpdateFragment(GameAssets.gTimeSliderBody(dSF).moveTo(iSliderXPos, iBodyTop))
     val frag2 = SceneUpdateFragment(GameAssets.gTimeSliderTop(dSF).moveTo(iSliderXPos, iCapTop))
