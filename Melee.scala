@@ -30,7 +30,7 @@ final case class Melee(model: FlicFlacGameModel):
     }
 
     allPieces.foreach { p1 =>
-      if (p1.pCurPos != p1.pHomePos) then
+      if p1.pCurPos != p1.pHomePos then
         // the combat algorithm only applies to those pieces on the board, not to those pieces
         // that are in their home positions
 
@@ -82,14 +82,17 @@ final case class Melee(model: FlicFlacGameModel):
                     vectorHealth(index1) -= 1
                     vectorHealth(index2) += 1
                   end if
-                scribe.debug("@@@ {" + shape1 + color1 + ":" + vectorHealth(index1) + "} {" 
-                                      + shape2 + color2 + ":" + vectorHealth(index2) + "}")
+              end match
+              scribe.debug(
+                "@@@ {" + shape1 + color1 + ":" + vectorHealth(index1) + "} {"
+                  + shape2 + color2 + ":" + vectorHealth(index2) + "}"
+              )
             end if // p1BodyColor == p2FlyingColor1 || p1BodyColor == p2FlyingColor2
           end if // setQRS1.contains(qrs2)
         }
       end if // p1.pCurPos != p1.pHomePos
     }
-    //scribeCombat(allPieces, vectorHealth)
+    // scribeCombat(allPieces, vectorHealth)
 
     val piecesWithCaptures = captured(allPieces, vectorHealth)
     (piecesWithCaptures)
@@ -104,7 +107,7 @@ final case class Melee(model: FlicFlacGameModel):
     allPieces.foreach { piece =>
       val index = (piece.pieceShape * 6) + piece.pieceIdentity
       val newPiece =
-        if vectorHealth(index) < 0 then 
+        if vectorHealth(index) < 0 then
           // oh lordy - I have been captured
           Piece.setCaptured(piece, true)
         else
@@ -140,7 +143,7 @@ final case class Melee(model: FlicFlacGameModel):
         if spotQRS.contains(qrs1) then
           val captorColor1 = if pp.bFlipped then (pp.pieceIdentity + 4) % 6 else (pp.pieceIdentity + 1) % 6
           val captorColor2 = if pp.bFlipped then (pp.pieceIdentity + 5) % 6 else (pp.pieceIdentity + 2) % 6
-          if prisonerColor == captorColor1 || prisonerColor == captorColor2 then 
+          if prisonerColor == captorColor1 || prisonerColor == captorColor2 then
             // add this piece to captors
             setCaptors = setCaptors + pp
           end if

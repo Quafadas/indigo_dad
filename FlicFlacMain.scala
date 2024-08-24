@@ -76,7 +76,7 @@ case class FlicFlacGame(
     val newCaptorsTime = cachedParamsOrNew.playPamsCaptorsTime
     val newTT = TurnTimer(newTurnTime, newCaptorsTime)
     val cachedGameOrNew = FlicFlacGameModel.retrieve()
-    val updatedGame = cachedGameOrNew.copy(turnTimer = newTT) 
+    val updatedGame = cachedGameOrNew.copy(turnTimer = newTT)
     Outcome(updatedGame)
   end initialModel
 

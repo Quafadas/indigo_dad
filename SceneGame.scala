@@ -256,10 +256,14 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         val newPieces = model.pieces.newTurn(model)
         if model.gameState == GameState.CYLINDER_TURN then
           scribe.debug("@@@ BLOCK TURN @@@")
-          Outcome(model.copy(gameState = GameState.BLOCK_TURN, pieces = newPieces, gameScore = newScore, turnTimer = newTT))
+          Outcome(
+            model.copy(gameState = GameState.BLOCK_TURN, pieces = newPieces, gameScore = newScore, turnTimer = newTT)
+          )
         else
           scribe.debug("@@@ CYLINDER TURN @@@")
-          Outcome(model.copy(gameState = GameState.CYLINDER_TURN, pieces = newPieces, gameScore = newScore, turnTimer = newTT))
+          Outcome(
+            model.copy(gameState = GameState.CYLINDER_TURN, pieces = newPieces, gameScore = newScore, turnTimer = newTT)
+          )
         end if
       else
         val newTT = TurnTimer.restartForCaptors(model.turnTimer)
@@ -269,14 +273,10 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
     // Keyboard Interface for testing purposes only ...
     case k: KeyboardEvent.KeyDown =>
-      if (k.keyCode == Key.ADD)
-        Outcome(model).addGlobalEvents(ButtonPlusEvent)
-      else if (k.keyCode == Key.SUBTRACT)
-        Outcome(model).addGlobalEvents(ButtonMinusEvent)
-      else if (k.keyCode == Key.ENTER)
-        Outcome(model).addGlobalEvents(ButtonTurnEvent)
-      else
-        Outcome(model)
+      if k.keyCode == Key.ADD then Outcome(model).addGlobalEvents(ButtonPlusEvent)
+      else if k.keyCode == Key.SUBTRACT then Outcome(model).addGlobalEvents(ButtonMinusEvent)
+      else if k.keyCode == Key.ENTER then Outcome(model).addGlobalEvents(ButtonTurnEvent)
+      else Outcome(model)
       end if
 
     case FrameTick =>
@@ -288,14 +288,16 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       end if
 
       if TurnTimer.expired(model.turnTimer) then
+        // signal a button turn evet to switch players
         Outcome(model).addGlobalEvents(ButtonTurnEvent)
       else
         val possibleTT = TurnTimer.update(model.turnTimer)
         possibleTT match
           case Some(tt) =>
             Outcome(model.copy(turnTimer = tt))
-          case None => 
-            Outcome(model)      
+          case None =>
+            Outcome(model)
+        end match
       end if
 
     case _ =>
@@ -380,22 +382,21 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val textDiag = TextBox(sFactor + " " + dMsg, 200, 40) // FIXME 200,40 just some convenient numbers for text box size
       .withColor(RGBA.Black)
       .withFontSize(Pixels(20))
-      .moveTo(0,0)
-    
+      .moveTo(0, 0)
+
     val cylinderScoreX = coordXFromScore(model.gameScore._1)
     val blockScoreX = coordXFromScore(model.gameScore._2)
 
-    val cylinderScore = 
+    val cylinderScore =
       TextBox((model.gameScore._1).toString(), 150, 300)
         .withColor(RGBA.Black)
         .withFontSize(Pixels(100))
         .moveTo(cylinderScoreX, 200)
-    val blockScore = 
+    val blockScore =
       TextBox((model.gameScore._2).toString(), 150, 300)
         .withColor(RGBA.Black)
         .withFontSize(Pixels(100))
         .moveTo(blockScoreX, 340)
-        
 
     val bootData = context.frameContext.startUpData.flicFlacBootData // FIXME width and height from wrong source
     val width = bootData.pixelWidth
@@ -419,7 +420,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(viewModel.plusButton.draw)
         |+| SceneUpdateFragment(viewModel.minusButton.draw)
         |+| SceneUpdateFragment(viewModel.turnButton.draw)
-        |+| SceneUpdateFragment(Layer(GameAssets.gScorePanel(1.0).moveTo(0,130)))
+        |+| SceneUpdateFragment(Layer(GameAssets.gScorePanel(1.0).moveTo(0, 130)))
         |+| SceneUpdateFragment(cylinderScore)
         |+| SceneUpdateFragment(blockScore)
         |+| TurnTimer.show(model)
@@ -430,7 +431,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     )
   end present
 
-  def coordXFromScore(score: Int) : Int =
+  def coordXFromScore(score: Int): Int =
     if score < 10 then 150
     else 120
   end coordXFromScore
@@ -454,8 +455,8 @@ final case class GameSceneViewModel(
     yield this.copy(newGameButton = bn1, plusButton = bn2, minusButton = bn3, turnButton = bn4)
 
   def changeButtonBoundaries(model: FlicFlacGameModel, gvp: GameViewport): GameSceneViewModel =
-    //val dSF = model.scalingFactor
-    //scribe.debug("@@@ dSF:" + dSF)
+    // val dSF = model.scalingFactor
+    // scribe.debug("@@@ dSF:" + dSF)
     // Current implementation does not require buttons to scale so we override the scaling factor to 1.0
     val dSF = 1.0
 

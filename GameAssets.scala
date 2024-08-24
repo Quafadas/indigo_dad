@@ -38,17 +38,17 @@ object GameAssets:
       AssetType.Image(AssetName(blAssetName), AssetPath(blAssetPath)),
       AssetType.Image(AssetName(cnAssetName), AssetPath(cnAssetPath)),
       AssetType.Image(AssetName(spAssetName), AssetPath(spAssetPath)),
-      AssetType.Image(AssetName(tsAssetName), AssetPath(tsAssetPath)),
+      AssetType.Image(AssetName(tsAssetName), AssetPath(tsAssetPath))
     )
 
   def gHex(sf: Double): Graphic[Material.ImageEffects] =
-    if (sf < 0.25) || (sf > 1.0) then 
+    if (sf < 0.25) || (sf > 1.0) then
       // FIXME we should not need this trap in the end
       scribe.error("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
       scribe.error("@@@ BAD sf:" + sf)
       scribe.error("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
       Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName))) // .scaleBy(sf,sf)
-    else 
+    else
       // valid scale factor
       Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName))).scaleBy(sf, sf)
     end if
@@ -64,14 +64,13 @@ object GameAssets:
 
   def gTimeSliderBody(sf: Double): Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 50, 1220), 3, Material.ImageEffects(AssetName(tsAssetName)))
-    .withCrop(0,25,50,1195)
-    .scaleBy(sf, sf)
+      .withCrop(0, 25, 50, 1195)
+      .scaleBy(sf, sf)
 
   def gTimeSliderTop(sf: Double): Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 50, 1220), 3, Material.ImageEffects(AssetName(tsAssetName)))
-    .withCrop(0,0,50,25)
-    .scaleBy(sf, sf)
-
+      .withCrop(0, 0, 50, 25)
+      .scaleBy(sf, sf)
 
   // Check FlacFont.txt for details
 
