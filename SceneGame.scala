@@ -399,9 +399,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         .withFontSize(Pixels(100))
         .moveTo(blockScoreX, 340)
 
-    val bootData = context.frameContext.startUpData.flicFlacBootData // FIXME width and height from wrong source
-    val width = bootData.pixelWidth
-    val height = bootData.pixelHeight
+    val width = GameAssets.GameSceneDimensions.width  // force the width as 1580
+    val height = GameAssets.GameSceneDimensions.height // force the height as 1300
 
     val iHeight = (math.round(GameAssets.GameSceneDimensions.height * dSF)).toInt
     val iLeftWidth = model.hexBoard3.pBase.x
@@ -512,7 +511,7 @@ object GameSceneViewModel:
     GameSceneViewModel(
       None, // ... we have no last position of the pointer recorded
 
-      GameViewport(1580, 1900),
+      GameViewport(GameAssets.GameSceneDimensions.width, GameAssets.GameSceneDimensions.height),
       Button(
         buttonAssets = GameAssets.buttonNewGameAssets(1.0),
         bounds = newGameBounds,

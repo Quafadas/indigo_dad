@@ -24,9 +24,11 @@ object GameAssets:
 
   scribe.debug("@@@ Object GameAssets START")
 
-  /* Game rectangle found by experimentation
+  /* Game rectangle found by experimentation.
      This rectangle dimensions also laid out in html file
-     Previous Rectangle was (0,0,1580,1400) */
+     This is the "master" setting for the game dimensions 
+     for all of the scala code
+  */
 
   val GameSceneDimensions = Rectangle(0, 0, 1580, 1300)
 

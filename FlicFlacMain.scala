@@ -43,15 +43,14 @@ case class FlicFlacGame(
     .withMinimumLevel(Level.Debug)
     .replace()
 
-  var kount1 = 3
-  var kount2 = 3
-  var kount3 = 3
-  var kount4 = 3
-
   val magnification = 1
 
   val config: GameConfig =
-    GameConfig.default.withMagnification(magnification)
+    // The default from indigo was the following line ...
+    // GameConfig.default.withMagnification(magnification)
+    // ... but Simon discovered we need to use our own config in order to control viewport
+    // properly and avoid "scaling & chopping issues" ... JP 26/08/24
+    FlicFlacConfig.config
 
   val assets: Set[AssetType] =
     GameAssets.get()
@@ -142,10 +141,6 @@ case class FlicFlacGame(
       flicFlacViewModel: FlicFlacViewModel
   ): GlobalEvent => Outcome[FlicFlacViewModel] =
     case FrameTick =>
-      if kount4 > 0 then
-        scribe.debug("@@@ FlicFlacMain-updateViewModel FrameTick")
-        kount4 = kount4 - 1
-      end if
       Outcome(flicFlacViewModel)
 
     case ViewportResize(gameViewPort) =>
@@ -162,10 +157,6 @@ case class FlicFlacGame(
         .addGlobalEvents(ViewportResize(flicFlacViewModel.theGameViewPort))
 
     case _ =>
-      if kount3 > 0 then
-        scribe.debug("@@@ FlicFlac Main-updateViewModel _")
-        kount3 = kount3 - 1
-      end if
       Outcome(flicFlacViewModel)
   end updateViewModel
 
@@ -175,10 +166,6 @@ case class FlicFlacGame(
   ): GlobalEvent => Outcome[FlicFlacGameModel] =
 
     case _ =>
-      if kount2 > 0 then
-        scribe.debug("@@@ FlicFlacMain-updateModel")
-        kount2 = kount2 - 1
-      end if
       Outcome(flicFlacGameModel)
   end updateModel
 
@@ -187,11 +174,6 @@ case class FlicFlacGame(
       flicFlacGameModel: FlicFlacGameModel,
       flicFlacViewModel: FlicFlacViewModel
   ): Outcome[SceneUpdateFragment] = Outcome {
-
-    if kount1 > 0 then
-      scribe.debug("@@@ FlicFlacMain-present")
-      kount1 = kount1 - 1
-    end if
 
     SceneUpdateFragment.empty
   }
