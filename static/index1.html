@@ -21,67 +21,38 @@
   <body onload="LocalStorageRead()">    
     <div id="readResults" class="configParams">
       <div>
-        <i>1) Choose your pieces.</i>    
-        <span title="On the two dimensional board, blocks appear as rectangles and the cylinders as hexagons.">
-          <div>
-            <label for="blockShape" class="configLabel">You are ... BLOCKS</label>
-            <input id="blockShape" style="flex-direction: row-reverse; accent-color: black;"  type="radio" name="shape" value=1>  
+        <i>1) Enter your name</i><br>
+        <span title="This name is the first part of a key to establish the link to your opponent.">
+          <div id="errorMsg1" class="configErrorMsg"><b>Invalid Name</b><br>
+            Your name should be at least 3 characters long<br>
           </div>
           <div>
-            <label for="cylinderShape" class="configLabel">CYLINDERS</label>
-            <input id="cylinderShape" style="flex-direction: row-reverse; accent-color: black;" type="radio" name="shape" value=0>      
+            <label for="myName" class="configLabel">Your Name:</label>
+            <input id="myName" class="configValue" type="text" name="myName">  
           </div>
         </span>
       </div>
 
       <br>
       <div>
-        <i>2) Inform your opponent of your local IP Address & Port</i><br>
-        <span title="This is your IP address and your port number. No need to change local IP address given.">
-          <div id="errorMsg2" class="configErrorMsg"><b>Invalid IP Address or Port. </b><br>
-            The IP address should be non-zero and take the form &quot;n.n.n.n&quot; <br>
-            ... where n is a decimol number in the range 0 <=n <= 255.<br>
-            The port number should be a non-zero integer in the range 0 < n <= 65535.<br>
+        <i>2) Enter your opponent&apos;s name</i><br>
+        <span title="This name is the second part of a key to establish the link to your opponent.">
+          <div id="errorMsg2" class="configErrorMsg"><b>Invalid Name</b><br>
+            Your opponent&apos;s name should be at least 3 characters long<br> 
           </div>
           <div>
-            <label for="localIp" class="configLabel">Local IP Address:</label>
-            <input id="localIp" class="configValue" type="text" name="localIp">  
+            <label for="oppoName" class="configLabel">Opponent&apos;s Name:</label>
+            <input id="oppoName" class="configValue" type="text" name="oppoName">  
           </div>
-          <div>
-            <label for="localPort" class="configLabel">Local Port:</label>
-            <input id="localPort" class="configValue" type="number" name="localPort">    
-          </div>
-        </span>
-      </div>
-
-
-      <br>
-      <div>
-        <i>3) Enter your opponents IP Address & Port</i><br>
-        <span title="When your opponent runs this game, he sees a different local IP address (& port number).  
-        You need to obtain this information and enter their details here.">
-          <div id="errorMsg3" class="configErrorMsg"><b>Invalid IP Address or Port. </b><br>
-            The IP address should be non-zero and take the form &quot;n.n.n.n&quot; <br>
-            ... where n is a decimol number in the range 0 <=n <= 255.<br>
-            The port number should be a non-zero integer in the range 0 < n <= 65535.<br> 
-          </div>
-          <div>
-            <label for="remoteIp" class="configLabel">Remote IP Address:</label>
-            <input id="remoteIp" class="configValue" type="text" name="remoteIp">  
-          </div>
-          <div>
-            <label for="remotePort" class="configLabel">Remote Port:</label>
-            <input id="remotePort" class="configValue" type="number" name="remotePort">  
-          </div>  
         </span>
       </div>
       
       <br>
      
-      <i>4) Enter agreed game parameters</i><br>
+      <i>3) Propose the game parameters</i><br>
       <div>
         <span title="This is the number of points you need to win. Remember you must win by at least two clear points">
-          <div id="errorMsg4A" class="configErrorMsg"><b>Invalid target set as Final Score</b><br>
+          <div id="errorMsg3A" class="configErrorMsg"><b>Invalid target set as Final Score</b><br>
             The score to win needs to be set as a non-zero positive integer.<br>
           </div>
           <label for="scoreToWin" class="configLabel">Score to Win:</label>
@@ -90,7 +61,7 @@
       </div>
       <div>
         <span title="This is the number of seconds allowed for each turn. A value of zero disables this timer">
-          <div id="errorMsg4B" class="configErrorMsg"><b>Invalid Turn Time</b><br>
+          <div id="errorMsg3B" class="configErrorMsg"><b>Invalid Turn Time</b><br>
             The turn time must be set as as a non-zero positive integer, <br>
             representing the maximum time allowed in seconds for each turn.<br>
           </div>
@@ -100,7 +71,7 @@
       </div>
       <div>
         <span title="This is the number of seconds allowed for an extended turn after a successful capture. It is suggested to make this half the turn timer above. Once again, a value of zero disables this timer.">
-          <div id="errorMsg4C" class="configErrorMsg"><b>Invalid Captor&apos;s Turn Time</b><br>
+          <div id="errorMsg3C" class="configErrorMsg"><b>Invalid Captor&apos;s Turn Time</b><br>
             The captor&apos;s turn time must be set as as a non-zero positive integer, <br>
             representing the maximum time allowed in seconds for extra turns.<br>
           </div>
@@ -109,9 +80,10 @@
         </span>
       </div>
       <div>
-        <div id="errorMsg4D" class="configErrorMsg">
+        <div id="errorMsg3D" class="configErrorMsg">
           <b>Invalid Random Event Probability</b><br>
-          This probability is a percentage where 0 <= probability <= 100 <br>
+          This is an integer representing the percentage probability,<br>
+          where 0 <= probability <= 100 <br>
         </div>
         <span title="This is the percentage probabilty that a random event will occur. A value of zero prohibits these occurences.">
           <label for="randEventProb" class="configLabel">Random Event Probability:</label>
@@ -138,17 +110,8 @@
         const oFlicFlac = JSON.parse(sFlicFlacPlayParams)
         document.getElementById("readResults").style.border="4px solid blue"
 
-        if (oFlicFlac.playPamsLocalShape == 1) {
-            document.getElementById("blockShape").checked=true
-          }
-        else{
-          document.getElementById("cylinderShape").checked=true
-        }
-
-        document.getElementById("localIp").defaultValue = oFlicFlac.playPamsLocalIpAddr
-        document.getElementById("localPort").defaultValue = oFlicFlac.playPamsLocalPort
-        document.getElementById("remoteIp").defaultValue = oFlicFlac.playPamsRemoteIpAddr
-        document.getElementById("remotePort").defaultValue = oFlicFlac.playPamsRemotePort
+        document.getElementById("myName").defaultValue = oFlicFlac.playPamsOurName
+        document.getElementById("oppoName").defaultValue = oFlicFlac.playPamsOppoName
         document.getElementById("scoreToWin").defaultValue = oFlicFlac.playPamsScoreToWin
         document.getElementById("turnTime").defaultValue = oFlicFlac.playPamsTurnTime
         document.getElementById("captorsTime").defaultValue = oFlicFlac.playPamsCaptorsTime
@@ -162,83 +125,67 @@
     }
     
     function LocalStorageWrite() {
-      // validate the new parameters
-      var localShape = 0
-      var remoteShape = 0
-      if (document.getElementById("blockShape").value) (
-        localShape = 1
-      )
-      else (
-        remoteShape = 1
-      )
+      console.log("@@@ LocalStorageWrite")
 
-      var localIp = document.getElementById("localIp").value
-      var localPort = document.getElementById("localPort").value
-      var remoteIp = document.getElementById("remoteIp").value
-      var remotePort = document.getElementById("remotePort").value
+      // validate the new parameters
+
+      var myName = document.getElementById("myName").value
+      var oppoName = document.getElementById("oppoName").value
       var scoreToWin = document.getElementById("scoreToWin").value
       var turnTime = document.getElementById("turnTime").value
       var captorsTime = document.getElementById("captorsTime").value
       var randEventProb = document.getElementById("randEventProb").value
 
       var invalidParams = false;
-      if ((localIp === "0.0.0.0")
-      || (isValidIP(localIp) === false)
-      || (isValidPort(localPort) === false))
+
+      if (myName.length < 3)
+      {
+        document.getElementById("errorMsg1").style.display="block";
+        invalidParams = true;
+      }
+
+      if (oppoName.length < 3)
       {
         document.getElementById("errorMsg2").style.display="block";
         invalidParams = true;
       }
 
-      if ((remoteIp === "0.0.0.0")
-      || (isValidIP(remoteIp) === false)
-      || (isValidPort(remotePort) === false))
+      if (scoreToWin < 1)
       {
-        document.getElementById("errorMsg3").style.display="block";
-        invalidParams = true;
-      }
-
-      if (scoreToWin < 0)
-      {
-        document.getElementById("errorMsg4A").style.display="block";
+        document.getElementById("errorMsg3A").style.display="block";
         invalidParams = true;
       }
 
       if (turnTime < 0)
       {
-        document.getElementById("errorMsg4B").style.display="block";
+        document.getElementById("errorMsg3B").style.display="block";
         invalidParams = true;
       }
 
       if (captorsTime < 0)
       {
-        document.getElementById("errorMsg4C").style.display="block";
+        document.getElementById("errorMsg3C").style.display="block";
         invalidParams = true;        
       }
 
       if ((randEventProb < 0) || (randEventProb > 100))
       {
-        document.getElementById("errorMsg4D").style.display="block";
+        document.getElementById("errorMsg3D").style.display="block";
         invalidParams = true;
       }
 
       if (invalidParams == true) {
         // leave error message(s) showing if one or more paramters invalid
         document.getElementById("readResults").style.border="4px solid red";
+        console.log("@@@ Invalid PlayParams detected")
         return;
       }
       else {
-        document.getElementById("readResults").style.border="4px solid blue";
-
         // infuse new settings into a new PlayParams object
 
         var oPlayParams = {
-          playPamsLocalShape: localShape,
-          playPamsLocalIpAddr: localIp,
-          playPamsLocalPort: localPort,
-          playPamsRemoteShape: remoteShape,
-          playPamsRemoteIpAddr: remoteIp,
-          playPamsRemotePort: remotePort,
+          playPamsOurName: myName,
+          playPamsOppoName: oppoName,
           playPamsScoreToWin: scoreToWin,
           playPamsTurnTime: turnTime,
           playPamsCaptorsTime: captorsTime,
@@ -252,27 +199,6 @@
         // relocate to indigo environment
         window.location.href = './index2.html';
       }
-    }
-
-    const isValidIP = (ip) => {
-      const ipv4Pattern = /^(25[0-5]|2[0-4]\d|1\d{2}|\d{1,2})(\.(25[0-5]|2[0-4]\d|1\d{2}|\d{1,2})){3}$/;
-      if (ipv4Pattern.test(ip)) {
-        return true;
-      }
-
-      // Check for IPv6
-      const ipv6Pattern = /^([\da-fA-F]{1,4}:){7}[\da-fA-F]{1,4}$/;
-      if (ipv6Pattern.test(ip)) {
-        return true;
-      }
-
-      return false;
-    }
-    function isValidPort(port) {
-      if ((port > 0) && (port <= 65535))
-        return true
-      else
-        return false
     }
     </script>
   </body>

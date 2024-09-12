@@ -7,12 +7,8 @@ import io.circe.syntax.*
 import io.circe.parser.decode
 
 final case class FlicFlacPlayerParams(
-    playPamsLocalIpAddr: String, // ..... default 127.0.0.1
-    playPamsLocalPort: Int, // .......... default 3000
-    playPamsLocalShape: Int, // ..... ... default 0 = cylinder
-    playPamsRemoteIpAddr: String, // .... default 127.0.0.1
-    playPamsRemotePort: Int, // ......... default 3000
-    playPamsRemoteShape: Int, // ........ default 1 = block
+    playPamsOurName: String, // ......... default "OurName"
+    playPamsOppoName: String, // ........ default "OppoName"
     playPamsScoreToWin: Int, // ......... default 11
     playPamsTurnTime: Int, // ........... default 10 seconds
     playPamsCaptorsTime: Int, // ........ default 5 seconds
@@ -31,12 +27,8 @@ object FlicFlacPlayerParams:
         case Left(_) =>
           scribe.error("@@@ Retrieve PlayerParams failed - assert default")
           FlicFlacPlayerParams(
-            "127.0.0.1", // ... LocalIpAddr
-            3000, // .......... LocalPort
-            CYLINDER, // ...... LocalShape
-            "127.0.0.1", // ... RemoteIpAddr
-            3000, // .......... RemotePort
-            BLOCK, // ......... RemoteShape
+            "OurName", // ..... Our name
+            "OppoName", // .... Opponents name
             11, // ............ ScoreToWin
             10, // ............ TurnTime
             5, // ............. CaptorsTime
@@ -44,4 +36,9 @@ object FlicFlacPlayerParams:
           )
     cacheConfigOrDefault
   end retrieve
+
+  def GetNames(): (String, String) =
+    val playerParams = retrieve()
+    (playerParams.playPamsOurName, playerParams.playPamsOppoName)
+    
 end FlicFlacPlayerParams

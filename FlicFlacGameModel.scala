@@ -8,6 +8,9 @@ import io.circe.parser.decode
 import game.Piece.pieceShape
 
 final case class FlicFlacGameModel(
+    ourName: String,
+    oppoName: String,
+    ourPieceType: Int,
     gameState: GameState,
     gameScore: (Int, Int),
     scalingFactor: Double,
@@ -37,6 +40,9 @@ object FlicFlacGameModel:
   def creation(playerParams: FlicFlacPlayerParams): FlicFlacGameModel =
     scribe.debug("@@@ FlicFlacGameModel creation")
 
+    val sOurName = playerParams.playPamsOurName
+    val sOppoName = playerParams.playPamsOppoName
+    val iOurPieceType = CYLINDER // FIXME ... this needs to be adjusted once comms link is established
     val startingGameState = GameState.START
     val score = (0, 0)
     val defaultScalingFactor = 1.0
@@ -47,6 +53,9 @@ object FlicFlacGameModel:
     val captorsTime = playerParams.playPamsCaptorsTime
     val turnTimer = TurnTimer(turnTime, captorsTime)
     FlicFlacGameModel(
+      sOurName,
+      sOppoName,
+      iOurPieceType,
       startingGameState,
       score,
       defaultScalingFactor,
@@ -147,6 +156,9 @@ object FlicFlacGameModel:
   def reset(previousModel: FlicFlacGameModel): FlicFlacGameModel =
     scribe.debug("@@@ Reset model")
 
+    val sOurName = previousModel.ourName
+    val sOppoName = previousModel.oppoName
+    val iOurPieceType = previousModel.ourPieceType
     val resetGameState = GameState.START
     val score = (0, 0)
     val defaultSF = 1.0
@@ -157,6 +169,9 @@ object FlicFlacGameModel:
     val captorsTime = previousModel.turnTimer.iCaptorsTurnTime
     val turnTimer = TurnTimer(turnTime, captorsTime)
     FlicFlacGameModel(
+      sOurName,
+      sOppoName,
+      iOurPieceType,
       resetGameState,
       score,
       defaultSF,

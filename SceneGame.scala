@@ -277,6 +277,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       if k.keyCode == Key.ADD then Outcome(model).addGlobalEvents(ButtonPlusEvent)
       else if k.keyCode == Key.SUBTRACT then Outcome(model).addGlobalEvents(ButtonMinusEvent)
       else if k.keyCode == Key.ENTER then Outcome(model).addGlobalEvents(ButtonTurnEvent)
+      else if k.keyCode == Key.SPACE then Outcome(model).addGlobalEvents(SubSysGameUpdate) // FIXME just a test
       else Outcome(model)
       end if
 
@@ -289,7 +290,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       end if
 
       if TurnTimer.expired(model.turnTimer) then
-        // signal a button turn evet to switch players
+        // signal a button turn event to switch players
         Outcome(model).addGlobalEvents(ButtonTurnEvent)
       else
         val possibleTT = TurnTimer.update(model.turnTimer)
@@ -385,6 +386,32 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       .withFontSize(Pixels(20))
       .moveTo(0, 0)
 
+    val cylinderName = 
+      if (model.ourPieceType == CYLINDER) then
+        model.ourName
+      else 
+        model.oppoName
+      end if
+    val blockName = 
+      if (model.ourPieceType == CYLINDER) then
+        model.oppoName
+      else
+        model.ourName
+      end if
+    
+    val cylinderPlayer =
+      TextBox((cylinderName).toString(), 220, 50)
+        .withColor(RGBA.Black)
+        .withFontSize(Pixels(40))
+        .moveTo(14, 190)
+
+    val blockPlayer =
+      TextBox((blockName).toString(), 220, 50)
+        .withColor(RGBA.Black)
+        .withFontSize(Pixels(40))
+        .moveTo(14, 370)
+
+
     val cylinderScoreX = coordXFromScore(model.gameScore._1)
     val blockScoreX = coordXFromScore(model.gameScore._2)
 
@@ -392,12 +419,12 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       TextBox((model.gameScore._1).toString(), 150, 300)
         .withColor(RGBA.Black)
         .withFontSize(Pixels(100))
-        .moveTo(cylinderScoreX, 200)
+        .moveTo(cylinderScoreX, 250)
     val blockScore =
       TextBox((model.gameScore._2).toString(), 150, 300)
         .withColor(RGBA.Black)
         .withFontSize(Pixels(100))
-        .moveTo(blockScoreX, 340)
+        .moveTo(blockScoreX, 430)
 
     val width = GameAssets.GameSceneDimensions.width  // force the width as 1580
     val height = GameAssets.GameSceneDimensions.height // force the height as 1300
@@ -421,6 +448,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(viewModel.minusButton.draw)
         |+| SceneUpdateFragment(viewModel.turnButton.draw)
         |+| SceneUpdateFragment(Layer(GameAssets.gScorePanel(1.0).moveTo(0, 130)))
+        |+| SceneUpdateFragment(cylinderPlayer)
+        |+| SceneUpdateFragment(blockPlayer)
         |+| SceneUpdateFragment(cylinderScore)
         |+| SceneUpdateFragment(blockScore)
         |+| TurnTimer.show(model)
@@ -503,9 +532,9 @@ end GameSceneViewModel
 
 object GameSceneViewModel:
   val turnBounds = Rectangle(10, 30, 90, 80)
-  val plusBounds = Rectangle(10, 500, 90, 80)
-  val minusBounds = Rectangle(160, 500, 90, 80)
-  val newGameBounds = Rectangle(10, 600, 240, 80)
+  val plusBounds = Rectangle(10, 600, 90, 80)
+  val minusBounds = Rectangle(160, 600, 90, 80)
+  val newGameBounds = Rectangle(10, 700, 240, 80)
 
   val initial: GameSceneViewModel =
     GameSceneViewModel(

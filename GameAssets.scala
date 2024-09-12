@@ -62,7 +62,7 @@ object GameAssets:
       .scaleBy(sf, sf)
 
   def gScorePanel(sf: Double): Graphic[Material.ImageEffects] =
-    Graphic(Rectangle(0, 0, 250, 350), 3, Material.ImageEffects(AssetName(spAssetName)))
+    Graphic(Rectangle(0, 0, 250, 440), 3, Material.ImageEffects(AssetName(spAssetName)))
 
   def gTimeSliderBody(sf: Double): Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 50, 1220), 3, Material.ImageEffects(AssetName(tsAssetName)))
