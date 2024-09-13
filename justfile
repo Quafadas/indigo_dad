@@ -22,5 +22,5 @@ clean:
   scala-cli clean .
 
 copyAssets:
-  cp -r {{justfile_directory()}}/static/{{outDir}}
+  cp -r {{justfile_directory()}}/static /{{outDir}}
   
