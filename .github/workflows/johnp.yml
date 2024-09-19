@@ -40,6 +40,8 @@ jobs:
       - run: just buildJs
       - run: just copyAssets
       - run: ls /home/runner/work/indigoLite/indigoLite/.out/
+      - run: echo "@@@@@@@@@@"
+      - run: just listOutDir
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - uses: actions/upload-artifact@v4
