@@ -1,7 +1,8 @@
 name: Continuous FrustrationName
 run-name: ContinuosFrustrationRunName
 
-on: [push, workflow_dispatch]
+on: 
+  [push, workflow_dispatch]:
     branches:
       - main
 
