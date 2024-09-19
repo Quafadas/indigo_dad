@@ -1,10 +1,11 @@
 name: Continuous Integration
 
-on:
-  push:
-    branches: ['main']
-  workflow_dispatch:
-    branches: ['main']
+#trying to disable workflow whilst frustration occurs
+#on:
+#  push:
+#    branches: ['main']
+#  workflow_dispatch:
+#    branches: ['main']
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
