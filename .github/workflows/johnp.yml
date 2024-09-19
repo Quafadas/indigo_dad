@@ -1,4 +1,5 @@
-name: Continuous Frustration
+name: Continuous FrustrationName
+run-name: ContinuosFrustrationRunName
 
 on:
   push:
@@ -25,26 +26,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v3
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: coursier/cache-action@v6.3
-      - uses: VirtusLab/scala-cli-setup@main
+        uses: coursier/cache-action@v6.3
+        uses: VirtusLab/scala-cli-setup@main
         with:
           power: true
           jvm: temurin:21
-      - uses: taiki-e/install-action@just
+        uses: taiki-e/install-action@just
 
       - name: ConfigurePages
-      - uses: actions/configure-pages@v4
-      - run: pwd
-      - run: just buildJs
-      - run: just copyAssets
-      - run: ls /home/runner/work/indigoLite/indigoLite/.out/
-      - run: echo "@@@@@@@@@@"
-      - run: just listOutDir
-      - name: UploadArtifact
-      - uses: actions/upload-artifact@v4
+        uses: actions/configure-pages@v4
+        run: pwd
+        run: just buildJs
+        run: just copyAssets
+        run: ls /home/runner/work/indigoLite/indigoLite/.out/
+        run: echo "@@@@@@@@@@"
+        run: just listOutDir
+        name: UploadArtifact
+        uses: actions/upload-artifact@v4
         with:
           name: page
           path: /home/runner/work/indigoLite/indigoLite/.out/
@@ -59,12 +60,12 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v4
       with:
         name: page
         path: .
-    - uses: actions/configure-pages@v4
-    - uses: actions/upload-pages-artifact@v2
+      uses: actions/configure-pages@v4
+      uses: actions/upload-pages-artifact@v2
       with:
         path: .
     - name: Deploy to GitHub Pages
