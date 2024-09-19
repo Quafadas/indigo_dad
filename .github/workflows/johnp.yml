@@ -2,10 +2,10 @@ name: Continuous FrustrationName
 run-name: ContinuosFrustrationRunName
 
 on: 
-  [push, workflow_dispatch]:
-    branches:
-      - main
-
+  push:
+    branches: ['main']
+  workflow_dispatch:
+    branches: ['main']
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
