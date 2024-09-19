@@ -16,11 +16,20 @@ buildJs:
 ## JP 23/06/2024 switched to scalafmt during skype call with Simon
 format:
   scalafmt ~/GIT/indigoLite
-
+  
 ## JP 24/06/2024 added "clean", sometimes help with browser synchronisation with build
 clean:
   scala-cli clean .
 
+## JP 19/09/2024 removed trailing /
+## ... the previous command was ...
+## cp -r {{justfile_directory()}}/static/ {{outDir}} ... which might be wrong I think
 copyAssets:
-  cp -r {{justfile_directory()}}/static/ {{outDir}}
+  cp -r {{justfile_directory()}}/static {{outDir}}
+
+## JP 19/09/2024 added listOurDir command to help debug continuous integration problem 
+listOutDir:
+  pwd
+  echo {{outDir}}
+  ls -AlR {{outDir}}
   
