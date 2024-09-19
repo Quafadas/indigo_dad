@@ -1,11 +1,10 @@
 name: Continuous FrustrationName
 run-name: ContinuosFrustrationRunName
 
-on:
-  push:
-    branches: ['main']
-  workflow_dispatch:
-    branches: ['main']
+on: [push, workflow_dispatch]
+    branches:
+      - main
+
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -18,7 +17,7 @@ concurrency:
 
 jobs:
   build:
-    name: build
+    - name: build
     if: github.ref == 'refs/heads/main'
     strategy:
       matrix:
