@@ -1,15 +1,13 @@
 name: Continuous Integration
 
-
 on:
   push:
-    branches: ['main']
-  workflow_dispatch:
     branches: ['main']
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ACTIONS_STEP_DEBUG: true
+  ACTIONS_RUNNER_DEBUG: true
 
 concurrency:
   group: ${{ github.workflow }} @ ${{ github.ref }}
@@ -25,25 +23,33 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
+      - run: echo "@@@@@-1-@@@@@"
+      - run: pwd
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          path: /home/runner/work/indigoLite/indigoLite
+          if no-files-found: error
       - uses: coursier/cache-action@v6.3
       - uses: VirtusLab/scala-cli-setup@main
         with:
           power: true
           jvm: temurin:21
       - uses: taiki-e/install-action@just
-      - name: Setup Pages
+      - name: ConfigurePages
         uses: actions/configure-pages@v4
+      - run: echo "@@@@@-2-@@@@@"
+      - run: pwd
       - run: just buildJs
       - run: just copyAssets
       - run: ls /home/runner/work/indigoLite/indigoLite/.out/
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-      - uses: actions/upload-artifact@v4
+      - run: echo "@@@@@-3-@@@@@"
+      - run: just listOutDir
+      - name: UploadArtifact
+        uses: actions/upload-artifact@v4
         with:
           name: page
+          include-hidden-files: true
           path: /home/runner/work/indigoLite/indigoLite/.out/
           if-no-files-found: error
   deploy:
