@@ -1,10 +1,7 @@
-name: Continuous FrustrationName
-run-name: ContinuosFrustrationRunName
+name: ContinuousFrustrationName
 
 on: 
   push:
-    branches: ['main']
-  workflow_dispatch:
     branches: ['main']
 
 env:
@@ -43,13 +40,7 @@ jobs:
       - run: pwd
       - run: echo "@@@@@-2-@@@@@"
       - run: just buildJs
-        with:
-          path: /home/runner/work/indigoLite/.out
-          if no-files-found: error
       - run: just copyAssets
-        with:
-          path: /home/runner/work/indigoLite/.out/static
-          if no-files-found: error
       - run: ls /home/runner/work/indigoLite/indigoLite/.out
       - run: echo "@@@@@-3-@@@@@"
       - run: just listOutDir
