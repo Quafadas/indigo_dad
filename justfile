@@ -15,7 +15,6 @@ buildJs:
   echo "@@@"
   mkdir -p {{outDir}}
   scala-cli --power package . -o {{outDir}} -f
-  echo "buildJs result=" $?
   ls -alR {{outDir}}
   echo "@@@"
 
