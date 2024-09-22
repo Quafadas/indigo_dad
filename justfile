@@ -30,7 +30,7 @@ clean:
 ## ... the previous command was ...
 ## cp -r {{justfile_directory()}}/static/ {{outDir}} ... which might be wrong I think
 copyAssets:
-  cp -r {{justfile_directory()}}/static {{outDir}}
+  cp -r {{justfile_directory()}}/static/ {{outDir}}
 
 ## JP 19/09/2024 added listOurDir command to help debug continuous integration problem 
 listOutDir:
