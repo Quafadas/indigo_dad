@@ -42,7 +42,7 @@ jobs:
       - run: pwd
       - run: just buildJs
       - run: just copyAssets
-      - run: ls /home/runner/work/indigoLite/indigoLite/.out
+      - run: ls /home/runner/work/indigoLite/indigoLite/.out/
       - run: echo "@@@@@-3-@@@@@"
       - run: just listOutDir
       - name: UploadArtifact
