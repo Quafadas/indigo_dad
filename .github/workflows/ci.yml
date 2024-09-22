@@ -46,6 +46,7 @@ jobs:
       - run: echo "@@@@@-3-@@@@@"
       - run: pwd
       - run: ls -AlR /home/runner/work/indigoLite/indigoLite/.out/ | wc -l
+      - run: ls -AlR /home/runner/work/indigoLite/indigoLite/.out/static/ | wc -l
       - name: UploadArtifact
         uses: actions/upload-artifact@v4
         with:
