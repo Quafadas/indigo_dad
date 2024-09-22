@@ -43,9 +43,9 @@ jobs:
       - run: just buildJs
       - run: ls -AlR /home/runner/work/indigoLite/indigoLite/.out/ | wc -l
       - run: just copyAssets
-      - run: ls /home/runner/work/indigoLite/indigoLite/.out/
       - run: echo "@@@@@-3-@@@@@"
-      - run: just listOutDir
+      - run: pwd
+      - run: ls -AlR /home/runner/work/indigoLite/indigoLite/.out/ | wc -l
       - name: UploadArtifact
         uses: actions/upload-artifact@v4
         with:
