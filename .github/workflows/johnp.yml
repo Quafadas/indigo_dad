@@ -24,10 +24,11 @@ jobs:
     timeout-minutes: 60
     steps:
       - run: echo "@@@@@-1-@@@@@"
+      - run: pwd
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          path: /home/runner/work/
+          path: /home/runner/work/indigoLite/indigoLite
           if no-files-found: error
       - uses: coursier/cache-action@v6.3
       - uses: VirtusLab/scala-cli-setup@main
@@ -37,8 +38,8 @@ jobs:
       - uses: taiki-e/install-action@just
       - name: ConfigurePages
         uses: actions/configure-pages@v4
-      - run: pwd
       - run: echo "@@@@@-2-@@@@@"
+      - run: pwd
       - run: just buildJs
       - run: just copyAssets
       - run: ls /home/runner/work/indigoLite/indigoLite/.out
