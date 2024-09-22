@@ -41,6 +41,7 @@ jobs:
       - run: echo "@@@@@-2-@@@@@"
       - run: pwd
       - run: just buildJs
+      - run: ls -AlR /home/runner/work/indigoLite/indigoLite/.out/ | wc -l
       - run: just copyAssets
       - run: ls /home/runner/work/indigoLite/indigoLite/.out/
       - run: echo "@@@@@-3-@@@@@"
