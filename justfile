@@ -43,4 +43,5 @@ listOutDir:
   ls -AlR {{outDir}} | wc -l
 ##  ls -AlR /home/runner/work/indigoLite/indigoLite/.out/
   ls -AlR /home/runner/work/indigoLite/indigoLite/.out/ | wc -l
+  echo "@@@@@@"
   
