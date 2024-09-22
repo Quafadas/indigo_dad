@@ -16,7 +16,7 @@ buildJs:
   mkdir -p {{outDir}}
   scala-cli --power package . -o {{outDir}} -f
   ls -alR {{outDir}}
-  ls -alR | wc -l
+  ls -alR {{outDir}} | wc -l
 
 ## JP 23/06/2024 switched to scalafmt during skype call with Simon
 format:
