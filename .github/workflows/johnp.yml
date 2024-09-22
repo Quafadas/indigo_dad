@@ -26,9 +26,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
+      - run: echo "@@@@@-1-@@@@@"
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          path: /home/runner/work/indigoLite
+          if no-files-found: error
       - uses: coursier/cache-action@v6.3
       - uses: VirtusLab/scala-cli-setup@main
         with:
@@ -38,16 +41,24 @@ jobs:
       - name: ConfigurePages
         uses: actions/configure-pages@v4
       - run: pwd
+      - run: echo "@@@@@-2-@@@@@"
       - run: just buildJs
+        with:
+          path: /home/runner/work/indigoLite/.out
+          if no-files-found: error
       - run: just copyAssets
-      - run: ls /home/runner/work/indigoLite/indigoLite/.out/
-      - run: echo "@@@@@@@@@@"
+        with:
+          path: /home/runner/work/indigoLite/.out/static
+          if no-files-found: error
+      - run: ls /home/runner/work/indigoLite/indigoLite/.out
+      - run: echo "@@@@@-3-@@@@@"
       - run: just listOutDir
       - name: UploadArtifact
         uses: actions/upload-artifact@v4
         with:
           name: page
           path: /home/runner/work/indigoLite/indigoLite/.out/
+          if-no-files-found: error
   deploy:
     needs: build
     permissions:

@@ -10,6 +10,9 @@ dev:
 
 ## Builds the front end project
 buildJs:
+  echo "@@@"
+  echo {{outDir}}
+  echo "@@@"
   mkdir -p {{outDir}}
   scala-cli --power package . -o {{outDir}} -f
 
