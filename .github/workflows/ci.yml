@@ -75,6 +75,10 @@ jobs:
     - uses: actions/upload-pages-artifact@v2
       with:
         path: .
+    - run: echo "@@@@@-4-@@@@@"
+    - run: ls -AlR . | wc -l
+    - run: ls -Alr ./static | wc -l
+    - run: echo "@@@@@-5-@@@@@"
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v3
