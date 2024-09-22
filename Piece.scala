@@ -6,17 +6,20 @@ import io.circe.Encoder
 import io.circe.Decoder
 
 final case class Piece(
-    pieceShape: Int, // ................ 0=cylinder, 1=block
-    pieceIdentity: Int, // ............. 0,1,2,3,4,5 for Blue/Green/Yellow/Orange/Red/Purple
-    pCurPos: Point, // ................. current position (in hexArrayCoords)
-    pHomePos: Point, // ................ starting/home position (in hexArrayCoords)
+    pieceShape: Int, // .................... 0=cylinder, 1=block
+    pieceIdentity: Int, // ................. 0,1,2,3,4,5 for Blue/Green/Yellow/Orange/Red/Purple
+    pCurPos: Point, // ..................... current position (in hexArrayCoords)
+    pHomePos: Point, // .................... starting/home position (in hexArrayCoords)
+    pTurnStartPos: Point, // ............... piece position at start of turn
+    bTurnStartFlipState: Boolean, // ....... false if normal orientation at start of turn, true if flipped
 
     // parameters below required for model, but not for creation
 
-    bFlipped: Boolean = false, // ...... piece normal is f, piece flipped is 1
-    bSelected: Boolean = false, // ..... piece is selected
-    bCaptured: Boolean = false, // ..... piece is captured (or not)
-    bMoved: Boolean = false // ......... piece has moved this turn
+    bFlipped: Boolean = false, // .......... piece normal is false, piece flipped is true
+    bSelected: Boolean = false, // ......... piece is selected
+    bCaptured: Boolean = false, // ......... piece is captured (or not)
+    bCaptor: Boolean = false, // ........... piece has made a capture this turn
+    bMoved: Boolean = false // ............. piece has moved this turn
 ) derives Encoder.AsObject,
       Decoder
 object Piece:
@@ -35,6 +38,10 @@ object Piece:
   def captured(p: Piece): Boolean =
     p.bCaptured
   end captured
+
+  def captor(p: Piece): Boolean =
+    p.bCaptor
+  end captor
 
   def moved(p: Piece): Boolean =
     p.bMoved
@@ -56,15 +63,36 @@ object Piece:
   end setSelected
 
   def setToggleFlip(p: Piece): Piece =
-    p.copy(bFlipped = (if p.bFlipped then false else true))
+    p.copy(bFlipped = if p.bFlipped then false else true)
   end setToggleFlip
 
   def setCaptured(p: Piece, b: Boolean): Piece =
     p.copy(bCaptured = b)
   end setCaptured
 
+  def setCaptor(p: Piece, b: Boolean): Piece =
+    p.copy(bCaptor = b)
+  end setCaptor
+
+  def setMoved(p: Piece, b: Boolean): Piece =
+    p.copy(bMoved = b)
+  end setMoved
+
+  def setTurnStartPos(p: Piece, pPos: Point): Piece =
+    p.copy(pTurnStartPos = pPos, bTurnStartFlipState = p.bFlipped)
+  end setTurnStartPos
+
   def setPosition(p: Piece, pPos: Point): Piece =
-    p.copy(pCurPos = pPos)
+    if p.pCurPos == pPos then
+      // no change
+      p
+    else if pPos == p.pTurnStartPos then
+      // piece taking back move
+      p.copy(pCurPos = pPos, bMoved = false, bCaptor = false, bFlipped = p.bTurnStartFlipState)
+    else
+      // normal move
+      p.copy(pCurPos = pPos, bMoved = true)
+    end if
   end setPosition
 
   def moveToHome(p: Piece): Piece =
@@ -112,10 +140,10 @@ object PieceAssets:
     Vector("Cyldr", "Block")
 
   val pieceNames: Vector[String] = // Piece Names %6
-    Vector("Blue", "Green", "Yellow", "Orange", "Red", "Purple")
+    Vector("Blue  ", "Green ", "Yellow", "Orange", "Red   ", "Purple", "Grey  ")
 
   def getGraphic(shape: Int, id: Int, flipped: Boolean): Graphic[Material.ImageEffects] =
-    val safeId = id % 6
+    val safeId = id % (6 + 1) // there are six main colours + 1 is for grey (the captured color)
     val pieceAssetName = if shape == CYLINDER then cylindersAssetName else blocksAssetName
     val verticalOffset = if flipped then gHeight else 0
     val pieceRect = Rectangle(gWidth * safeId, 0 + verticalOffset, gWidth + 1, gHeight + 1)

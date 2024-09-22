@@ -5,7 +5,7 @@ import indigo.*
 /* HexBoardHelper contains additional functions used to test the hex board during development.
  */
 
-class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCfg: BoardConfig, fS: Double):
+class HexBoardHelper3() extends HexBoard3():
 
   fillLeftTopHex(arrayWidth, arrayHeight, CM)
   fillCentreTopHex(arrayWidth, arrayHeight, CM)
@@ -29,10 +29,10 @@ class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCf
     while y < height do
       var x = 0
       while x < width do
-        println("HH: " + hexArray(x)(y))
+        scribe.debug("HH: " + hexArray(x)(y))
         x += 1
       end while
-      println("---")
+      scribe.debug("---")
       y += 1
     end while
   end printBoard
@@ -42,7 +42,7 @@ class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCf
   This is a debug/test function
    */
   def fillVerticalCentreLine(width: Int, height: Int, color: Int): Unit =
-    //  println("fillVerticalCentreLine width:" + width + " height:" + height + " color:" + color)
+    //  scribe.debug("fillVerticalCentreLine width:" + width + " height:" + height + " color:" + color)
     val centre: Int = (width - 1) / 2
     if ((width - 1) & 1) == 1 then fillVerticalBorder(centre, 1, height, color)
     else fillVerticalBorder(centre, 0, height, color)
@@ -54,7 +54,7 @@ class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCf
   This is a debug/test function
    */
   def fillLeftTopHex(width: Int, height: Int, color: Int): Unit =
-    //  println("fillLeftTopHex width:" + width + " height:" + height + " color:" + color)
+    //  scribe.debug("fillLeftTopHex width:" + width + " height:" + height + " color:" + color)
     setHexColor(Point(0, 0), color)
   end fillLeftTopHex
 
@@ -63,7 +63,7 @@ class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCf
   This is a debug/test function
    */
   def fillCentreTopHex(width: Int, height: Int, color: Int): Unit =
-    //  println("fillTopCentreHex width:" + width + " height:" + height + " color:" + color)
+    //  scribe.debug("fillTopCentreHex width:" + width + " height:" + height + " color:" + color)
     val centre: Int = (width - 1) / 2
     if ((width - 1) & 1) == 1 then setHexColor(Point(centre, 1), color)
     else setHexColor(Point(centre, 0), color)
@@ -75,7 +75,7 @@ class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCf
   This is a debug/test function
    */
   def fillRightTopHexTwice(width: Int, height: Int, color: Int): Unit =
-    //  println("fillRightTopHex width:" + width + " height:" + height + " color:" + color)
+    //  scribe.debug("fillRightTopHex width:" + width + " height:" + height + " color:" + color)
     setHexColor(Point(width - 1, 0), color)
     setHexColor(Point(width - 1, 1), color)
   end fillRightTopHexTwice
@@ -85,7 +85,7 @@ class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCf
   This is a debug/test function
    */
   def fillLeftCentreHex(width: Int, height: Int, color: Int): Unit =
-    //  println("fillLeftCentreHex width:" + width + " height:" + height + " color:" + color)
+    //  scribe.debug("fillLeftCentreHex width:" + width + " height:" + height + " color:" + color)
     val x: Int = 0
     val y: Int = height / 2
     setHexColor(Point(x, y - 1), color)
@@ -96,7 +96,7 @@ class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCf
   This is a debug/test function
    */
   def fillCentreCentreHex(width: Int, height: Int, color: Int): Unit =
-    //  println("fillCentreCentreHex width:" + width + " height:" + height + " color:" + color)
+    //  scribe.debug("fillCentreCentreHex width:" + width + " height:" + height + " color:" + color)
     val x: Int = (width - 1) / 2
     val y: Int = height / 2
     if ((width - 1) & 1) == 1 then setHexColor(Point(x, y), color)
@@ -109,7 +109,7 @@ class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCf
   This is a debug/test function
    */
   def fillRightCentreHex(width: Int, height: Int, color: Int): Unit =
-    //  println("fillRightCentreHex width:" + width + " height:" + height + " color:" + color)
+    //  scribe.debug("fillRightCentreHex width:" + width + " height:" + height + " color:" + color)
     val x: Int = width - 1
     val y: Int = height / 2
     if ((width - 1) & 1) == 1 then setHexColor(Point(x, y), color)
@@ -122,7 +122,7 @@ class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCf
   This is a debug/test function
    */
   def fillLeftBottomHexTwice(width: Int, height: Int, color: Int): Unit =
-    //  println("fillLeftBottomHex width:" + width + " height:" + height + " color:" + color)
+    //  scribe.debug("fillLeftBottomHex width:" + width + " height:" + height + " color:" + color)
     setHexColor(Point(0, height - 1), color)
     setHexColor(Point(0, height - 2), color)
   end fillLeftBottomHexTwice
@@ -132,7 +132,7 @@ class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCf
   This is a debug/test function
    */
   def fillCentreBottomHex(width: Int, height: Int, color: Int): Unit =
-    //  println("fillCentreBottomHex width:" + width + " height:" + height + " color:" + color)
+    //  scribe.debug("fillCentreBottomHex width:" + width + " height:" + height + " color:" + color)
     val centre: Int = (width - 1) / 2
     if ((width - 1) & 1) == 1 then setHexColor(Point(centre, height - 1), color)
     else setHexColor(Point(centre, height - 2), color)
@@ -144,8 +144,8 @@ class HexBoardHelper(boardCfg: BoardConfig, fS: Double) extends HexBoard(boardCf
   This is a debug/test function
    */
   def fillRightBottomHex(width: Int, height: Int, color: Int): Unit =
-    //  println("fillRightBottomHex width:" + width + " height:" + height + " color:" + color)
+    //  scribe.debug("fillRightBottomHex width:" + width + " height:" + height + " color:" + color)
     setHexColor(Point(width - 1, height - 1), color)
   end fillRightBottomHex
 
-end HexBoardHelper
+end HexBoardHelper3

@@ -1,6 +1,6 @@
-name: Continuous Integration
+name: ContinuousFrustrationName
 
-on:
+on: 
   push:
     branches: ['main']
 
@@ -41,21 +41,16 @@ jobs:
       - run: echo "@@@@@-2-@@@@@"
       - run: pwd
       - run: just buildJs
-      - run: ls -AlR /home/runner/work/indigoLite/indigoLite/.out/ | wc -l
       - run: just copyAssets
+      - run: ls /home/runner/work/indigoLite/indigoLite/.out/
       - run: echo "@@@@@-3-@@@@@"
-      - run: pwd
-      - run: ls -AlR /home/runner/work/indigoLite/indigoLite/.out/ | wc -l
-      - run: ls -AlR /home/runner/work/indigoLite/indigoLite/.out/static/ | wc -l
+      - run: just listOutDir
       - name: UploadArtifact
         uses: actions/upload-artifact@v4
         with:
           name: page
           include-hidden-files: true
-          overwrite: true
-          path: |
-            /home/runner/work/indigoLite/indigoLite/.out/
-            /home/runner/work/indigoLite/indigoLite/.out/static/
+          path: /home/runner/work/indigoLite/indigoLite/.out/
           if-no-files-found: error
   deploy:
     needs: build
@@ -75,10 +70,6 @@ jobs:
     - uses: actions/upload-pages-artifact@v2
       with:
         path: .
-    - run: echo "@@@@@-4-@@@@@"
-    - run: ls -AlR . | wc -l
-    - run: ls -Alr ./static | wc -l
-    - run: echo "@@@@@-5-@@@@@"
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v3

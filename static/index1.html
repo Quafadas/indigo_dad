@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>FlicFlac</title>
+    <style>
+    body {
+      padding: 0px;
+      margin: 20px;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      background-image: url('rules/FlicFlacV4.png');
+      background-size: 100vw 100vh;
+      background-color: black;
+      font-family: arial;
+      font-size: 20px;
+    }    
+    </style>
+
+    <link rel="stylesheet" href="./Rules.css" />    
+  </head>
+  <body onload="LocalStorageRead()">    
+    <div id="readResults" class="configParams">
+      <div>
+        <i>1) Enter your name</i><br>
+        <span title="This name is the first part of a key to establish the link to your opponent.">
+          <div id="errorMsg1" class="configErrorMsg"><b>Invalid Name</b><br>
+            Your name should be at least 3 characters long<br>
+          </div>
+          <div>
+            <label for="myName" class="configLabel">Your Name:</label>
+            <input id="myName" class="configValue" type="text" name="myName">  
+          </div>
+        </span>
+      </div>
+
+      <br>
+      <div>
+        <i>2) Enter your opponent&apos;s name</i><br>
+        <span title="This name is the second part of a key to establish the link to your opponent.">
+          <div id="errorMsg2" class="configErrorMsg"><b>Invalid Name</b><br>
+            Your opponent&apos;s name should be at least 3 characters long<br> 
+          </div>
+          <div>
+            <label for="oppoName" class="configLabel">Opponent&apos;s Name:</label>
+            <input id="oppoName" class="configValue" type="text" name="oppoName">  
+          </div>
+        </span>
+      </div>
+      
+      <br>
+     
+      <i>3) Propose the game parameters</i><br>
+      <div>
+        <span title="This is the number of points you need to win. Remember you must win by at least two clear points">
+          <div id="errorMsg3A" class="configErrorMsg"><b>Invalid target set as Final Score</b><br>
+            The score to win needs to be set as a non-zero positive integer.<br>
+          </div>
+          <label for="scoreToWin" class="configLabel">Score to Win:</label>
+          <input id="scoreToWin" class="configValue" type="number" name="scoreToWin">    
+        </span>
+      </div>
+      <div>
+        <span title="This is the number of seconds allowed for each turn. A value of zero disables this timer">
+          <div id="errorMsg3B" class="configErrorMsg"><b>Invalid Turn Time</b><br>
+            The turn time must be set as as a non-zero positive integer, <br>
+            representing the maximum time allowed in seconds for each turn.<br>
+          </div>
+          <label for="turnTime" class="configLabel">Turn Time:</label>
+          <input id="turnTime" class="configValue" type="number" name="turnTime">  
+        </span>          
+      </div>
+      <div>
+        <span title="This is the number of seconds allowed for an extended turn after a successful capture. It is suggested to make this half the turn timer above. Once again, a value of zero disables this timer.">
+          <div id="errorMsg3C" class="configErrorMsg"><b>Invalid Captor&apos;s Turn Time</b><br>
+            The captor&apos;s turn time must be set as as a non-zero positive integer, <br>
+            representing the maximum time allowed in seconds for extra turns.<br>
+          </div>
+          <label for="captorsTime" class="configLabel">Captor&apos;s Time:</label>
+          <input id="captorsTime" class="configValue" type="number" name="captorsTime">
+        </span>
+      </div>
+      <div>
+        <div id="errorMsg3D" class="configErrorMsg">
+          <b>Invalid Random Event Probability</b><br>
+          This is an integer representing the percentage probability,<br>
+          where 0 <= probability <= 100 <br>
+        </div>
+        <span title="This is the percentage probabilty that a random event will occur. A value of zero prohibits these occurences.">
+          <label for="randEventProb" class="configLabel">Random Event Probability:</label>
+          <input id="randEventProb" class="configValue" type="number" name="randEventProb">              
+        </span>
+      </div>
+    </div>
+
+    <br>
+    <div id="Index">
+      <button id="playButton" class="myButton" style="margin-right: 2em;" onclick = "LocalStorageWrite()">Play</button>
+
+      <a href = "./Rules1.html">
+        <button class="myButton" style="margin-right: 2em;">Rules</button>
+      </a>
+    </div>
+    
+    <script>
+    
+    function LocalStorageRead() {
+      const sFlicFlacPlayParams = window.localStorage.getItem("FlicFlacPlayerParams");
+      if (sFlicFlacPlayParams != null) {
+        /* We have the object decoded so display on parameters panel */
+        const oFlicFlac = JSON.parse(sFlicFlacPlayParams)
+        document.getElementById("readResults").style.border="4px solid blue"
+
+        document.getElementById("myName").defaultValue = oFlicFlac.playPamsOurName
+        document.getElementById("oppoName").defaultValue = oFlicFlac.playPamsOppoName
+        document.getElementById("scoreToWin").defaultValue = oFlicFlac.playPamsScoreToWin
+        document.getElementById("turnTime").defaultValue = oFlicFlac.playPamsTurnTime
+        document.getElementById("captorsTime").defaultValue = oFlicFlac.playPamsCaptorsTime
+        document.getElementById("randEventProb").defaultValue = oFlicFlac.playPamsRandEventProb      
+      }
+      else      
+      {
+        /* no json object found so leave parameters panel blank */
+        console.log("@@@ Cache for PlayParams not found")
+      }
+    }
+    
+    function LocalStorageWrite() {
+      console.log("@@@ LocalStorageWrite")
+
+      // validate the new parameters
+
+      var myName = document.getElementById("myName").value
+      var oppoName = document.getElementById("oppoName").value
+      var scoreToWin = document.getElementById("scoreToWin").value
+      var turnTime = document.getElementById("turnTime").value
+      var captorsTime = document.getElementById("captorsTime").value
+      var randEventProb = document.getElementById("randEventProb").value
+
+      var invalidParams = false;
+
+      if (myName.length < 3)
+      {
+        document.getElementById("errorMsg1").style.display="block";
+        invalidParams = true;
+      }
+
+      if (oppoName.length < 3)
+      {
+        document.getElementById("errorMsg2").style.display="block";
+        invalidParams = true;
+      }
+
+      if (scoreToWin < 1)
+      {
+        document.getElementById("errorMsg3A").style.display="block";
+        invalidParams = true;
+      }
+
+      if (turnTime < 0)
+      {
+        document.getElementById("errorMsg3B").style.display="block";
+        invalidParams = true;
+      }
+
+      if (captorsTime < 0)
+      {
+        document.getElementById("errorMsg3C").style.display="block";
+        invalidParams = true;        
+      }
+
+      if ((randEventProb < 0) || (randEventProb > 100))
+      {
+        document.getElementById("errorMsg3D").style.display="block";
+        invalidParams = true;
+      }
+
+      if (invalidParams == true) {
+        // leave error message(s) showing if one or more paramters invalid
+        document.getElementById("readResults").style.border="4px solid red";
+        console.log("@@@ Invalid PlayParams detected")
+        return;
+      }
+      else {
+        // infuse new settings into a new PlayParams object
+
+        var oPlayParams = {
+          playPamsOurName: myName,
+          playPamsOppoName: oppoName,
+          playPamsScoreToWin: scoreToWin,
+          playPamsTurnTime: turnTime,
+          playPamsCaptorsTime: captorsTime,
+          playPamsRandEventProb: randEventProb
+        }
+
+        // create new string to write as new cache
+        const sNewFlicFlacPlayParams = JSON.stringify(oPlayParams);      
+        window.localStorage.setItem("FlicFlacPlayerParams", sNewFlicFlacPlayParams);
+
+        // relocate to indigo environment
+        window.location.href = './index2.html';
+      }
+    }
+    </script>
+  </body>
+</html>

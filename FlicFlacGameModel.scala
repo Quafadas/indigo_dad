@@ -8,104 +8,200 @@ import io.circe.parser.decode
 import game.Piece.pieceShape
 
 final case class FlicFlacGameModel(
-    boardConfig: BoardConfig,
-    modelPieces: Vector[Piece]
+    ourName: String,
+    oppoName: String,
+    ourPieceType: Int,
+    gameState: GameState,
+    gameScore: (Int, Int),
+    scalingFactor: Double,
+    pieces: Pieces,
+    possibleMoveSpots: Spots,
+    highLighter: HighLighter,
+    hexBoard3: HexBoard3,
+    turnTimer: TurnTimer
 ) derives Encoder.AsObject,
       Decoder
 
+enum GameState:
+  case START
+  case BLOCK_TURN
+  case BLOCK_PAUSE
+  case BLOCK_RESOLVE
+  case CYLINDER_TURN
+  case CYLINDER_PAUSE
+  case CYLINDER_RESOLVE
+  case FINISH
+end GameState
+
 object FlicFlacGameModel:
-  println("@@@ Object FlicFlacGameModel Start")
+  scribe.debug("@@@ Object FlicFlacGameModel Start")
   var iTick = 0
 
-  def creation(center: Point): FlicFlacGameModel =
-    println("@@@ FlicFlacGameModel creation")
-    val skaleFaktor = 1.0 // FIXME when scale strategy decided
-    val bCfg = establishBoardConfig()
-    val hexBoard = HexBoard(bCfg, skaleFaktor)
+  def creation(playerParams: FlicFlacPlayerParams): FlicFlacGameModel =
+    scribe.debug("@@@ FlicFlacGameModel creation")
 
-    FlicFlacGameModel(bCfg, summonPieces(hexBoard))
+    val sOurName = playerParams.playPamsOurName
+    val sOppoName = playerParams.playPamsOppoName
+    val iOurPieceType = CYLINDER // FIXME ... this needs to be adjusted once comms link is established
+    val startingGameState = GameState.START
+    val score = (0, 0)
+    val defaultScalingFactor = 1.0
+    val hexBoard3 = HexBoard3()
+    val highLighter = HighLighter(hexBoard3, false, Point(0, 0))
+    val startingSpots: Spots = Spots(Set.empty)
+    val turnTime = playerParams.playPamsTurnTime
+    val captorsTime = playerParams.playPamsCaptorsTime
+    val turnTimer = TurnTimer(turnTime, captorsTime)
+    FlicFlacGameModel(
+      sOurName,
+      sOppoName,
+      iOurPieceType,
+      startingGameState,
+      score,
+      defaultScalingFactor,
+      summonPieces(hexBoard3),
+      startingSpots,
+      highLighter,
+      hexBoard3,
+      turnTimer
+    )
   end creation
 
-  def establishBoardConfig(): BoardConfig =
-    val boardCfg = BoardConfig(
-      91, // .......................... GWIDTH pixel width of graphic
-      81, // .......................... GHEIGHT pixel height of graphic
-      Point(260, 30), // ............... where the (inisible) top left hand corner of the hex grid board is positioned
-      3, // ........................... game size
-      70, // .......................... amount to add to a hex centre x coord to reach the vertical line of the next column
-      40, // .......................... half the amount to add to a hex centre y coord to reach the next hexagon below
-      10 // ........................... xcoord of halfway along the top left diagonal line of first hex
-    )
-    boardCfg
-  end establishBoardConfig
+  def summonPieces(hexBoard3: HexBoard3): Pieces =
+    val cy1 = hexBoard3.getCylinderHomePos(CB)
+    val cy2 = hexBoard3.getCylinderHomePos(CG)
+    val cy3 = hexBoard3.getCylinderHomePos(CY)
+    val cy4 = hexBoard3.getCylinderHomePos(CO)
+    val cy5 = hexBoard3.getCylinderHomePos(CR)
+    val cy6 = hexBoard3.getCylinderHomePos(CP)
+    val bk1 = hexBoard3.getBlockHomePos(CB)
+    val bk2 = hexBoard3.getBlockHomePos(CG)
+    val bk3 = hexBoard3.getBlockHomePos(CY)
+    val bk4 = hexBoard3.getBlockHomePos(CO)
+    val bk5 = hexBoard3.getBlockHomePos(CR)
+    val bk6 = hexBoard3.getBlockHomePos(CP)
 
-  def summonPieces(hexBoard: HexBoard): Vector[Piece] =
     val startingModelPieces: Vector[Piece] = Vector(
-      Piece(CYLINDER, CB, hexBoard.getCylinderHomePos(CB), hexBoard.getCylinderHomePos(CB)),
-      Piece(CYLINDER, CG, hexBoard.getCylinderHomePos(CG), hexBoard.getCylinderHomePos(CG)),
-      Piece(CYLINDER, CY, hexBoard.getCylinderHomePos(CY), hexBoard.getCylinderHomePos(CY)),
-      Piece(CYLINDER, CO, hexBoard.getCylinderHomePos(CO), hexBoard.getCylinderHomePos(CO)),
-      Piece(CYLINDER, CR, hexBoard.getCylinderHomePos(CR), hexBoard.getCylinderHomePos(CR)),
-      Piece(CYLINDER, CP, hexBoard.getCylinderHomePos(CP), hexBoard.getCylinderHomePos(CP)),
-      Piece(BLOCK, CB, hexBoard.getBlockHomePos(CB), hexBoard.getBlockHomePos(CB)),
-      Piece(BLOCK, CG, hexBoard.getBlockHomePos(CG), hexBoard.getBlockHomePos(CG)),
-      Piece(BLOCK, CY, hexBoard.getBlockHomePos(CY), hexBoard.getBlockHomePos(CY)),
-      Piece(BLOCK, CO, hexBoard.getBlockHomePos(CO), hexBoard.getBlockHomePos(CO)),
-      Piece(BLOCK, CR, hexBoard.getBlockHomePos(CR), hexBoard.getBlockHomePos(CR)),
-      Piece(BLOCK, CP, hexBoard.getBlockHomePos(CP), hexBoard.getBlockHomePos(CP))
+      Piece(CYLINDER, CB, cy1, cy1, cy1, false),
+      Piece(CYLINDER, CG, cy2, cy2, cy2, false),
+      Piece(CYLINDER, CY, cy3, cy3, cy3, false),
+      Piece(CYLINDER, CO, cy4, cy4, cy4, false),
+      Piece(CYLINDER, CR, cy5, cy5, cy5, false),
+      Piece(CYLINDER, CP, cy6, cy6, cy6, false),
+      Piece(BLOCK, CB, bk1, bk1, bk1, false),
+      Piece(BLOCK, CG, bk2, bk2, bk2, false),
+      Piece(BLOCK, CY, bk3, bk3, bk3, false),
+      Piece(BLOCK, CO, bk4, bk4, bk4, false),
+      Piece(BLOCK, CR, bk5, bk5, bk5, false),
+      Piece(BLOCK, CP, bk6, bk6, bk6, false)
     )
-    startingModelPieces
+    Pieces(startingModelPieces)
   end summonPieces
 
   def findPieceByPos(model: FlicFlacGameModel, pos: Point): Option[Piece] =
-    model.modelPieces.find(Piece.position(_) == pos)
+    model.pieces.modelPieces.find(Piece.position(_) == pos)
   end findPieceByPos
 
   def findPieceSelected(model: FlicFlacGameModel): Option[Piece] =
-    model.modelPieces.find(Piece.selected(_) == true)
+    model.pieces.modelPieces.find(Piece.selected(_) == true)
   end findPieceSelected
 
-  def modify(previousModel: FlicFlacGameModel, possiblePiece: Option[Piece]): FlicFlacGameModel =
+  def modify(
+      previousModel: FlicFlacGameModel,
+      possiblePiece: Option[Piece],
+      possibleHighLighter: Option[HighLighter]
+  ): FlicFlacGameModel =
+    val m1 = modifyPiece(previousModel, possiblePiece)
+    val m2 = modifyHighLighter(m1, possibleHighLighter)
+    val m3 = modifyPossibleMoves(m2)
+    val asJson = m3.asJson.noSpaces
+    org.scalajs.dom.window.localStorage.setItem("FlicFlacStats", asJson)
+    m3
+  end modify
+
+  def modifyPiece(previousModel: FlicFlacGameModel, possiblePiece: Option[Piece]): FlicFlacGameModel =
     possiblePiece match
       case Some(newPiece) =>
-        var resultingPieces: Vector[Piece] = Vector.empty
-        for oldPiece <- previousModel.modelPieces do
+        var resultingVector: Vector[Piece] = Vector.empty
+        for oldPiece <- previousModel.pieces.modelPieces do
           if (oldPiece.pieceShape == newPiece.pieceShape) && (oldPiece.pieceIdentity == newPiece.pieceIdentity) then
-            resultingPieces = resultingPieces :+ newPiece
-          else resultingPieces = resultingPieces :+ oldPiece
+            resultingVector = resultingVector :+ newPiece
+          else resultingVector = resultingVector :+ oldPiece
+          end if
         end for
-        val newModel = FlicFlacGameModel(previousModel.boardConfig, resultingPieces)
-        val asJson = newModel.asJson.noSpaces
-        org.scalajs.dom.window.localStorage.setItem("FlicFlac", asJson)
-        printPieces(newModel)
-        newModel
+        val resultingPieces: Pieces = Pieces(resultingVector)
+        previousModel.copy(pieces = resultingPieces)
 
       case None =>
         previousModel
-    end match
-  end modify
+  end modifyPiece
+
+  def modifyPieces(previousModel: FlicFlacGameModel, newPieces: Pieces): FlicFlacGameModel =
+    previousModel.copy(pieces = newPieces)
+  end modifyPieces
+
+  def modifyHighLighter(previousModel: FlicFlacGameModel, possibleHighLighter: Option[HighLighter]): FlicFlacGameModel =
+    possibleHighLighter match
+      case Some(newHighLighter) =>
+        previousModel.copy(highLighter = newHighLighter)
+      case None =>
+        previousModel
+  end modifyHighLighter
+
+  def modifyPossibleMoves(previousModel: FlicFlacGameModel): FlicFlacGameModel =
+    val newSpots = previousModel.possibleMoveSpots.calculatePossibleMoves(previousModel)
+    previousModel.copy(possibleMoveSpots = newSpots)
+  end modifyPossibleMoves
 
   def reset(previousModel: FlicFlacGameModel): FlicFlacGameModel =
-    println("@@@ Reset model")
-    val skaleFaktor = 1.0 // FIXME when scale strategy decided
-    val previousBoardCfg = previousModel.boardConfig
-    val hexBoard = HexBoard(previousBoardCfg, skaleFaktor)
-    FlicFlacGameModel(previousBoardCfg, summonPieces(hexBoard))
+    scribe.debug("@@@ Reset model")
+
+    val sOurName = previousModel.ourName
+    val sOppoName = previousModel.oppoName
+    val iOurPieceType = previousModel.ourPieceType
+    val resetGameState = GameState.START
+    val score = (0, 0)
+    val defaultSF = 1.0
+    val hexBoard3 = HexBoard3()
+    val highLighter = HighLighter(hexBoard3, false, Point(0, 0))
+    val emptySpots: Spots = Spots(Set.empty)
+    val turnTime = previousModel.turnTimer.iTotalTurnTime
+    val captorsTime = previousModel.turnTimer.iCaptorsTurnTime
+    val turnTimer = TurnTimer(turnTime, captorsTime)
+    FlicFlacGameModel(
+      sOurName,
+      sOppoName,
+      iOurPieceType,
+      resetGameState,
+      score,
+      defaultSF,
+      summonPieces(hexBoard3),
+      emptySpots,
+      highLighter,
+      hexBoard3,
+      turnTimer
+    )
   end reset
 
   def retrieve(): FlicFlacGameModel =
-    val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlac")) match
+
+    // FIXME reading PlayerParams here is just a test
+    val playerParams = FlicFlacPlayerParams.retrieve()
+    scribe.debug("@@@ ScoreToWin: " + playerParams.playPamsScoreToWin)
+
+    val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlacStats")) match
       case Right(model: FlicFlacGameModel) =>
-        println("@@@ Restored model")
+        // FIXME we should check for version number here and goto create if mismatch
+        scribe.debug("@@@ Restored model")
         model
       case Left(_) =>
-        println("@@@ Created model")
-        FlicFlacGameModel.creation(Point(0, 0))
+        scribe.debug("@@@ Created model")
+        FlicFlacGameModel.creation(playerParams)
     cacheOrNew
   end retrieve
 
   def printPieces(model: FlicFlacGameModel): Unit =
-    for p <- model.modelPieces do
+    for p <- model.pieces.modelPieces do
 
       val sSelected = if Piece.selected(p) then "S" else "-"
       val sFlipped = if Piece.flipped(p) then "F" else "-"
@@ -121,30 +217,9 @@ object FlicFlacGameModel:
         + sFlipped
         + sCaptured
         + sMoved
-      println(s)
+      scribe.trace(s)
     end for
   end printPieces
-  /*
-    pCurPos: Point, // ................. current position (in hexArrayCoords)
-    pHomePos: Point, // ................ starting/home position (in hexArrayCoords)
 
-    // parameters below required for model, but not for creation
-
-    bFlipped: Boolean = false, // ...... piece normal is f, piece flipped is 1
-    bSelected: Boolean = false, // ..... piece is selected
-    bCaptured: Boolean = false, // ..... piece is captured (or not)
-    bMoved: Boolean = false // ......... piece has moved this turn
-   */
-
-  def debugJP(id: String, iTickStart: Int, model: FlicFlacGameModel): Unit =
-    if iTickStart > 0 then iTick = iTickStart
-    end if
-    if iTick > 0 then
-      println("@@@ $$ " + id)
-      println("@@@ " + model.modelPieces.head)
-      iTick = iTick - 1
-    end if
-  end debugJP
-
-  println("@@@ Object FlicFlacGameModel Finish")
+  scribe.debug("@@@ Object FlicFlacGameModel Finish")
 end FlicFlacGameModel
