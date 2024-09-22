@@ -34,7 +34,13 @@ copyAssets:
 ## JP 19/09/2024 added listOurDir command to help debug continuous integration problem 
 listOutDir:
   pwd
+  echo "@@@"
   echo {{outDir}}
-  ls -AlR {{outDir}}
+  echo "@@@@"
+  echo "/home/runner/work/indigoLite/indigoLite/.out/"
+  echo "@@@@@"
+##  ls -AlR {{outDir}}
   ls -AlR {{outDir}} | wc -l
+##  ls -AlR /home/runner/work/indigoLite/indigoLite/.out/
+  ls -AlR /home/runner/work/indigoLite/indigoLite/.out/ | wc -l
   
