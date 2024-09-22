@@ -52,7 +52,10 @@ jobs:
         with:
           name: page
           include-hidden-files: true
-          path: /home/runner/work/indigoLite/indigoLite/.out/
+          overwrite: true
+          path: |
+            /home/runner/work/indigoLite/indigoLite/.out/
+            /home/runner/work/indigoLite/indigoLite/.out/static/
           if-no-files-found: error
   deploy:
     needs: build
