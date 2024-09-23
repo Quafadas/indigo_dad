@@ -23,8 +23,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
-      - run: echo "@@@@@-1-@@@@@"
-      - run: pwd
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -37,14 +35,8 @@ jobs:
       - uses: taiki-e/install-action@just
       - name: ConfigurePages
         uses: actions/configure-pages@v4
-      - run: echo "@@@@@-2-@@@@@"
-      - run: pwd
       - run: just buildJs
-      - run: ls -AlR /home/runner/work/indigoLite/indigoLite/.out/ | wc -l
       - run: just copyAssets
-      - run: echo "@@@@@-3-@@@@@"
-      - run: pwd
-      - run: ls -AlR /home/runner/work/indigoLite/indigoLite/.out/ | wc -l
       - name: UploadArtifact
         uses: actions/upload-artifact@v4
         with:
@@ -71,10 +63,6 @@ jobs:
     - uses: actions/upload-pages-artifact@v2
       with:
         path: .
-    - run: echo "@@@@@-4-@@@@@"
-    - run: ls -AlR . | wc -l
-    - run: ls -AlR ./static | wc -l
-    - run: echo "@@@@@-5-@@@@@"
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v3
