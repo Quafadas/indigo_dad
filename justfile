@@ -10,13 +10,8 @@ dev:
 
 ## Builds the front end project
 buildJs:
-  echo "@@@"
-  echo {{outDir}}
-  echo "@@@"
   mkdir -p {{outDir}}
   scala-cli --power package . -o {{outDir}} -f
-  ls -alR {{outDir}}
-  echo "@@@"
 
 ## JP 23/06/2024 switched to scalafmt during skype call with Simon
 format:
@@ -26,23 +21,6 @@ format:
 clean:
   scala-cli clean .
 
-## JP 19/09/2024 removed trailing /
-## ... the previous command was ...
-## cp -r {{justfile_directory()}}/static/ {{outDir}} ... which might be wrong I think
 copyAssets:
   cp -r {{justfile_directory()}}/static/* {{outDir}}
-
-## JP 19/09/2024 added listOurDir command to help debug continuous integration problem 
-listOutDir:
-  pwd
-  echo "@@@"
-  echo {{outDir}}
-  echo "@@@@"
-  echo "/home/runner/work/indigoLite/indigoLite/.out/"
-  echo "@@@@@"
-##  ls -AlR {{outDir}}
-##  ls -AlR {{outDir}} | wc -l
-##  ls -AlR /home/runner/work/indigoLite/indigoLite/.out/
-##  ls -AlR /home/runner/work/indigoLite/indigoLite/.out/ | wc -l
-##  echo "@@@@@@"
 
