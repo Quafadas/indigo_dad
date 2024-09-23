@@ -38,7 +38,7 @@
         <i>2) Enter your opponent&apos;s name</i><br>
         <span title="This name is the second part of a key to establish the link to your opponent.">
           <div id="errorMsg2" class="configErrorMsg"><b>Invalid Name</b><br>
-            Your opponent&apos;s name should be at least 3 characters long<br> 
+            Your opponent&apos;s name should be at least 3 characters long and different from your name<br> 
           </div>
           <div>
             <label for="oppoName" class="configLabel">Opponent&apos;s Name:</label>
@@ -145,6 +145,12 @@
       }
 
       if (oppoName.length < 3)
+      {
+        document.getElementById("errorMsg2").style.display="block";
+        invalidParams = true;
+      }
+
+      if (myName == oppoName)
       {
         document.getElementById("errorMsg2").style.display="block";
         invalidParams = true;
