@@ -95,11 +95,13 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
       Outcome(())
 
     case _ =>
-      latestUpdate.fold {
+      val outcome = latestUpdate.fold {
         Outcome(())
       } { ffgm =>
         Outcome(()).addGlobalEvents(WebRtcEvent.RecievedData(ffgm))
       }
+      latestUpdate = None
+      outcome
   }
 
   def present(
