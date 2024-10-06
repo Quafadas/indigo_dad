@@ -2,6 +2,7 @@ package game
 
 import scala.scalajs.js
 import indigo.*
+
 import java.util.Timer
 import indigo.platform.networking.Network
 import io.github.quafadas.peerscalajs.Peer
@@ -28,9 +29,13 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
   var latestUpdate: Option[FlicFlacGameModel] = None
 
   type EventType = GlobalEvent
+
   type SubSystemModel = Unit
   type ReferenceData = FlicFlacGameModel
   val id: SubSystemId = SubSystemId("SubSystemGame")
+
+  var peer: Option[Peer] = None
+  var dataConnection: Option[DataConnection] = None
 
   val eventFilter: GlobalEvent => Option[EventType] = {
     case ft: FrameTick  => Some(ft)
@@ -110,3 +115,28 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
   ): Outcome[SceneUpdateFragment] =
     Outcome(SceneUpdateFragment.empty)
 end SSGame
+
+/*---
+// when p rxes a connection event ... this function fires
+    val p = new Peer(id = id)
+    p.on("connection", (data: DataConnection) => {
+
+        data.on("data", (data: js.Object) => {
+          println(s"Received data: ${js.JSON.stringify(data)}")
+        })
+        dataConnection.set(Some(data))  // sets our data connection variable to be that connection
+        println(s"Received data connection from ${data.peer}")
+    })
+
+// send your opponents id
+  val data = p.connect(inId) // p.connect(s2)
+          data.on("data", (data: js.Object) => {
+            println(s"Received data: ${js.JSON.stringify(data)}")
+          })
+          dataConnection.set(Some(data))   
+
+// sending a message between 
+  case (dataConn, msg) =>
+    println(s"sending message: $msg")
+    dataConn.foreach(_.send(msg))         
+*/
