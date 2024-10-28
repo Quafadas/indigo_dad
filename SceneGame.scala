@@ -37,6 +37,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
   ): GlobalEvent => Outcome[FlicFlacGameModel] = {
 
     case e: WebRtcEvent.RecievedData =>
+      scribe.debug("@@@ WebRtcEvent.RecievedData SceneGame handler")
       Outcome(e.ffgm)
 
     case e: PointerEvent.PointerDown =>

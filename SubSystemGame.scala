@@ -32,11 +32,16 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
   type ReferenceData = FlicFlacGameModel
   val id: SubSystemId = SubSystemId("SubSystemGame")
 
-  val eventFilter: GlobalEvent => Option[EventType] = Some(_)
+  // val eventFilter: GlobalEvent => Option[EventType] = Some(_)
   // Some(e)
   // =>
   // case e: WebRtcEvent => Some(e)
   // case _              => None
+
+  val eventFilter: GlobalEvent => Option[WebRtcEvent] = {
+    case e: WebRtcEvent => Some(e)
+    case _              => None
+    }
 
   // Extra line here, as mandated by indigo's SubSystem.scala. Yet it is not in the examples!!!
   def reference(flicFlacGameModel: FlicFlacGameModel): FlicFlacGameModel = flicFlacGameModel
@@ -54,26 +59,26 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
     case WebRtcEvent.SendGameData(ffgm) =>
       scribe.debug("@@@ SubSystemGame WebRtcEvent.SendGameData")
       val toSend = ffgm.asJson.noSpaces
-      scribe.debug(toSend)
+      scribe.debug(s"@@@ $toSend")
       conn.foreach(_.send(js.JSON.parse(toSend)))
       Outcome(())
 
     case WebRtcEvent.MakePeerConnection =>
-      scribe.debug("@@@ SubSystemGame WebRtcEvent.MakePeerConnection")
-      println("MakePeerConnection")
-      println(s"data ${context.reference}")
-      peer = Some(Peer(id = context.reference.ourName))
+      scribe.debug("@@@ SubSystemGame WebRtcEvent.MakePeerConnection using ...")
+      scribe.debug(s"@@@ data ${context.reference}")
+      peer = Some(Peer(id = context.reference.oppoName))
       peer.foreach(
         _.on(
           "connection",
           (c: DataConnection) =>
-            scribe.debug(s"@@@ SubSystemGame We made a connection! with $c")
+            val peerName = c.peer
+            scribe.debug("@@@ SubSystemGame We made a connection with " + peerName)
             conn = Some(c)
             c.on(
               "data",
               (data: js.Object) =>
                 val str = js.JSON.stringify(data)
-                scribe.debug(s"@@@ SubSystemGame received data $data ")
+                scribe.debug(s"@@@ SubSystemGame received data $data")
 
                 val ffgm = decode[FlicFlacGameModel](str)
                   .fold(
@@ -94,12 +99,22 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
       }
       Outcome(())
 
+/*
     case _ =>
       latestUpdate.fold {
         Outcome(())
       } { ffgm =>
         Outcome(()).addGlobalEvents(WebRtcEvent.RecievedData(ffgm))
       }
+*/        
+    case _ =>
+      scribe.debug("@@@ SubSystemGame Default Handler")
+      latestUpdate.fold {
+        Outcome(())
+      } { ffgm =>
+        Outcome(()).addGlobalEvents(WebRtcEvent.RecievedData(ffgm))
+      }
+
   }
 
   def present(

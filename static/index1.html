@@ -202,6 +202,9 @@
         const sNewFlicFlacPlayParams = JSON.stringify(oPlayParams);      
         window.localStorage.setItem("FlicFlacPlayerParams", sNewFlicFlacPlayParams);
 
+        // remove the previous main parameters
+        window.localStorage.removeItem("FlicFlacStats")
+
         // relocate to indigo environment
         window.location.href = './index2.html';
       }
