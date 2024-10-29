@@ -66,7 +66,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
     case WebRtcEvent.MakePeerConnection =>
       scribe.debug("@@@ SubSystemGame WebRtcEvent.MakePeerConnection using ...")
       scribe.debug(s"@@@ data ${context.reference}")
-      peer = Some(Peer(id = context.reference.oppoName))
+      peer = Some(Peer(id = context.reference.ourName))
       peer.foreach(
         _.on(
           "connection",
