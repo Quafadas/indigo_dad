@@ -104,7 +104,12 @@
     <script>
     
     function LocalStorageRead() {
-      const sFlicFlacPlayParams = window.localStorage.getItem("FlicFlacPlayerParams");
+      var sFlicFlacPlayParams = window.localStorage.getItem("FlicFlacPlayerParams1");
+      var sFlicFlacPlayParams2 = window.localStorage.getItem("FlicFlacPlayerParams2");
+      if (sFlicFlacPlayParams == null) {
+        sFlicFlacPlayParams = sFlicFlacPlayParams2
+      }
+
       if (sFlicFlacPlayParams != null) {
         /* We have the object decoded so display on parameters panel */
         const oFlicFlac = JSON.parse(sFlicFlacPlayParams)
@@ -199,14 +204,23 @@
         }
 
         // create new string to write as new cache
-        const sNewFlicFlacPlayParams = JSON.stringify(oPlayParams);      
-        window.localStorage.setItem("FlicFlacPlayerParams", sNewFlicFlacPlayParams);
+        const sNewFlicFlacPlayParams = JSON.stringify(oPlayParams);
 
         // remove the previous main parameters
-        window.localStorage.removeItem("FlicFlacStats")
+        window.localStorage.removeItem("FlicFlacStats1")
+        window.localStorage.removeItem("FlicFlacStats2")
+        window.localStorage.removeItem("FlicFlacPlayerParams1")
+        window.localStorage.removeItem("FlicFlacPlayerParams2")
+
+        if (myName < oppoName) {
+          window.localStorage.setItem("FlicFlacPlayerParams1", sNewFlicFlacPlayParams);
+        }
+        else {
+          window.localStorage.setItem("FlicFlacPlayerParams2", sNewFlicFlacPlayParams);
+        }
 
         // relocate to indigo environment
-        window.location.href = './index2.html';
+        window.location.href = './index2.html?N1='+myName+"&N2="+oppoName;
       }
     }
     </script>

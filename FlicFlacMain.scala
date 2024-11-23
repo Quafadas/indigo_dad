@@ -70,12 +70,12 @@ case class FlicFlacGame(
 
   def initialModel(flicFlacStartupData: FlicFlacStartupData): Outcome[FlicFlacGameModel] =
     scribe.debug("@@@ FlicFlacMain-initialModel()")
-    val cachedParamsOrNew = FlicFlacPlayerParams.retrieve()
+    val cachedParamsOrNew = FlicFlacPlayerParams.getParams(flicFlacStartupData)
     scribe.debug(s"@@@ PlayerParams: $cachedParamsOrNew")
     val newTurnTime = cachedParamsOrNew.playPamsTurnTime
     val newCaptorsTime = cachedParamsOrNew.playPamsCaptorsTime
     val newTT = TurnTimer(newTurnTime, newCaptorsTime)
-    val cachedGameOrNew = FlicFlacGameModel.retrieve()
+    val cachedGameOrNew = FlicFlacGameModel.retrieve(flicFlacStartupData)
     val updatedGame = cachedGameOrNew.copy(turnTimer = newTT)
     Outcome(updatedGame).addGlobalEvents(
       WebRtcEvent.MakePeerConnection
@@ -103,9 +103,11 @@ case class FlicFlacGame(
     scribe.debug("@@@ BootFlags: " + flags)
     val width = flags("width").toInt
     val height = flags("height").toInt
+    val name1: String = flags("name1")
+    val name2: String = flags("name2")
     Outcome {
       val flicFlacBootData: FlicFlacBootData =
-        FlicFlacBootData.create(width, height)
+        FlicFlacBootData.create(width, height, name1, name2)
         // ViewConfig.default
 
       val config =

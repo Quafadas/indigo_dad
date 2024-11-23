@@ -51,11 +51,27 @@ object TyrianApp extends TyrianIOApp[Msg, TyrianModel]:
         if dom.document.getElementById("indigo-container") == null then
           Msg.RetryIndigo
         else
+          val i1 = dom.window.location.href.indexOf("?N1=")
+          val i2 = dom.window.location.href.indexOf("&N2=")
+
+          val sName1A = dom.window.location.href.substring(i1+4)
+          val i3 = sName1A.indexOf("&")
+          val sName1 = sName1A.substring(0,i3)
+
+          val sName2A = dom.window.location.href.substring(i2+4)
+          val i4 = sName2A.indexOf("&")
+          val sName2 = sName2A.substring(0,i4)
+
+          scribe.info("@@@ NAME1:" +sName1)
+          scribe.info("@@@ NAME2:" +sName2)
+
           FlicFlacGame(model.bridge.subSystem(IndigoGameId("indigo-container"))).launch(
             "indigo-container",
             Map[String, String](
               "width" -> dom.window.innerWidth.toString,
-              "height" -> dom.window.innerHeight.toString
+              "height" -> dom.window.innerHeight.toString,
+              "name1" -> sName1,
+              "name2" -> sName2
             )
           )
           Msg.DoNothing
@@ -76,7 +92,8 @@ object TyrianApp extends TyrianIOApp[Msg, TyrianModel]:
     case Msg.RunGame =>
       (
         model.copy(renderUi = false),
-        Nav.loadUrl[IO](s"${dom.window.location}?runGame=true"),
+//        Nav.loadUrl[IO](s"${dom.window.location}?runGame=true"),
+        Nav.loadUrl[IO](s"${dom.window.location}&runGame=true"), // players names have already inserted ?
       )
     // format: on
   }

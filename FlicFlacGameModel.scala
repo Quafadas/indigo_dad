@@ -115,7 +115,10 @@ object FlicFlacGameModel:
     val m2 = modifyHighLighter(m1, possibleHighLighter)
     val m3 = modifyPossibleMoves(m2)
     val asJson = m3.asJson.noSpaces
-    org.scalajs.dom.window.localStorage.setItem("FlicFlacStats", asJson)
+    val statsCache = GetStatsName(previousModel.ourName, previousModel.ourName)
+
+    org.scalajs.dom.window.localStorage.setItem(statsCache, asJson)
+
     Outcome(m3).addGlobalEvents(WebRtcEvent.SendGameData(m3))
   end modify
 
@@ -183,13 +186,26 @@ object FlicFlacGameModel:
     )
   end reset
 
-  def retrieve(): FlicFlacGameModel =
+  def GetStatsName(ourName: String, oppoName: String): String =
+    val sName: String = 
+      if (ourName.compare(oppoName) < 0) then
+        // we are the PeerJS initiator
+        "FlicFlacStats1"
+      else
+        // we are the PeerJS responder
+        "FlicFlacStats2"
+      end if
+    sName
+
+  def retrieve(startupData: FlicFlacStartupData): FlicFlacGameModel =
 
     // FIXME reading PlayerParams here is just a test
-    val playerParams = FlicFlacPlayerParams.retrieve()
-    scribe.debug("@@@ ScoreToWin: " + playerParams.playPamsScoreToWin)
+    val playerParams = FlicFlacPlayerParams.getParams(startupData)
+    val ourName = playerParams.playPamsOurName
+    val oppoName = playerParams.playPamsOppoName
 
-    val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem("FlicFlacStats")) match
+    val statsCache = GetStatsName(ourName, oppoName) 
+    val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem(statsCache)) match
       case Right(model: FlicFlacGameModel) =>
         // FIXME we should check for version number here and goto create if mismatch
         scribe.debug("@@@ Restored model")

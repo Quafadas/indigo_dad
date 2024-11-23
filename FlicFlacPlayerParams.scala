@@ -18,14 +18,25 @@ final case class FlicFlacPlayerParams(
 
 object FlicFlacPlayerParams:
 
-  def retrieve(): FlicFlacPlayerParams =
+  def getParams(startupData: FlicFlacStartupData): FlicFlacPlayerParams =
+    val ourName = startupData.flicFlacBootData.name1
+    val oppoName = startupData.flicFlacBootData.name2
+    val storageName = 
+      if (ourName.compare(oppoName) < 0) then
+        // we are the PeerJS initiator
+        "FlicFlacPlayerParams1"
+      else
+        // we are the PeerJS responder
+        "FlicFlacPlayerParams2"
+      end if
+
     val cacheConfigOrDefault =
-      decode[FlicFlacPlayerParams](org.scalajs.dom.window.localStorage.getItem("FlicFlacPlayerParams")) match
+      decode[FlicFlacPlayerParams](org.scalajs.dom.window.localStorage.getItem(storageName)) match
         case Right(playerParams: FlicFlacPlayerParams) =>
-          scribe.debug(s"@@@ Retrieved PlayerParams $playerParams")
+          scribe.debug(s"@@@ FlicFlacPlayerParams getParams $playerParams")
           playerParams
         case Left(_) =>
-          scribe.error("@@@ Retrieve PlayerParams failed - assert default")
+          scribe.error("@@@ FlicFlacPlayerParams getParams failed - assert default")
           FlicFlacPlayerParams(
             "OurName", // ..... Our name
             "OppoName", // .... Opponents name
@@ -35,11 +46,6 @@ object FlicFlacPlayerParams:
             1 // .............. cfgRandEventProb
           )
     cacheConfigOrDefault
-  end retrieve
-
-  def GetNames(): (String, String) =
-    val playerParams = retrieve()
-    (playerParams.playPamsOurName, playerParams.playPamsOppoName)
-  end GetNames
+  end getParams
 
 end FlicFlacPlayerParams
