@@ -35,13 +35,12 @@ end GameState
 
 object FlicFlacGameModel:
   scribe.debug("@@@ Object FlicFlacGameModel Start")
-  var iTick = 0
 
   def creation(playerParams: FlicFlacPlayerParams): FlicFlacGameModel =
     scribe.debug("@@@ FlicFlacGameModel creation")
 
-    var sOurName = playerParams.playPams1_OurName
-    var sOppoName = playerParams.playPams2_OppoName
+    val sOurName = playerParams.playPams1_OurName
+    val sOppoName = playerParams.playPams2_OppoName
     val iOurPieceType = CYLINDER // FIXME ... this needs to be adjusted once comms link is established
     val startingGameState = GameState.START
     val score = (0, 0)
