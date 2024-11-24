@@ -40,8 +40,8 @@ object FlicFlacGameModel:
   def creation(playerParams: FlicFlacPlayerParams): FlicFlacGameModel =
     scribe.debug("@@@ FlicFlacGameModel creation")
 
-    val sOurName = playerParams.playPamsOurName
-    val sOppoName = playerParams.playPamsOppoName
+    val sOurName = playerParams.playPams1_OurName
+    val sOppoName = playerParams.playPams2_OppoName
     val iOurPieceType = CYLINDER // FIXME ... this needs to be adjusted once comms link is established
     val startingGameState = GameState.START
     val score = (0, 0)
@@ -49,9 +49,13 @@ object FlicFlacGameModel:
     val hexBoard3 = HexBoard3()
     val highLighter = HighLighter(hexBoard3, false, Point(0, 0))
     val startingSpots: Spots = Spots(Set.empty)
-    val turnTime = playerParams.playPamsTurnTime
-    val captorsTime = playerParams.playPamsCaptorsTime
+    val turnTime = playerParams.playPams4_TurnTime
+    val captorsTime = playerParams.playPams5_CaptorsTime
     val turnTimer = TurnTimer(turnTime, captorsTime)
+
+    // FIXME why have I not included playPams3_ScoreToWin
+    // FIXME why have I not included playPams6_Randeventprob
+
     FlicFlacGameModel(
       sOurName,
       sOppoName,
@@ -190,10 +194,10 @@ object FlicFlacGameModel:
     val sName: String = 
       if (ourName.compare(oppoName) < 0) then
         // we are the PeerJS initiator
-        "FlicFlacStats1"
+        "FlicFlac-Game1"
       else
         // we are the PeerJS responder
-        "FlicFlacStats2"
+        "FlicFlac-Game2"
       end if
     sName
 
@@ -201,8 +205,8 @@ object FlicFlacGameModel:
 
     // FIXME reading PlayerParams here is just a test
     val playerParams = FlicFlacPlayerParams.getParams(startupData)
-    val ourName = playerParams.playPamsOurName
-    val oppoName = playerParams.playPamsOppoName
+    val ourName = playerParams.playPams1_OurName
+    val oppoName = playerParams.playPams2_OppoName
 
     val statsCache = GetStatsName(ourName, oppoName) 
     val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem(statsCache)) match

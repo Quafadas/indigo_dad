@@ -72,8 +72,8 @@ case class FlicFlacGame(
     scribe.debug("@@@ FlicFlacMain-initialModel()")
     val cachedParamsOrNew = FlicFlacPlayerParams.getParams(flicFlacStartupData)
     scribe.debug(s"@@@ PlayerParams: $cachedParamsOrNew")
-    val newTurnTime = cachedParamsOrNew.playPamsTurnTime
-    val newCaptorsTime = cachedParamsOrNew.playPamsCaptorsTime
+    val newTurnTime = cachedParamsOrNew.playPams4_TurnTime
+    val newCaptorsTime = cachedParamsOrNew.playPams5_CaptorsTime
     val newTT = TurnTimer(newTurnTime, newCaptorsTime)
     val cachedGameOrNew = FlicFlacGameModel.retrieve(flicFlacStartupData)
     val updatedGame = cachedGameOrNew.copy(turnTimer = newTT)

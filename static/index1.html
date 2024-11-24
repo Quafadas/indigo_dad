@@ -104,23 +104,19 @@
     <script>
     
     function LocalStorageRead() {
-      var sFlicFlacPlayParams = window.localStorage.getItem("FlicFlacPlayerParams1");
-      var sFlicFlacPlayParams2 = window.localStorage.getItem("FlicFlacPlayerParams2");
-      if (sFlicFlacPlayParams == null) {
-        sFlicFlacPlayParams = sFlicFlacPlayParams2
-      }
+      var sFlicFlacPlayParams = window.localStorage.getItem("FlicFlac-Params");
 
       if (sFlicFlacPlayParams != null) {
         /* We have the object decoded so display on parameters panel */
         const oFlicFlac = JSON.parse(sFlicFlacPlayParams)
         document.getElementById("readResults").style.border="4px solid blue"
 
-        document.getElementById("myName").defaultValue = oFlicFlac.playPamsOurName
-        document.getElementById("oppoName").defaultValue = oFlicFlac.playPamsOppoName
-        document.getElementById("scoreToWin").defaultValue = oFlicFlac.playPamsScoreToWin
-        document.getElementById("turnTime").defaultValue = oFlicFlac.playPamsTurnTime
-        document.getElementById("captorsTime").defaultValue = oFlicFlac.playPamsCaptorsTime
-        document.getElementById("randEventProb").defaultValue = oFlicFlac.playPamsRandEventProb      
+        document.getElementById("myName").defaultValue = oFlicFlac.playPams1_OurName
+        document.getElementById("oppoName").defaultValue = oFlicFlac.playPams2_OppoName
+        document.getElementById("scoreToWin").defaultValue = oFlicFlac.playPams3_ScoreToWin
+        document.getElementById("turnTime").defaultValue = oFlicFlac.playPams4_TurnTime
+        document.getElementById("captorsTime").defaultValue = oFlicFlac.playPams5_CaptorsTime
+        document.getElementById("randEventProb").defaultValue = oFlicFlac.playPams6_RandEventProb      
       }
       else      
       {
@@ -195,31 +191,36 @@
         // infuse new settings into a new PlayParams object
 
         var oPlayParams = {
-          playPamsOurName: myName,
-          playPamsOppoName: oppoName,
-          playPamsScoreToWin: scoreToWin,
-          playPamsTurnTime: turnTime,
-          playPamsCaptorsTime: captorsTime,
-          playPamsRandEventProb: randEventProb
+          playPams1_OurName: myName,
+          playPams2_OppoName: oppoName,
+          playPams3_ScoreToWin: scoreToWin,
+          playPams4_TurnTime: turnTime,
+          playPams5_CaptorsTime: captorsTime,
+          playPams6_RandEventProb: randEventProb
+        }
+
+        if (myName < oppoName) {
+          // oPlayParams is in the correct order
+          window.localStorage.removeItem("FlicFlac-Game1") // remove any previous game for INITIATOR
+        }
+        else {
+          // we swap oPlayParams here
+          // On same machine and same browser, both indigo sessions will share the ordered PlayerParams
+          // The indigo sessions use FlicFlac-Game1 or FlicFlac-Game2 according to N1 and N2 passed as cookies
+          var tempOurName = oPlayParams.playPams1_OurName
+          var tempOppoName = oPlayParams.playPams2_OppoName
+          oPlayParams.playPams1_OurName = tempOppoName
+          oPlayParams.playPams2_OppoName = tempOurName
+
+          window.localStorage.removeItem("FlicFlac-Game2") // remove any previous game for RESPONDER
         }
 
         // create new string to write as new cache
-        const sNewFlicFlacPlayParams = JSON.stringify(oPlayParams);
+        const sOrderedFlicFlacPlayParams = JSON.stringify(oPlayParams);
 
-        // remove the previous main parameters
-        window.localStorage.removeItem("FlicFlacStats1")
-        window.localStorage.removeItem("FlicFlacStats2")
-        window.localStorage.removeItem("FlicFlacPlayerParams1")
-        window.localStorage.removeItem("FlicFlacPlayerParams2")
+        window.localStorage.setItem("FlicFlac-Params", sOrderedFlicFlacPlayParams);
 
-        if (myName < oppoName) {
-          window.localStorage.setItem("FlicFlacPlayerParams1", sNewFlicFlacPlayParams);
-        }
-        else {
-          window.localStorage.setItem("FlicFlacPlayerParams2", sNewFlicFlacPlayParams);
-        }
-
-        // relocate to indigo environment
+        // relocate to indigo environment ... N1 and N2 are crucial to indigo code
         window.location.href = './index2.html?N1='+myName+"&N2="+oppoName;
       }
     }
