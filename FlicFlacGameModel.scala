@@ -40,8 +40,8 @@ object FlicFlacGameModel:
   def creation(playerParams: FlicFlacPlayerParams): FlicFlacGameModel =
     scribe.debug("@@@ FlicFlacGameModel creation")
 
-    val sOurName = playerParams.playPams1_OurName
-    val sOppoName = playerParams.playPams2_OppoName
+    var sOurName = playerParams.playPams1_OurName
+    var sOppoName = playerParams.playPams2_OppoName
     val iOurPieceType = CYLINDER // FIXME ... this needs to be adjusted once comms link is established
     val startingGameState = GameState.START
     val score = (0, 0)
@@ -119,11 +119,11 @@ object FlicFlacGameModel:
     val m2 = modifyHighLighter(m1, possibleHighLighter)
     val m3 = modifyPossibleMoves(m2)
     val asJson = m3.asJson.noSpaces
-    val statsCache = GetStatsName(previousModel.ourName, previousModel.ourName)
+    val gameCache = getGameName(previousModel.ourName, previousModel.ourName)
 
-    org.scalajs.dom.window.localStorage.setItem(statsCache, asJson)
+    org.scalajs.dom.window.localStorage.setItem(gameCache, asJson)
 
-    Outcome(m3).addGlobalEvents(WebRtcEvent.SendGameData(m3))
+    Outcome(m3).addGlobalEvents(WebRtcEvent.SendData(m3))
   end modify
 
   def modifyPiece(previousModel: FlicFlacGameModel, possiblePiece: Option[Piece]): FlicFlacGameModel =
@@ -190,7 +190,7 @@ object FlicFlacGameModel:
     )
   end reset
 
-  def GetStatsName(ourName: String, oppoName: String): String =
+  def getGameName(ourName: String, oppoName: String): String =
     val sName: String = 
       if (ourName.compare(oppoName) < 0) then
         // we are the PeerJS initiator
@@ -202,14 +202,12 @@ object FlicFlacGameModel:
     sName
 
   def retrieve(startupData: FlicFlacStartupData): FlicFlacGameModel =
-
-    // FIXME reading PlayerParams here is just a test
     val playerParams = FlicFlacPlayerParams.getParams(startupData)
     val ourName = playerParams.playPams1_OurName
     val oppoName = playerParams.playPams2_OppoName
 
-    val statsCache = GetStatsName(ourName, oppoName) 
-    val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem(statsCache)) match
+    val gameCache = getGameName(ourName, oppoName) 
+    val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem(gameCache)) match
       case Right(model: FlicFlacGameModel) =>
         // FIXME we should check for version number here and goto create if mismatch
         scribe.debug("@@@ Restored model")

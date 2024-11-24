@@ -77,9 +77,7 @@ case class FlicFlacGame(
     val newTT = TurnTimer(newTurnTime, newCaptorsTime)
     val cachedGameOrNew = FlicFlacGameModel.retrieve(flicFlacStartupData)
     val updatedGame = cachedGameOrNew.copy(turnTimer = newTT)
-    Outcome(updatedGame).addGlobalEvents(
-      WebRtcEvent.MakePeerConnection
-    )
+    Outcome(updatedGame).addGlobalEvents(WebRtcEvent.MakePeerEntity)
   end initialModel
 
   def initialScene(flicFlacBootData: FlicFlacBootData): Option[SceneName] =
@@ -219,4 +217,3 @@ case object ButtonParamsEvent extends GlobalEvent
 case object ButtonPlusEvent extends GlobalEvent
 case object ButtonMinusEvent extends GlobalEvent
 case object ButtonTurnEvent extends GlobalEvent
-case object SubSysGameUpdate extends GlobalEvent

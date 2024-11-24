@@ -7,11 +7,11 @@ import io.circe.syntax.*
 import io.circe.parser.decode
 
 final case class FlicFlacPlayerParams(
-    playPams1_OurName: String, // ......... default "OurName"
-    playPams2_OppoName: String, // ........ default "OppoName"
+    playPams1_OurName: String, // ......... default "Player1"
+    playPams2_OppoName: String, // ........ default "Player2"
     playPams3_ScoreToWin: Int, // ......... default 11
-    playPams4_TurnTime: Int, // ........... default 10 seconds
-    playPams5_CaptorsTime: Int, // ........ default 5 seconds
+    playPams4_TurnTime: Int, // ........... default 30 seconds
+    playPams5_CaptorsTime: Int, // ........ default 15 seconds
     playPams6_RandEventProb: Int // ....... default 1 (in 100)
 ) derives Encoder.AsObject,
       Decoder
@@ -26,13 +26,8 @@ object FlicFlacPlayerParams:
     val cacheConfigOrDefault =
       decode[FlicFlacPlayerParams](org.scalajs.dom.window.localStorage.getItem("FlicFlac-Params")) match
         case Right(playerParams: FlicFlacPlayerParams) =>
-          if (name1.compare(name2) < 0) then
-            // we are the PeerJS initiator
-            playerParams
-          else
-            // we are the PeerJS responder
-            playerParams.copy(playPams1_OurName = name2, playPams2_OppoName = name1)
-          end if
+          val newPlayerParams = playerParams.copy(playPams1_OurName = name1, playPams2_OppoName = name2)
+          newPlayerParams
 
         case Left(_) =>
           scribe.error("@@@ FlicFlacPlayerParams getParams failed - assert default")

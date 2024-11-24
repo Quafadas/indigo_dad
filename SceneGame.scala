@@ -26,7 +26,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
   def eventFilters: EventFilters = EventFilters.Permissive
 
-  def subSystems = Set(SSGame("SubSystemGame"))
+  val subSystems: Set[SubSystem[FlicFlacGameModel]] = Set(SSGame("SubSystemPeerJS"))
 
   var bBlinkOn = true
   var dMsg = "-----"
@@ -36,8 +36,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       model: FlicFlacGameModel
   ): GlobalEvent => Outcome[FlicFlacGameModel] = {
 
-    case e: WebRtcEvent.RecievedData =>
-      scribe.debug("@@@ WebRtcEvent.RecievedData SceneGame handler")
+    case e: FlicFlacGameUpdate.Info =>
+      scribe.debug("@@@ FlicFlacGameUpdate.Info")
       Outcome(e.ffgm)
 
     case e: PointerEvent.PointerDown =>
@@ -227,8 +227,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       val newHexBoard3 = model.hexBoard3.calculateXpYp(newSF, model.hexBoard3)
       val newModel = model.copy(scalingFactor = newSF, hexBoard3 = newHexBoard3)
       val asJson = newModel.asJson.noSpaces
-      val statsCache = FlicFlacGameModel.GetStatsName(newModel.ourName, newModel.oppoName)
-      org.scalajs.dom.window.localStorage.setItem(statsCache, asJson)
+      val gameCache = FlicFlacGameModel.getGameName(newModel.ourName, newModel.oppoName)
+      org.scalajs.dom.window.localStorage.setItem(gameCache, asJson)
       Outcome(newModel)
 
     case ButtonMinusEvent =>
@@ -238,8 +238,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       val newHexBoard3 = model.hexBoard3.calculateXpYp(newSF, model.hexBoard3)
       val newModel = model.copy(scalingFactor = newSF, hexBoard3 = newHexBoard3)
       val asJson = newModel.asJson.noSpaces
-      val statsCache = FlicFlacGameModel.GetStatsName(newModel.ourName, newModel.oppoName)
-      org.scalajs.dom.window.localStorage.setItem(statsCache, asJson)
+      val gameCache = FlicFlacGameModel.getGameName(newModel.ourName, newModel.oppoName)
+      org.scalajs.dom.window.localStorage.setItem(gameCache, asJson)
       Outcome(newModel)
 
     case ViewportResize(gameViewPort) =>
@@ -259,8 +259,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       // FIXME ... should the cylinders always have the fiest move?
       val newModel = model.copy(scalingFactor = dSF, hexBoard3 = newHexBoard3, gameState = GameState.CYLINDER_TURN)
       val asJson = newModel.asJson.noSpaces
-      val statsCache = FlicFlacGameModel.GetStatsName(newModel.ourName, newModel.oppoName)
-      org.scalajs.dom.window.localStorage.setItem(statsCache, asJson)
+      val gameCache = FlicFlacGameModel.getGameName(newModel.ourName, newModel.oppoName)
+      org.scalajs.dom.window.localStorage.setItem(gameCache, asJson)
       Outcome(newModel)
 
     case ButtonTurnEvent =>
@@ -305,7 +305,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       if k.keyCode == Key.ADD then Outcome(model).addGlobalEvents(ButtonPlusEvent)
       else if k.keyCode == Key.SUBTRACT then Outcome(model).addGlobalEvents(ButtonMinusEvent)
       else if k.keyCode == Key.ENTER then Outcome(model).addGlobalEvents(ButtonTurnEvent)
-      else if k.keyCode == Key.SPACE then Outcome(model).addGlobalEvents(SubSysGameUpdate) // FIXME just a test
       else Outcome(model)
       end if
 
@@ -588,3 +587,7 @@ object GameSceneViewModel:
       ).withUpActions(ButtonTurnEvent)
     )
 end GameSceneViewModel
+
+object FlicFlacGameUpdate:
+  case class Info(ffgm: FlicFlacGameModel) extends GlobalEvent
+end FlicFlacGameUpdate
