@@ -7,6 +7,8 @@ import io.github.quafadas.peerscalajs.DataConnection
 import scala.collection.mutable.Queue
 import io.circe.syntax.*
 import io.circe.parser.decode
+import cats.effect.kernel.Ref
+import cats.effect.unsafe.ref.Reference
 
 sealed trait WebRtcEvent extends GlobalEvent
 
@@ -49,7 +51,6 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
       context: SubSystemFrameContext[ReferenceData],
       message: Unit
   ): EventType => Outcome[Unit] = {
-
     case WebRtcEvent.MakePeerEntity =>
       scribe.debug("@@@-10 SubSystemPeerJS WebRtcEvent.MakePeerEntity using " + context.reference.ourName)
       val localPeer = Peer(id = context.reference.ourName)
@@ -227,67 +228,35 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
           Outcome(()).addGlobalEvents(update)
         case (false, None) => // ............................... Neither, idling
           Outcome(())
-          
+            
   }
   end update
 
-/*--
-    case WebRtcEvent.SendGameData(ffgm) =>
-      scribe.debug("@@@ SubSystemPeerJS WebRtcEvent.SendGameData")
-      val toSend = ffgm.asJson.noSpaces
-      scribe.debug(s"@@@ $toSend")
-      conn.foreach(_.send(js.JSON.parse(toSend)))
-      Outcome(())
-
-    case WebRtcEvent.MakePeerConnection =>
-      scribe.debug("@@@ SubSystemPeerJS WebRtcEvent.MakePeerConnection using ...")
-      scribe.debug(s"@@@ data ${context.reference}")
-      peer = Some(Peer(id = context.reference.ourName))
-      peer.foreach(
-        _.on(
-          "connection",
-          (c: DataConnection) =>
-            val peerName = c.peer
-            scribe.debug("@@@ SubSystemPeerJS We made a connection with " + peerName)
-            conn = Some(c)
-            c.on(
-              "data",
-              (data: js.Object) =>
-                val str = js.JSON.stringify(data)
-                scribe.debug(s"@@@ SubSystemPeerJS received data $data")
-
-                val ffgm = decode[FlicFlacGameModel](str)
-                  .fold(
-                    e =>
-                      scribe.error(s"Error decoding data: $e")
-                      throw new Exception("Error decoding data")
-                    ,
-                    identity
-                  )
-                latestUpdate = Some(ffgm)
-            )
-        )
-      )
-      peer.foreach { p =>
-        scribe.info(s"@@@ SubSystemPeerJS Connecting to ${context.reference.oppoName}")
-        val dataConn = p.connect(context.reference.oppoName)
-        conn = Some(dataConn)
-      }
-      Outcome(())
-
-    case _ =>
-      latestUpdate.fold {
-        Outcome(())
-      } { ffgm =>
-        Outcome(()).addGlobalEvents(WebRtcEvent.RecievedData(ffgm))
-      }
---*/
 
   def present(
       context: SubSystemFrameContext[ReferenceData],
       message: Unit
   ): Outcome[SceneUpdateFragment] =
-    Outcome(SceneUpdateFragment.empty)
+
+
+    val boxX = 260
+    val boxY = 136
+    val boxW = 1000
+    val boxH = 500
+
+
+    val textError = TextBox("This is an error warning" , boxW-16, boxH-16)
+      .withColor(RGBA.Black)
+      .withFontSize(Pixels(20))
+      .moveTo(boxX+8, boxY+8)
+
+    Outcome(
+      SceneUpdateFragment.empty
+      |+| SceneUpdateFragment(Shape.Box(Rectangle(boxX, boxY, boxW, boxH), Fill.Color(RGBA.Red)))
+      |+| SceneUpdateFragment(Shape.Box(Rectangle(boxX+4, boxY+4, boxW-8, boxH-8), Fill.Color(RGBA.White)))
+      |+| SceneUpdateFragment(textError)
+      
+    )
   end present
 
   def decodeRxJsonObject(data: js.Object, errNo: Int): FlicFlacGameModel =
