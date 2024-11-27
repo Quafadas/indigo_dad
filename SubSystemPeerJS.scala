@@ -35,7 +35,15 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
   var conn: Option[DataConnection] = None
   var latestUpdate: Option[FlicFlacGameUpdate.Info] = None
   val eventQueue: Queue[WebRtcEvent] = Queue.empty[WebRtcEvent]
-  var panelMsg: Option[(PanelType, String)] = None
+
+  // panelMsg controls the appearance of the Error/Pause/Results panel. It can be triggered in two different ways 1)&2)
+  // and it s cleared in one way 3)
+  // 1) direct manipulation of the var panelMsg & set bIssueFreezeNow=true from the callbacks in this file
+  // 2) indirectly on receipt of the message Frozen.PanelContent(T,msg) where T is one of P_ERROR, P_PAUSE, P_RESULTS
+  // 3) receipt of message Frozen.PanelContent(P_INVISIBLE,"") ... which occurs when you click outside the board
+ 
+
+  var panelMsg: (PanelType, String) = (PanelType.P_INVISIBLE, "")
 
   type EventType = GlobalEvent
   type SubSystemModel = Unit
@@ -100,7 +108,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
               "error",
               (e: js.Object) =>
                 scribe.error("@@@-19 LocalPeer.on error " + js.JSON.stringify(e))
-                panelMsg = Some(PanelType.P_ERROR, js.JSON.stringify(e))  // signalling ERROR
+                panelMsg = (PanelType.P_ERROR, js.JSON.stringify(e))  // signalling ERROR
             )
             eventQueue.enqueue(WebRtcEvent.CreatedPeerEntity(localPeer))
             Outcome(())
@@ -223,22 +231,9 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
             conn.foreach(_.close())
             Outcome(())
 
-          case e: ButtonTurnEvent.Occurence =>
-            panelMsg = None
+          case Freeze.PanelContent(t,m) =>
+            panelMsg = (t, m)
             Outcome(())
-
-          case k: KeyboardEvent.KeyDown =>
-            if k.keyCode == Key.KEY_X then 
-              val myArray: Array[String] = Array("1","2")
-              val s = myArray(10)
-              throw new Exception("Boom")
-            else if k.keyCode == Key.KEY_Y then
-              throw new PeerJsException("TestBoom 01234567890123456789012345678901234567890123456789012345678901234567890")
-            else if k.keyCode == Key.KEY_Z then
-              throw new PeerJsException("Z")
-            end if
-            Outcome(())
-
 
           case _ =>
 
@@ -250,30 +245,30 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
 
             val bEvents = !eventQueue.isEmpty
             (bEvents, latestUpdate) match
-              case (true, Some(update)) => // ........................ Both Event(s) and Game Update Info
+              case (true, Some(update)) => // ......................... Both Event(s) and Game Update Info
                 val events = eventQueue.dequeueAll(_ => true)
                 latestUpdate = None
                 Outcome(()).addGlobalEvents(events*).addGlobalEvents(update)
-              case (true, None) => // ................................ Just Event(s)
+              case (true, None) => // ................................. Just Event(s)
                 val events = eventQueue.dequeueAll(_ => true)
                 Outcome(()).addGlobalEvents(events*)
-              case (false, Some(update)) => // ....................... Just Game Update Info
+              case (false, Some(update)) => // ........................ Just Game Update Info
                 latestUpdate = None
                 Outcome(()).addGlobalEvents(update)
-              case (false, None) => // ............................... Neither, idling
+              case (false, None) => // ................................ Idling
                 Outcome(())
         } 
         catch {
           case e : PeerJsException => 
             val errorMsg = e.getMessage()
             scribe.error("@@@ SubSystemPeerJS update PeerJsCustomException handler " + errorMsg)
-            panelMsg = Some(PanelType.P_ERROR, errorMsg)
-            Outcome(()).addGlobalEvents(Freeze.Frozen(true))
+            panelMsg = (PanelType.P_ERROR, errorMsg)
+            Outcome(()).addGlobalEvents(Freeze.PanelContent(PanelType.P_ERROR, errorMsg))
           case e : Throwable =>
             val errorMsg = e.getMessage()
             scribe.error("@@@ SubSystemPeerJS update ThrowableException handler " + errorMsg)
-            panelMsg = Some(PanelType.P_ERROR, errorMsg)
-            Outcome(()).addGlobalEvents(Freeze.Frozen(true))
+            panelMsg = (PanelType.P_ERROR, errorMsg)
+            Outcome(()).addGlobalEvents(Freeze.PanelContent(PanelType.P_ERROR, errorMsg))
         }
   
   end update
@@ -285,11 +280,11 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
   ): Outcome[SceneUpdateFragment] =
 
     panelMsg  match {
-      case Some(PanelType.P_ERROR, msg) =>
+      case (PanelType.P_ERROR, msg) =>
         displayErrorPanel(msg)
-      case Some(PanelType.P_PAUSE, msg) =>
+      case (PanelType.P_PAUSE, msg) =>
         displayPausePanel(msg)
-      case Some(PanelType.P_RESULTS, msg) =>
+      case (PanelType.P_RESULTS, msg) =>
         displayResultsPanel(msg)
       case _ => // including P_INVISIBLE
         Outcome(SceneUpdateFragment.empty)        
@@ -308,7 +303,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
     val textError2 = TextBox(msg , boxW-16, boxH-16)
       .withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(boxX+8, boxY+100)
 
-    val textError3 = TextBox("(Click on    in corner to dismiss this notification)", boxW-16, boxH-16)
+    val textError3 = TextBox("(Click on any part of the white border to dismiss this notification)", boxW-16, boxH-16)
       .withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(boxX+8, boxY+140)
 
     Outcome(
@@ -318,7 +313,6 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
       |+| SceneUpdateFragment(textError1)
       |+| SceneUpdateFragment(textError2)
       |+| SceneUpdateFragment(textError3)
-      |+| SceneUpdateFragment(Layer(GameAssets.miniTurnButtonImage.scaleBy(0.5,0.5).moveTo(boxX+124, boxY+130)))
     )
 
   end displayErrorPanel
