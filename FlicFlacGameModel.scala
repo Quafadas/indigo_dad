@@ -13,6 +13,7 @@ final case class FlicFlacGameModel(
     ourPieceType: Int,
     gameState: GameState,
     gameScore: (Int, Int),
+    panelState: Option[(PanelType, String)],
     scalingFactor: Double,
     pieces: Pieces,
     possibleMoveSpots: Spots,
@@ -32,6 +33,16 @@ enum GameState:
   case CYLINDER_RESOLVE
   case FINISH
 end GameState
+
+enum PanelType:
+  case P_INVISIBLE
+  case P_ERROR
+  case P_PAUSE
+  case P_RESULTS
+end PanelType
+
+
+
 
 object FlicFlacGameModel:
   scribe.debug("@@@ Object FlicFlacGameModel Start")
@@ -61,6 +72,7 @@ object FlicFlacGameModel:
       iOurPieceType,
       startingGameState,
       score,
+      None,
       defaultScalingFactor,
       summonPieces(hexBoard3),
       startingSpots,
@@ -180,6 +192,7 @@ object FlicFlacGameModel:
       iOurPieceType,
       resetGameState,
       score,
+      None,
       defaultSF,
       summonPieces(hexBoard3),
       emptySpots,

@@ -263,7 +263,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       org.scalajs.dom.window.localStorage.setItem(gameCache, asJson)
       Outcome(newModel)
 
-    case ButtonTurnEvent.Info() =>
+    case ButtonTurnEvent.Occurence() =>
       scribe.debug("@@@ ButtonTurnEvent")
       val emptySpots = Spots(Set.empty)
       val newScore = model.pieces.extraTurnScoring(model)
@@ -304,7 +304,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     case k: KeyboardEvent.KeyDown =>
       if k.keyCode == Key.ADD then Outcome(model).addGlobalEvents(ButtonPlusEvent)
       else if k.keyCode == Key.SUBTRACT then Outcome(model).addGlobalEvents(ButtonMinusEvent)
-      else if k.keyCode == Key.ENTER then Outcome(model).addGlobalEvents(ButtonTurnEvent.Info())
+      else if k.keyCode == Key.ENTER then Outcome(model).addGlobalEvents(ButtonTurnEvent.Occurence())
       else Outcome(model)
       end if
 
@@ -318,7 +318,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
       if TurnTimer.expired(model.turnTimer) then
         // signal a button turn event to switch players
-        Outcome(model).addGlobalEvents(ButtonTurnEvent.Info())
+        Outcome(model).addGlobalEvents(ButtonTurnEvent.Occurence())
       else
         val possibleTT = TurnTimer.update(model.turnTimer)
         possibleTT match
@@ -539,7 +539,7 @@ final case class GameSceneViewModel(
         buttonAssets = GameAssets.buttonTurnAssets(dSF),
         bounds = GameAssets.scaleButtonBounds(GameSceneViewModel.turnBounds, dSF),
         depth = Depth(6)
-      ).withUpActions(ButtonTurnEvent.Info())
+      ).withUpActions(ButtonTurnEvent.Occurence())
 
     this.copy(
       // scalingFactor
@@ -584,7 +584,7 @@ object GameSceneViewModel:
         buttonAssets = GameAssets.buttonTurnAssets(1.0),
         bounds = turnBounds,
         depth = Depth(6)
-      ).withUpActions(ButtonTurnEvent.Info())
+      ).withUpActions(ButtonTurnEvent.Occurence())
     )
 end GameSceneViewModel
 

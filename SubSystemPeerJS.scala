@@ -29,12 +29,6 @@ end WebRtcEvent
 // val timerDivisor = 100  // makes this timer operate in 10ths of a second ... 0 means disabled, +20 = 2 seconds
 // var timerT1: Long = (System.currentTimeMillis() / timerDivisor) + 20
 
-enum PanelType:
-  case P_ERROR
-  case P_PAUSE
-  case P_RESULTS
-end PanelType
-
 final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameModel]:
 
   var peer: Option[Peer] = None
@@ -229,7 +223,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
             conn.foreach(_.close())
             Outcome(())
 
-          case e: ButtonTurnEvent.Info =>
+          case e: ButtonTurnEvent.Occurence =>
             panelMsg = None
             Outcome(())
 
@@ -268,7 +262,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
                 Outcome(()).addGlobalEvents(update)
               case (false, None) => // ............................... Neither, idling
                 Outcome(())
-            } 
+        } 
         catch {
           case e : PeerJsException => 
             val errorMsg = e.getMessage()
@@ -297,7 +291,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
         displayPausePanel(msg)
       case Some(PanelType.P_RESULTS, msg) =>
         displayResultsPanel(msg)
-      case _ =>
+      case _ => // including P_INVISIBLE
         Outcome(SceneUpdateFragment.empty)        
     }
   end present

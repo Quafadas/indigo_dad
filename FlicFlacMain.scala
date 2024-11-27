@@ -221,7 +221,7 @@ case object ButtonMinusEvent extends GlobalEvent
 //case object ButtonTurnEvent extends GlobalEvent
 
 object ButtonTurnEvent :
-  case class Info() extends GlobalEvent
+  case class Occurence() extends GlobalEvent
 end ButtonTurnEvent
 
 object Freeze:
