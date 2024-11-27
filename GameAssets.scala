@@ -163,6 +163,9 @@ object GameAssets:
     ButtonAssets(up, over, down)
   end buttonTurnAssets
 
+  def miniTurnButtonImage: Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(0, 0, 90, 80), 6, Material.ImageEffects(AssetName(bnAssetName))).withCrop(1050, 0, 90, 80) 
+
   def cornerTopLeft: Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 20, 20), 2, Material.ImageEffects(AssetName(cnAssetName)))
 
