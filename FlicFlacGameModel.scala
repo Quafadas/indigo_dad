@@ -23,7 +23,10 @@ final case class FlicFlacGameModel(
       Decoder
 
 enum GameState:
-  case START
+  case START_CON1 // a state included in the set return by getStartUpStates
+  case START_CON2 // a state included in the set return by getStartUpStates
+  case START_CON3 // a state included in the set return by getStartUpStates
+  case START_CON4 // a state included in the set return by getStartUpStates
   case BLOCK_TURN
   case BLOCK_PAUSE
   case BLOCK_RESOLVE
@@ -40,9 +43,6 @@ enum PanelType:
   case P_RESULTS
 end PanelType
 
-
-
-
 object FlicFlacGameModel:
   scribe.debug("@@@ Object FlicFlacGameModel Start")
 
@@ -52,7 +52,7 @@ object FlicFlacGameModel:
     val sOurName = playerParams.playPams1_OurName
     val sOppoName = playerParams.playPams2_OppoName
     val iOurPieceType = CYLINDER // FIXME ... this needs to be adjusted once comms link is established
-    val startingGameState = GameState.START
+    val startingGameState = GameState.START_CON1
     val score = (0, 0)
     val defaultScalingFactor = 1.0
     val hexBoard3 = HexBoard3()
@@ -128,7 +128,7 @@ object FlicFlacGameModel:
     val m2 = modifyHighLighter(m1, possibleHighLighter)
     val m3 = modifyPossibleMoves(m2)
     val asJson = m3.asJson.noSpaces
-    val gameCache = getGameName(previousModel.ourName, previousModel.ourName)
+    val gameCache = getGameName(previousModel.ourName, previousModel.oppoName)
 
     org.scalajs.dom.window.localStorage.setItem(gameCache, asJson)
 
@@ -175,7 +175,7 @@ object FlicFlacGameModel:
     val sOurName = previousModel.ourName
     val sOppoName = previousModel.oppoName
     val iOurPieceType = previousModel.ourPieceType
-    val resetGameState = GameState.START
+    val resetGameState = GameState.START_CON1
     val score = (0, 0)
     val defaultSF = 1.0
     val hexBoard3 = HexBoard3()
@@ -209,6 +209,17 @@ object FlicFlacGameModel:
         "FlicFlac-Game2"
       end if
     sName
+  end getGameName
+
+  def getStartUpStates() : Set[GameState] = 
+    val startUpStateSet = Set(
+        GameState.START_CON1, 
+        GameState.START_CON2, 
+        GameState.START_CON3, 
+        GameState.START_CON4
+        )
+    startUpStateSet
+  end  getStartUpStates
 
   def retrieve(startupData: FlicFlacStartupData): FlicFlacGameModel =
     val playerParams = FlicFlacPlayerParams.getParams(startupData)

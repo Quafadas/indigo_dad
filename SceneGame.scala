@@ -57,6 +57,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         e match
           case e: FlicFlacGameUpdate.Info =>
             scribe.debug("@@@ FlicFlacGameUpdate.Info")
+            // FXIME I need to call some kind of "FlicFlac Game modify"
             Outcome(e.ffgm)
 
           case e: PointerEvent.PointerDown =>
@@ -264,7 +265,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
           case ViewportResize(gameViewPort) =>
             var dSF = 1.0
-            if model.gameState == GameState.START then
+            if (FlicFlacGameModel.getStartUpStates().contains(model.gameState)) then
               scribe.debug("@@@ ViewPortResize from scratch")
               val w = gameViewPort.width - model.hexBoard3.pBase.x
               val h = gameViewPort.height - model.hexBoard3.pBase.y

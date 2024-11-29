@@ -17,20 +17,6 @@ import tyrian.TyrianSubSystem
 import cats.effect.IO
 import tyrian.TyrianIndigoBridge
 
-// *******************************************
-// Outstanding issues ...ViewModel.initialViewModel
-// Browser refresh resets game
-// Remove scale factor from Right Mouse Button
-// Support Scenes
-// Brown Area for Home & perhaps boarder ?
-// Rework to ViewModelControl
-// *******************************************
-
-// gameSize can be one of 2,3,4,5,6 and is the number of major hexagons across one side where ...
-// ... a major hexagon is ring of 6 hexagons, with a central 7th black hexagon
-//val gameSize = 2 // <<<<<<<<<<<<<<<<<<<<<<<
-//val boardBasePoint : Point = Point(400,50)  // where the (inisible) top left hand corner of the hex grid board is positioned
-
 case class FlicFlacGame(
     tyrianSubSystem: TyrianSubSystem[IO, Int, FlicFlacGameModel]
 ) extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
@@ -219,7 +205,6 @@ case object ButtonMinusEvent extends GlobalEvent
 
 //ButtonTurnEvent needs to be an object so that it can be filtered and processed in the subsystem(s)
 //case object ButtonTurnEvent extends GlobalEvent
-
 object ButtonTurnEvent :
   case class Occurence() extends GlobalEvent
 end ButtonTurnEvent

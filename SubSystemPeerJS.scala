@@ -10,6 +10,35 @@ import io.circe.parser.decode
 import cats.effect.kernel.Ref
 import cats.effect.unsafe.ref.Reference
 
+/*
+INITIATOR                                                            | RESPONDER
+@@@-10 SubSystemPeerJS WebRtcEvent.MakePeerEntity using FIRSTNAME    | @@@-10 SubSystemPeerJS WebRtcEvent.MakePeerEntity using SECONDNAME
+@@@-20 SubSystemPeerJS WebRtcEvent.CreatedPeerEntity                 | @@@-20 SubSystemPeerJS WebRtcEvent.CreatedPeerEntity
+@@@-11 localPeer.on open                                             | @@@-11 localPeer.on open
+                                                                     |
+@@@-30 SubSystemPeerJS WebRtcEvent.Connect: FIRSTNAME -> SECONDNAME  |
+@@@-50 SubSystemPeerJS WebRtcEvent.PeerCreatedConnection             |
+                                                                     | @@@-12 localPeer.connection to FIRSTNAME
+                                                                     | @@@-40 SubSystemPeerJS WebRtcEvent.IncomingPeerConnection
+@@@-31 Connect.on open                                               |
+                                                                     | @@@-50 SubSystemPeerJS WebRtcEvent.PeerCreatedConnection
+@@@-60 SubSystemPeerJS WebRtcEvent.ConnectionOpen                    |
+@@@-70 SubSystemPeerJS WebRtcEvent.SendData                          |
+@@@-71 SendData ALPHA                                                |
+                                                                     | @@@-41 IncomingPeerConnection.on data ALPHA
+                                                                     | @@@-80 SubSystemPeerJS WebRtcEvent.ReceiveData
+                                                                     | @@@-81 ReceiveData ALPHA
+                                                                     | @@@-70 SubSystemPeerJS WebRtcEvent.SendData
+                                                                     | @@@-71 SendData bravo
+@@@-61 ConnectionOpen.on data bravo                                  |
+@@@-80 SubSystemPeerJS WebRtcEvent.ReceiveData                       |
+@@@-81 ReceiveData bravo                                             |
+@@@-90 SubSystemPeerJS WebRtcEvent.Close                             |
+@@@-32 Connect.on close                                              |
+@@@-62 ConnectionOpen.on close                                       |
+                                                                     | @@@-42 IncomingPeerConnection.on closed
+*/
+
 sealed trait WebRtcEvent extends GlobalEvent
 
 object WebRtcEvent:
@@ -25,9 +54,8 @@ object WebRtcEvent:
 
 end WebRtcEvent
 
-// For the moment we don't need a timer mechansim
-// val timerDivisor = 100  // makes this timer operate in 10ths of a second ... 0 means disabled, +20 = 2 seconds
-// var timerT1: Long = (System.currentTimeMillis() / timerDivisor) + 20
+val timerDivisor = 100  // makes this timer operate in 10ths of a second ... 0 means disabled, +20 = 2 seconds
+var timerT1: Long = 0
 
 final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameModel]:
 
@@ -80,6 +108,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
                   // we are the connection initiator so attempt to make the request
                   eventQueue.enqueue(WebRtcEvent.Connect(context.reference.oppoName))
                 end if
+                setGameState(GameState.START_CON2 ,context.reference)
             )
 
             localPeer.on(
@@ -108,7 +137,8 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
               "error",
               (e: js.Object) =>
                 scribe.error("@@@-19 LocalPeer.on error " + js.JSON.stringify(e))
-                panelMsg = (PanelType.P_ERROR, js.JSON.stringify(e))  // signalling ERROR
+                panelMsg = (PanelType.P_ERROR, js.JSON.stringify(e) + " HINT: Wait for \"" + context.reference.oppoName + "\" to start")  // signalling ERROR
+                timerT1 = timerStart(100) // 10 seconds
             )
             eventQueue.enqueue(WebRtcEvent.CreatedPeerEntity(localPeer))
             Outcome(())
@@ -121,6 +151,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
           case WebRtcEvent.Connect(s) =>
             val ourname = peer.get.id
             scribe.debug("@@@-30 SubSystemPeerJS WebRtcEvent.Connect: " + ourname + " ->  " + s)
+            timerT1 = timerStop()
 
             val connection = peer match
               case Some(p) =>
@@ -132,6 +163,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
                   (_: Any) =>
                     scribe.debug("@@@-31 Connect.on open")
                     eventQueue.enqueue(WebRtcEvent.ConnectionOpen)
+                    timerT1 = timerStop() // successful connection so stop timer
                 )
                 conn.on(
                   "close",
@@ -142,12 +174,14 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
                   "error",
                   (e: js.Object) =>
                     scribe.error("@@@-33 Connect.on error" + js.JSON.stringify(e))
+                    panelMsg = (PanelType.P_ERROR, js.JSON.stringify(e))  // signalling ERROR
                 )
 
                 conn
 
               case None =>
                 scribe.fatal("@@@-39 Connect None ... Attempting to connect without a peer")
+                panelMsg = (PanelType.P_ERROR, "Connecting without a local peer in place")  // signalling ERROR                
                 val nullDataConnection = new DataConnection()
                 nullDataConnection // likely to cause exception                
 
@@ -174,7 +208,8 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
               "error",
               (e: js.Object) =>
                 scribe.error("@@@-49 IncomingPeerConnection.on error " + js.JSON.stringify(e))
-            )
+                panelMsg = (PanelType.P_ERROR, js.JSON.stringify(e))  // signalling ERROR
+                )
             eventQueue.enqueue(WebRtcEvent.PeerCreatedConnection(c))
             Outcome(())
 
@@ -202,18 +237,22 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
                 "error",
                 (e: js.Object) =>
                   scribe.error("@@@-69 ConnectionOpen.on error " + js.JSON.stringify(e))
+                  panelMsg = (PanelType.P_ERROR, js.JSON.stringify(e))  // signalling ERROR
               )
             }
             Outcome(())
 
           case WebRtcEvent.SendData(ffgm) =>
             scribe.debug("@@@-70 SubSystemPeerJS WebRtcEvent.SendData")
-            val toSendNoSpaces = ffgm.asJson.noSpaces
-            val toSendJson = js.JSON.parse(toSendNoSpaces)
 
             conn.foreach { c =>
-              scribe.debug("@@@-71 SendData " + c.peer + "->" + c.label)
-              c.send(toSendJson)
+              if (c.open) then
+                scribe.debug("@@@-71 SendData " + c.peer + "->" + c.label)
+                val toSendNoSpaces = ffgm.asJson.noSpaces
+                val toSendJson = js.JSON.parse(toSendNoSpaces)
+                c.send(toSendJson)
+              else
+                scribe.debug("@@@-72 SendData blocked as connection not open yet")
             }
             Outcome(())
 
@@ -231,17 +270,19 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
             conn.foreach(_.close())
             Outcome(())
 
-          case Freeze.PanelContent(t,m) =>
-            panelMsg = (t, m)
+          case Freeze.PanelContent(typeOfPanel,messageToDisplay) =>
+            panelMsg = (typeOfPanel, messageToDisplay)
             Outcome(())
 
-          case _ =>
 
-            // For the moment we don't need a timer mechansim
-            // if ((System.currentTimeMillis()/timerDivisor) > timerT1) then
-            //  timerT1 = (System.currentTimeMillis() / timerDivisor) + 20
-            //  scribe.info("@@@ Timer T1")
-            // end if
+          case _ =>
+            if (timerExpired(timerT1)) then 
+                timerT1 = timerStop()
+                if (context.reference.ourName.compare(context.reference.oppoName) < 0) then 
+                  // we are the connection initiator and timerT1 has expired so attempt to the connection request again
+                  eventQueue.enqueue(WebRtcEvent.Connect(context.reference.oppoName))                
+                end if
+            end if 
 
             val bEvents = !eventQueue.isEmpty
             (bEvents, latestUpdate) match
@@ -263,12 +304,12 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
             val errorMsg = e.getMessage()
             scribe.error("@@@ SubSystemPeerJS update PeerJsCustomException handler " + errorMsg)
             panelMsg = (PanelType.P_ERROR, errorMsg)
-            Outcome(()).addGlobalEvents(Freeze.PanelContent(PanelType.P_ERROR, errorMsg))
+            Outcome(())
           case e : Throwable =>
             val errorMsg = e.getMessage()
             scribe.error("@@@ SubSystemPeerJS update ThrowableException handler " + errorMsg)
             panelMsg = (PanelType.P_ERROR, errorMsg)
-            Outcome(()).addGlobalEvents(Freeze.PanelContent(PanelType.P_ERROR, errorMsg))
+            Outcome(())
         }
   
   end update
@@ -340,6 +381,35 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
     ffgm
   end decodeRxJsonObject
 
+  def timerStart(expiryTime: Long) : Long =// expiryTime is in 10ths of a second
+    val timer = (System.currentTimeMillis() / timerDivisor) + expiryTime
+    timer
+  end timerStart
+
+  def timerStop() : Long =
+    val timer = 0
+    timer
+  end timerStop
+
+  def timerExpired(timer: Long) : Boolean =
+    val currentTime = (System.currentTimeMillis() / timerDivisor)
+    val expired = (timer > 0) && (currentTime >= timer)
+    expired
+  end timerExpired
+
+  def setGameState(gs: GameState, ffgm: FlicFlacGameModel) : Unit = 
+    //
+    latestUpdate match
+      case Some(update) =>
+        // peerJs has already modified the model, so we must update the modification
+        val existingModel = update.ffgm
+        latestUpdate = Some(FlicFlacGameUpdate.Info(existingModel.copy(gameState = gs)))
+
+      case None =>
+        // peerJs has not modified the model so we need a new model to report
+        latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm.copy(gameState = gs)))
+  end setGameState
+  
 end SSGame
 
 class PeerJsException(cause: String) extends Exception(cause)
