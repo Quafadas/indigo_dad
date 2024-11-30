@@ -8,17 +8,17 @@ import io.circe.parser.decode
 import game.Piece.pieceShape
 
 final case class FlicFlacGameModel(
-    ourName: String,
-    oppoName: String,
-    ourPieceType: Int,
-    gameState: GameState,
-    gameScore: (Int, Int),
-    scalingFactor: Double,
-    pieces: Pieces,
-    possibleMoveSpots: Spots,
-    highLighter: HighLighter,
-    hexBoard3: HexBoard3,
-    turnTimer: TurnTimer
+    ourName: String, // ........... Swaps
+    oppoName: String, // .......... Swaps 
+    ourPieceType: Int, // ......... Swaps
+    gameState: GameState, // ...... Updates
+    gameScore: (Int, Int), // ..... Updates
+    pieces: Pieces, // ............ Updates
+    possibleMoveSpots: Spots, // .. Updates
+    highLighter: HighLighter, // .. Updates
+    turnTimer: TurnTimer, // ...... Updates
+    hexBoard3: HexBoard3, // ...... No change by model
+    scalingFactor: Double // ...... No change by model
 ) derives Encoder.AsObject,
       Decoder
 
@@ -49,18 +49,30 @@ object FlicFlacGameModel:
   def creation(playerParams: FlicFlacPlayerParams): FlicFlacGameModel =
     scribe.debug("@@@ FlicFlacGameModel creation")
 
-    val sOurName = playerParams.playPams1_OurName
-    val sOppoName = playerParams.playPams2_OppoName
-    val iOurPieceType = CYLINDER // FIXME ... this needs to be adjusted once comms link is established
-    val startingGameState = GameState.START_CON1
+    val rand = new scala.util.Random
+    val r = rand.nextInt(10)
+    val pieceType = 
+      if ( r>= 5) then
+        // Initiator as BLOCK ... (as Responder our setting will be overridden)
+        BLOCK
+      else
+        // Initiator as CYLINDER ... (as Responder our setting will be overridden)
+        CYLINDER
+      end if
+
+
+    val sOurName = playerParams.playPams1_Name1
+    val sOppoName = playerParams.playPams2_Name2
+    val iOurPieceType = pieceType
+    val state = GameState.START_CON1
     val score = (0, 0)
-    val defaultScalingFactor = 1.0
+    // pieces
+    val startingSpots: Spots = Spots(Set.empty)
+    // val highLighter = HighLighter(hexBoard3, false, Point(0, 0)) // moved to bottom as forward reference
+    val turnTimer = TurnTimer(playerParams.playPams4_TurnTime, playerParams.playPams5_CaptorsTime)
     val hexBoard3 = HexBoard3()
     val highLighter = HighLighter(hexBoard3, false, Point(0, 0))
-    val startingSpots: Spots = Spots(Set.empty)
-    val turnTime = playerParams.playPams4_TurnTime
-    val captorsTime = playerParams.playPams5_CaptorsTime
-    val turnTimer = TurnTimer(turnTime, captorsTime)
+    val defaultScalingFactor = 1.0
 
     // FIXME why have I not included playPams3_ScoreToWin
     // FIXME why have I not included playPams6_Randeventprob
@@ -69,14 +81,14 @@ object FlicFlacGameModel:
       sOurName,
       sOppoName,
       iOurPieceType,
-      startingGameState,
+      state,
       score,
-      defaultScalingFactor,
       summonPieces(hexBoard3),
       startingSpots,
       highLighter,
+      turnTimer,
       hexBoard3,
-      turnTimer
+      defaultScalingFactor
     )
   end creation
 
@@ -129,9 +141,7 @@ object FlicFlacGameModel:
     val m3 = modifyPossibleMoves(m2)
     val asJson = m3.asJson.noSpaces
     val gameCache = getGameName(previousModel.ourName, previousModel.oppoName)
-
     org.scalajs.dom.window.localStorage.setItem(gameCache, asJson)
-
     Outcome(m3).addGlobalEvents(WebRtcEvent.SendData(m3))
   end modify
 
@@ -190,12 +200,12 @@ object FlicFlacGameModel:
       iOurPieceType,
       resetGameState,
       score,
-      defaultSF,
       summonPieces(hexBoard3),
       emptySpots,
       highLighter,
+      turnTimer,
       hexBoard3,
-      turnTimer
+      defaultSF
     )
   end reset
 
@@ -208,6 +218,7 @@ object FlicFlacGameModel:
         // we are the PeerJS responder
         "FlicFlac-Game2"
       end if
+    scribe.debug("@@@ getGameName: " + sName)
     sName
   end getGameName
 
@@ -223,8 +234,8 @@ object FlicFlacGameModel:
 
   def retrieve(startupData: FlicFlacStartupData): FlicFlacGameModel =
     val playerParams = FlicFlacPlayerParams.getParams(startupData)
-    val ourName = playerParams.playPams1_OurName
-    val oppoName = playerParams.playPams2_OppoName
+    val ourName = playerParams.playPams1_Name1
+    val oppoName = playerParams.playPams2_Name2
 
     val gameCache = getGameName(ourName, oppoName) 
     val cacheOrNew = decode[FlicFlacGameModel](org.scalajs.dom.window.localStorage.getItem(gameCache)) match

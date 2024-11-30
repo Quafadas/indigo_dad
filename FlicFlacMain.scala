@@ -68,7 +68,7 @@ case class FlicFlacGame(
 
   def initialScene(flicFlacBootData: FlicFlacBootData): Option[SceneName] =
     scribe.debug("@@@ FlicFlacMain-initialScene()")
-    Some(SceneGame.name)
+    Some(SceneParams.name)
   end initialScene
 
   // JP 30/06/24
@@ -79,7 +79,7 @@ case class FlicFlacGame(
       flicFlacBootData: FlicFlacBootData
   ): NonEmptyList[Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]] =
     scribe.debug("@@@ FlicFlacMain-scenes()")
-    NonEmptyList(SceneGame)
+    NonEmptyList(SceneParams, SceneGame)
   end scenes
 
   def boot(flags: Map[String, String]): Outcome[BootResult[FlicFlacBootData, FlicFlacGameModel]] =
@@ -103,7 +103,7 @@ case class FlicFlacGame(
 
       BootResult(config, flicFlacBootData)
         .withAssets(assets)
-        .withSubSystems(tyrianSubSystem)
+        .withSubSystems(tyrianSubSystem, SSGame("SubSystemPeerJs"))
     }
   end boot
 

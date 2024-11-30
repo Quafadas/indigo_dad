@@ -50,12 +50,14 @@ object WebRtcEvent:
   case object ConnectionOpen extends WebRtcEvent with NetworkReceiveEvent // 60
   case class SendData(ffgm: FlicFlacGameModel) extends WebRtcEvent with NetworkReceiveEvent // 70
   case class ReceivedData(data: js.Object) extends WebRtcEvent with NetworkReceiveEvent // 80
-  case class Close() extends WebRtcEvent with NetworkReceiveEvent // 90
+  case object Close extends WebRtcEvent with NetworkReceiveEvent // 90
 
 end WebRtcEvent
 
-val timerDivisor = 100  // makes this timer operate in 10ths of a second ... 0 means disabled, +20 = 2 seconds
-var timerT1: Long = 0
+var timerT1 = TickTimer.stop() // .............................timerT1 used by INITIATOR to repeat connect request if previous fail
+//var timerTT = TimerTick.start(TT_THREE_SECONDS) // ..........timerTT is test timer
+
+
 
 final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameModel]:
 
@@ -96,6 +98,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
     e => 
       try {
         e match
+
           case WebRtcEvent.MakePeerEntity =>
             scribe.debug("@@@-10 SubSystemPeerJS WebRtcEvent.MakePeerEntity using " + context.reference.ourName)
             val localPeer = Peer(id = context.reference.ourName)
@@ -108,6 +111,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
                   // we are the connection initiator so attempt to make the request
                   eventQueue.enqueue(WebRtcEvent.Connect(context.reference.oppoName))
                 end if
+                // peer is established so bump Game State
                 setGameState(GameState.START_CON2 ,context.reference)
             )
 
@@ -138,7 +142,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
               (e: js.Object) =>
                 scribe.error("@@@-19 LocalPeer.on error " + js.JSON.stringify(e))
                 panelMsg = (PanelType.P_ERROR, js.JSON.stringify(e) + " HINT: Wait for \"" + context.reference.oppoName + "\" to start")  // signalling ERROR
-                timerT1 = timerStart(100) // 10 seconds
+                timerT1 = TickTimer.start(TT_TEN_SECONDS)
             )
             eventQueue.enqueue(WebRtcEvent.CreatedPeerEntity(localPeer))
             Outcome(())
@@ -151,7 +155,6 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
           case WebRtcEvent.Connect(s) =>
             val ourname = peer.get.id
             scribe.debug("@@@-30 SubSystemPeerJS WebRtcEvent.Connect: " + ourname + " ->  " + s)
-            timerT1 = timerStop()
 
             val connection = peer match
               case Some(p) =>
@@ -163,7 +166,6 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
                   (_: Any) =>
                     scribe.debug("@@@-31 Connect.on open")
                     eventQueue.enqueue(WebRtcEvent.ConnectionOpen)
-                    timerT1 = timerStop() // successful connection so stop timer
                 )
                 conn.on(
                   "close",
@@ -214,16 +216,22 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
             Outcome(())
 
           case WebRtcEvent.PeerCreatedConnection(connLocal: DataConnection) =>
+            // successful connectionas as RESPONDER so bump Game State
             scribe.debug("@@@-50 SubSystemPeerJS WebRtcEvent.PeerCreatedConnection")
             conn = Some(connLocal)
+            setGameState(GameState.START_CON3 ,context.reference)
             Outcome(())
 
           case WebRtcEvent.ConnectionOpen =>
+            // successful connection as INITIATOR so stop timerT1 and bump Game State
             scribe.debug("@@@-60 SubSystemPeerJS WebRtcEvent.ConnectionOpen")
+            timerT1 = TickTimer.stop() 
+            setGameState(GameState.START_CON3 ,context.reference)
             conn.foreach { c =>
               c.on(
                 "data",
                 (data: js.Object) =>
+                  scribe.debug("@@@-61 ConnectionOpen.on data ")
                   val ffgm = decodeRxJsonObject(data, 68) // 68 is the error number
                   latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm))
               )
@@ -245,15 +253,16 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
           case WebRtcEvent.SendData(ffgm) =>
             scribe.debug("@@@-70 SubSystemPeerJS WebRtcEvent.SendData")
 
-            conn.foreach { c =>
-              if (c.open) then
+            if (TickTimer.isInactive(timerT1)) then
+              conn.foreach { c =>
                 scribe.debug("@@@-71 SendData " + c.peer + "->" + c.label)
                 val toSendNoSpaces = ffgm.asJson.noSpaces
                 val toSendJson = js.JSON.parse(toSendNoSpaces)
                 c.send(toSendJson)
-              else
-                scribe.debug("@@@-72 SendData blocked as connection not open yet")
-            }
+              }
+            else
+              scribe.debug("@@@-72 SendData blocked as connection not open yet")
+            end if
             Outcome(())
 
           case WebRtcEvent.ReceivedData(data: js.Object) =>
@@ -265,7 +274,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
             }
             Outcome(())
 
-          case WebRtcEvent.Close() =>
+          case WebRtcEvent.Close =>
             scribe.debug("@@@-90 SubSystemPeerJS WebRtcEvent.Close")
             conn.foreach(_.close())
             Outcome(())
@@ -276,13 +285,19 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
 
 
           case _ =>
-            if (timerExpired(timerT1)) then 
-                timerT1 = timerStop()
+            if (TickTimer.expired(timerT1)) then 
+                timerT1 = TickTimer.stop()
                 if (context.reference.ourName.compare(context.reference.oppoName) < 0) then 
                   // we are the connection initiator and timerT1 has expired so attempt to the connection request again
                   eventQueue.enqueue(WebRtcEvent.Connect(context.reference.oppoName))                
                 end if
             end if 
+
+//            if (TimerTick.expired(timerTT)) then 
+//                scribe.debug("@@@ TimerTT restarting from " + timerTT)
+//                timerTT = TimerTick.start(TT_THREE_SECONDS)
+//            end if 
+
 
             val bEvents = !eventQueue.isEmpty
             (bEvents, latestUpdate) match
@@ -310,8 +325,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
             scribe.error("@@@ SubSystemPeerJS update ThrowableException handler " + errorMsg)
             panelMsg = (PanelType.P_ERROR, errorMsg)
             Outcome(())
-        }
-  
+        }  
   end update
 
 
@@ -319,6 +333,8 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
       context: SubSystemFrameContext[ReferenceData],
       message: Unit
   ): Outcome[SceneUpdateFragment] =
+
+  /*--
 
     panelMsg  match {
       case (PanelType.P_ERROR, msg) =>
@@ -330,6 +346,14 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
       case _ => // including P_INVISIBLE
         Outcome(SceneUpdateFragment.empty)        
     }
+  --*/
+    val topXandY = 250
+    Outcome (
+      SceneUpdateFragment.empty
+      |+| SceneUpdateFragment(Shape.Box(Rectangle(topXandY, topXandY, 200, 200), Fill.Color(RGBA.Olive)).withDepth(Depth(12))) // ...... (C)
+      |+| SceneUpdateFragment(Shape.Box(Rectangle(topXandY+4, topXandY+4, 192, 192), Fill.Color(RGBA.Cyan)).withDepth(Depth(13))) // ... (D)
+    )
+
   end present
 
   def displayErrorPanel(msg:String) : Outcome[SceneUpdateFragment] =
@@ -380,22 +404,6 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
       )
     ffgm
   end decodeRxJsonObject
-
-  def timerStart(expiryTime: Long) : Long =// expiryTime is in 10ths of a second
-    val timer = (System.currentTimeMillis() / timerDivisor) + expiryTime
-    timer
-  end timerStart
-
-  def timerStop() : Long =
-    val timer = 0
-    timer
-  end timerStop
-
-  def timerExpired(timer: Long) : Boolean =
-    val currentTime = (System.currentTimeMillis() / timerDivisor)
-    val expired = (timer > 0) && (currentTime >= timer)
-    expired
-  end timerExpired
 
   def setGameState(gs: GameState, ffgm: FlicFlacGameModel) : Unit = 
     //

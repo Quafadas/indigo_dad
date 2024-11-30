@@ -111,8 +111,8 @@
         const oFlicFlac = JSON.parse(sFlicFlacPlayParams)
         document.getElementById("readResults").style.border="4px solid blue"
 
-        document.getElementById("myName").defaultValue = oFlicFlac.playPams1_OurName
-        document.getElementById("oppoName").defaultValue = oFlicFlac.playPams2_OppoName
+        document.getElementById("myName").defaultValue = oFlicFlac.playPams1_Name1
+        document.getElementById("oppoName").defaultValue = oFlicFlac.playPams2_Name2
         document.getElementById("scoreToWin").defaultValue = oFlicFlac.playPams3_ScoreToWin
         document.getElementById("turnTime").defaultValue = oFlicFlac.playPams4_TurnTime
         document.getElementById("captorsTime").defaultValue = oFlicFlac.playPams5_CaptorsTime
@@ -191,8 +191,8 @@
         // infuse new settings into a new PlayParams object
 
         var oPlayParams = {
-          playPams1_OurName: myName,
-          playPams2_OppoName: oppoName,
+          playPams1_Name1: myName,
+          playPams2_Name2: oppoName,
           playPams3_ScoreToWin: scoreToWin,
           playPams4_TurnTime: turnTime,
           playPams5_CaptorsTime: captorsTime,
@@ -207,10 +207,10 @@
           // we swap oPlayParams here
           // On same machine and same browser, both indigo sessions will share the ordered PlayerParams
           // The indigo sessions use FlicFlac-Game1 or FlicFlac-Game2 according to N1 and N2 passed as cookies
-          var tempOurName = oPlayParams.playPams1_OurName
-          var tempOppoName = oPlayParams.playPams2_OppoName
-          oPlayParams.playPams1_OurName = tempOppoName
-          oPlayParams.playPams2_OppoName = tempOurName
+          var tempOurName = oPlayParams.playPams1_Name1
+          var tempOppoName = oPlayParams.playPams2_Name2
+          oPlayParams.playPams1_Name1 = tempOppoName
+          oPlayParams.playPams2_Name2 = tempOurName
 
           window.localStorage.removeItem("FlicFlac-Game2") // remove any previous game for RESPONDER
         }

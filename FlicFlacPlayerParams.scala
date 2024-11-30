@@ -7,8 +7,8 @@ import io.circe.syntax.*
 import io.circe.parser.decode
 
 final case class FlicFlacPlayerParams(
-    playPams1_OurName: String, // ......... default "Player1"
-    playPams2_OppoName: String, // ........ default "Player2"
+    playPams1_Name1: String, // ........... default "Player1"
+    playPams2_Name2: String, // ........... default "Player2"
     playPams3_ScoreToWin: Int, // ......... default 11
     playPams4_TurnTime: Int, // ........... default 30 seconds
     playPams5_CaptorsTime: Int, // ........ default 15 seconds
@@ -26,7 +26,7 @@ object FlicFlacPlayerParams:
     val cacheConfigOrDefault =
       decode[FlicFlacPlayerParams](org.scalajs.dom.window.localStorage.getItem("FlicFlac-Params")) match
         case Right(playerParams: FlicFlacPlayerParams) =>
-          val newPlayerParams = playerParams.copy(playPams1_OurName = name1, playPams2_OppoName = name2)
+          val newPlayerParams = playerParams.copy(playPams1_Name1 = name1, playPams2_Name2 = name2)
           newPlayerParams
 
         case Left(_) =>
