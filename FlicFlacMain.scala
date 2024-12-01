@@ -115,6 +115,7 @@ case class FlicFlacGame(
     val w = flicFlacStartupData.flicFlacBootData.gameViewPort.width
     val h = flicFlacStartupData.flicFlacBootData.gameViewPort.height
     val staticAssets = flicFlacStartupData.staticAssets
+
     Outcome(
       FlicFlacViewModel(
         staticAssets,

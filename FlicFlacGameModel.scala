@@ -8,9 +8,11 @@ import io.circe.parser.decode
 import game.Piece.pieceShape
 
 final case class FlicFlacGameModel(
-    ourName: String, // ........... Swaps
-    oppoName: String, // .......... Swaps 
-    ourPieceType: Int, // ......... Swaps
+    ourName: String, // ........... Subject to negotiation during startup
+    oppoName: String, // .......... Subject to negotiation during startup
+    ourPieceType: Int, // ......... Subject to negotiation during startup
+    winningScore: Int, // ......... Subject to negotiation during startup
+    randEventFreq: Int, // ........ Subject to negotiation during startup
     gameState: GameState, // ...... Updates
     gameScore: (Int, Int), // ..... Updates
     pieces: Pieces, // ............ Updates
@@ -64,6 +66,8 @@ object FlicFlacGameModel:
     val sOurName = playerParams.playPams1_Name1
     val sOppoName = playerParams.playPams2_Name2
     val iOurPieceType = pieceType
+    val iWinningScore = playerParams.playPams3_ScoreToWin
+    val iRandEventFreq = playerParams.playPams6_RandEventProb
     val state = GameState.START_CON1
     val score = (0, 0)
     // pieces
@@ -74,13 +78,12 @@ object FlicFlacGameModel:
     val highLighter = HighLighter(hexBoard3, false, Point(0, 0))
     val defaultScalingFactor = 1.0
 
-    // FIXME why have I not included playPams3_ScoreToWin
-    // FIXME why have I not included playPams6_Randeventprob
-
     FlicFlacGameModel(
       sOurName,
       sOppoName,
       iOurPieceType,
+      iWinningScore,
+      iRandEventFreq,
       state,
       score,
       summonPieces(hexBoard3),
@@ -185,6 +188,8 @@ object FlicFlacGameModel:
     val sOurName = previousModel.ourName
     val sOppoName = previousModel.oppoName
     val iOurPieceType = previousModel.ourPieceType
+    val iWinningScore = previousModel.winningScore
+    val iRandEventFreq = previousModel.randEventFreq
     val resetGameState = GameState.START_CON1
     val score = (0, 0)
     val defaultSF = 1.0
@@ -198,6 +203,8 @@ object FlicFlacGameModel:
       sOurName,
       sOppoName,
       iOurPieceType,
+      iWinningScore,
+      iRandEventFreq,
       resetGameState,
       score,
       summonPieces(hexBoard3),

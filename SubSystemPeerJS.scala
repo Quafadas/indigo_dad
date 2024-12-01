@@ -195,7 +195,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
             c.on(
               "data",
               (data: js.Object) =>
-                scribe.debug("@@@-41 ConnectionOpen.on data ")
+                scribe.debug("@@@-41 ConnectionOpen.on data")
                 val str = js.JSON.stringify(data)
                 val ffgm = decodeRxJsonObject(data, 48) // 48 is the error number
                 latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm))
@@ -255,7 +255,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
 
             if (TickTimer.isInactive(timerT1)) then
               conn.foreach { c =>
-                scribe.debug("@@@-71 SendData " + c.peer + "->" + c.label)
+                scribe.debug("@@@-71 SendData " + peer.get.id + "->" + c.label)
                 val toSendNoSpaces = ffgm.asJson.noSpaces
                 val toSendJson = js.JSON.parse(toSendNoSpaces)
                 c.send(toSendJson)
@@ -268,7 +268,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
           case WebRtcEvent.ReceivedData(data: js.Object) =>
             scribe.debug("@@@-80 SubSystemPeerJS WebRtcEvent.ReceiveData")
             conn.foreach { c =>
-              scribe.debug("@@@-81 ReceiveData " + c.label + "->" + c.peer)
+              scribe.debug("@@@-81 ReceiveData " + c.label + "->" + peer.get.id)
               val ffgm = decodeRxJsonObject(data, 88) // 88 is the error number
               latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm))
             }

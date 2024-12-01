@@ -9,24 +9,6 @@ import indigo.shared.events.KeyboardEvent.KeyUp
 import indigo.platform.networking.Network
 import game.FlicFlacGameModel.getStartUpStates
 
-/*
-trait Scene[FlicFlacStartUpData, FlicFlacGameModel, FlicFlacViewModel] derives CanEqual {
-  type SceneModel = FlicFlacGameModel
-  type SceneViewModel = GameSceneViewModel
-
-  def name: SceneName
-  def modelLens: Lens[FlicFlacGameModel, FlicFlacGameModel]
-  def viewModelLens: Lens[FlicFlacViewModel, SceneViewModel]
-  def eventFilters: EventFilters = EventFilters.Permissive
-  val subSystems: Set[SubSystem[FlicFlacGameModel]]
-
-  def updateModel(context: SceneContext[FlicFlacStartUpData], model: SceneModel): GlobalEvent => Outcome[SceneModel]
-  def updateViewModel(context: SceneContext[FlicFlacStartUpData], model: SceneModel, viewModel: SceneViewModel): GlobalEvent => Outcome[SceneViewModel]
-
-  def present(context: SceneContext[FlicFlacStartUpData], model: SceneModel, viewModel: SceneViewModel): Outcome[SceneUpdateFragment]
-}
-*/
-
 object SceneParams extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
   type SceneModel = FlicFlacGameModel
   type SceneViewModel = GameSceneViewModel
@@ -49,6 +31,10 @@ object SceneParams extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
 
   var timerCON3 = TickTimer.stop() // this timer used to transmit initial settings
   
+  def updateViewModel(context: SceneContext[FlicFlacStartupData], model: SceneModel, viewModel: SceneViewModel): GlobalEvent => Outcome[SceneViewModel] = {
+    e =>
+      Outcome(viewModel)
+  }
 
   def updateModel(context: SceneContext[FlicFlacStartupData], model: FlicFlacGameModel): GlobalEvent => Outcome[FlicFlacGameModel] = {
     e =>
@@ -106,10 +92,6 @@ object SceneParams extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
 
         case _ => Outcome(model)
 
-  }
-  def updateViewModel(context: SceneContext[FlicFlacStartupData], model: SceneModel, viewModel: SceneViewModel): GlobalEvent => Outcome[SceneViewModel] = {
-    e =>
-      Outcome(viewModel)
   }
 
   def present(context: SceneContext[FlicFlacStartupData], model: SceneModel, viewModel: SceneViewModel): Outcome[SceneUpdateFragment] = {
