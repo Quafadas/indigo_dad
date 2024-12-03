@@ -12,7 +12,7 @@
       background-size: 100vw 100vh;
       background-color: black;
       font-family: arial;
-      font-size: 20px;
+      font-size: 30px;
     }    
     </style>
 
@@ -28,12 +28,11 @@
           </div>
           <div>
             <label for="myName" class="configLabel">Your Name:</label>
-            <input id="myName" class="configValue" type="text" name="myName">  
+            <input id="myName" class="configNameValue" type="text" name="myName">
           </div>
         </span>
       </div>
 
-      <br>
       <div>
         <i>2) Enter your opponent&apos;s name</i><br>
         <span title="This name is the second part of a key to establish the link to your opponent.">
@@ -42,53 +41,77 @@
           </div>
           <div>
             <label for="oppoName" class="configLabel">Opponent&apos;s Name:</label>
-            <input id="oppoName" class="configValue" type="text" name="oppoName">  
+            <input id="oppoName" class="configNameValue" type="text" name="oppoName">  
           </div>
         </span>
       </div>
-      
-      <br>
-     
+
       <i>3) Propose the game parameters</i><br>
       <div>
-        <span title="This is the number of points you need to win. Remember you must win by at least two clear points">
-          <div id="errorMsg3A" class="configErrorMsg"><b>Invalid target set as Final Score</b><br>
-            The score to win needs to be set as a non-zero positive integer.<br>
-          </div>
-          <label for="scoreToWin" class="configLabel">Score to Win:</label>
-          <input id="scoreToWin" class="configValue" type="number" name="scoreToWin">    
-        </span>
+        <table class ="borderless">        
+          <td class ="borderless">
+            <span title="This is the number of points you need to win. Remember you must win by at least two clear points">
+              <div id="errorMsg3A" class="configErrorMsg"><b>Invalid target set as Final Score</b><br>
+                The score to win needs to be set as a non-zero positive integer.<br>
+              </div>
+              <label for="scoreToWin" class="configLabel">Score to Win:</label>
+              <input id="scoreToWin" class="configNumberValue" type="number" name="scoreToWin">    
+            </span>
+          </td>
+          <td class ="borderless">
+            <img src="./Flag.png" style="height: 2em; width: auto"/>
+          </td>
+        </table>
       </div>
       <div>
-        <span title="This is the number of seconds allowed for each turn. A value of zero disables this timer">
-          <div id="errorMsg3B" class="configErrorMsg"><b>Invalid Turn Time</b><br>
-            The turn time must be set as as a non-zero positive integer, <br>
-            representing the maximum time allowed in seconds for each turn.<br>
-          </div>
-          <label for="turnTime" class="configLabel">Turn Time:</label>
-          <input id="turnTime" class="configValue" type="number" name="turnTime">  
-        </span>          
+        <table class ="borderless">        
+          <td class ="borderless">
+            <span title="This is the number of seconds allowed for each turn. A value of zero disables this timer">
+              <div id="errorMsg3B" class="configErrorMsg"><b>Invalid Turn Time</b><br>
+                The turn time must be set as as a non-zero positive integer, <br>
+                representing the maximum time allowed in seconds for each turn.<br>
+              </div>
+              <label for="turnTime" class="configLabel">Turn Time:</label>
+              <input id="turnTime" class="configNumberValue" type="number" name="turnTime">  
+            </span>          
+          </td>
+          <td class ="borderless">
+            <img src="./TallTimer.png" style="height: 2em; width: auto"/>
+          </td>
+        </table>
       </div>
       <div>
-        <span title="This is the number of seconds allowed for an extended turn after a successful capture. It is suggested to make this half the turn timer above. Once again, a value of zero disables this timer.">
-          <div id="errorMsg3C" class="configErrorMsg"><b>Invalid Captor&apos;s Turn Time</b><br>
-            The captor&apos;s turn time must be set as as a non-zero positive integer, <br>
-            representing the maximum time allowed in seconds for extra turns.<br>
-          </div>
-          <label for="captorsTime" class="configLabel">Captor&apos;s Time:</label>
-          <input id="captorsTime" class="configValue" type="number" name="captorsTime">
-        </span>
-      </div>
-      <div>
-        <div id="errorMsg3D" class="configErrorMsg">
-          <b>Invalid Random Event Probability</b><br>
-          This is an integer representing the percentage probability,<br>
-          where 0 <= probability <= 100 <br>
+        <table class ="borderless">        
+          <td class ="borderless">
+            <span title="This is the number of seconds allowed for an extended turn after a successful capture. It is suggested to make this half the turn timer above. Once again, a value of zero disables this timer.">
+              <div id="errorMsg3C" class="configErrorMsg"><b>Invalid Captor&apos;s Turn Time</b><br>
+                The captor&apos;s turn time must be set as as a non-zero positive integer, <br>
+                representing the maximum time allowed in seconds for extra turns.<br>
+              </div>
+              <label for="captorsTime" class="configLabel">Captor&apos;s Time:</label>
+              <input id="captorsTime" class="configNumberValue" type="number" name="captorsTime">
+            </span>
+            <td class ="borderless">
+              <img src="./PortCullis.png" style="height: 2em; width: auto"/>
+            </td>
+          </table>
         </div>
-        <span title="This is the percentage probabilty that a random event will occur. A value of zero prohibits these occurences.">
-          <label for="randEventProb" class="configLabel">Random Event Probability:</label>
-          <input id="randEventProb" class="configValue" type="number" name="randEventProb">              
-        </span>
+      <div>
+        <table class ="borderless">        
+          <td class ="borderless">
+            <div id="errorMsg3D" class="configErrorMsg">
+              <b>Invalid Random Event Probability</b><br>
+              This is an integer representing the percentage probability,<br>
+              where 0 <= probability <= 100 <br>
+            </div>
+            <span title="This is the percentage probabilty that a random event will occur. A value of zero prohibits these occurences.">
+              <label for="randEventProb" class="configLabel">Random Event Probability:</label>
+              <input id="randEventProb" class="configNumberValue" type="number" name="randEventProb">              
+            </span>
+            <td class ="borderless">
+              <img src="./Bolt.png" style="height: 2em; width: auto"/>
+            </td>
+          </table>
       </div>
     </div>
 
@@ -120,8 +143,15 @@
       }
       else      
       {
-        /* no json object found so leave parameters panel blank */
-        console.log("@@@ Cache for PlayParams not found")
+        /* no json object found so suggest some default parameters */
+        console.log("@@@ Cache for PlayParams not found - suggesting defaults")
+        document.getElementById("myName").defaultValue = "Player1"
+        document.getElementById("oppoName").defaultValue = "Player2"
+        document.getElementById("scoreToWin").defaultValue = 11
+        document.getElementById("turnTime").defaultValue = 20
+        document.getElementById("captorsTime").defaultValue = 10
+        document.getElementById("randEventProb").defaultValue = 1
+
       }
     }
     

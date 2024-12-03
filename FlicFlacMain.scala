@@ -103,7 +103,7 @@ case class FlicFlacGame(
 
       BootResult(config, flicFlacBootData)
         .withAssets(assets)
-        .withSubSystems(tyrianSubSystem, SSGame("SubSystemPeerJs"))
+        .withSubSystems(tyrianSubSystem, SSPeerJS("SubSystemPeerJS"))
     }
   end boot
 

@@ -86,7 +86,7 @@ table, th, tr, td {
 }
 
 .configParams {
-  font-size: 16px;
+  font-size: 24px;
   font-family: Arial;
   color:blue;
   padding: 10px;
@@ -104,10 +104,24 @@ table, th, tr, td {
   color:black;
 }
 
-.configValue {
+.configNameValue {
   font-size: 1em;
   font-family: Arial;
-  /*width: 10em;*/
+  width: 12em;
+  height:1.6em;
+  display:inline-block;
+  text-align: left;
+  background-color:lavender;
+  color:black;
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+
+.configNumberValue {
+  font-size: 1em;
+  font-family: Arial;
+  width: 6em;
   height:1.6em;
   display:inline-block;
   text-align: left;
@@ -121,6 +135,10 @@ table, th, tr, td {
   font-style: italic;
   color:red;
   display:none;
+}
+
+.borderless {
+  border: 3px solid white !important;
 }
 
   

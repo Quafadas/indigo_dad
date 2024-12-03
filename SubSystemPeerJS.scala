@@ -55,25 +55,22 @@ object WebRtcEvent:
 end WebRtcEvent
 
 var timerT1 = TickTimer.stop() // .............................timerT1 used by INITIATOR to repeat connect request if previous fail
-//var timerTT = TimerTick.start(TT_THREE_SECONDS) // ..........timerTT is test timer
 
-
-
-final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameModel]:
+final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGameModel]:
 
   var peer: Option[Peer] = None
   var conn: Option[DataConnection] = None
   var latestUpdate: Option[FlicFlacGameUpdate.Info] = None
   val eventQueue: Queue[WebRtcEvent] = Queue.empty[WebRtcEvent]
+  var peerJsPanel: (PanelType, String) = (PanelType.P_INVISIBLE, "")
 
-  // panelMsg controls the appearance of the Error/Pause/Results panel. It can be triggered in two different ways 1)&2)
+  // peerJsPanel controls the appearance of the Error/Pause/Results panel. It can be triggered in two different ways 1)&2)
   // and it s cleared in one way 3)
-  // 1) direct manipulation of the var panelMsg & set bIssueFreezeNow=true from the callbacks in this file
-  // 2) indirectly on receipt of the message Frozen.PanelContent(T,msg) where T is one of P_ERROR, P_PAUSE, P_RESULTS
-  // 3) receipt of message Frozen.PanelContent(P_INVISIBLE,"") ... which occurs when you click outside the board
+  // 1) direct manipulation of the var peerJsPanel from the callbacks in this file
+  // 2) indirectly on receipt of the message Frozen.PanelContent(T,msg) where T is one of P_ERROR, P_RESULTS
+  // 3) generation of message Frozen.PanelContent(P_INVISIBLE,"") in one of the scenes ... which occurs when you click (maybe outside the board)
  
 
-  var panelMsg: (PanelType, String) = (PanelType.P_INVISIBLE, "")
 
   type EventType = GlobalEvent
   type SubSystemModel = Unit
@@ -97,8 +94,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
   ): EventType => Outcome[Unit] =
     e => 
       try {
-        e match
-
+        e match         
           case WebRtcEvent.MakePeerEntity =>
             scribe.debug("@@@-10 SubSystemPeerJS WebRtcEvent.MakePeerEntity using " + context.reference.ourName)
             val localPeer = Peer(id = context.reference.ourName)
@@ -141,7 +137,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
               "error",
               (e: js.Object) =>
                 scribe.error("@@@-19 LocalPeer.on error " + js.JSON.stringify(e))
-                panelMsg = (PanelType.P_ERROR, js.JSON.stringify(e) + " HINT: Wait for \"" + context.reference.oppoName + "\" to start")  // signalling ERROR
+                peerJsPanel = (PanelType.P_ERROR, js.JSON.stringify(e) + " HINT: Wait for \"" + context.reference.oppoName + "\" to start")  // signalling ERROR
                 timerT1 = TickTimer.start(TT_TEN_SECONDS)
             )
             eventQueue.enqueue(WebRtcEvent.CreatedPeerEntity(localPeer))
@@ -176,14 +172,14 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
                   "error",
                   (e: js.Object) =>
                     scribe.error("@@@-33 Connect.on error" + js.JSON.stringify(e))
-                    panelMsg = (PanelType.P_ERROR, js.JSON.stringify(e))  // signalling ERROR
+                    peerJsPanel = (PanelType.P_ERROR, js.JSON.stringify(e))  // signalling ERROR
                 )
 
                 conn
 
               case None =>
                 scribe.fatal("@@@-39 Connect None ... Attempting to connect without a peer")
-                panelMsg = (PanelType.P_ERROR, "Connecting without a local peer in place")  // signalling ERROR                
+                peerJsPanel = (PanelType.P_ERROR, "Connecting without a local peer in place")  // signalling ERROR                
                 val nullDataConnection = new DataConnection()
                 nullDataConnection // likely to cause exception                
 
@@ -210,7 +206,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
               "error",
               (e: js.Object) =>
                 scribe.error("@@@-49 IncomingPeerConnection.on error " + js.JSON.stringify(e))
-                panelMsg = (PanelType.P_ERROR, js.JSON.stringify(e))  // signalling ERROR
+                peerJsPanel = (PanelType.P_ERROR, js.JSON.stringify(e))  // signalling ERROR
                 )
             eventQueue.enqueue(WebRtcEvent.PeerCreatedConnection(c))
             Outcome(())
@@ -245,7 +241,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
                 "error",
                 (e: js.Object) =>
                   scribe.error("@@@-69 ConnectionOpen.on error " + js.JSON.stringify(e))
-                  panelMsg = (PanelType.P_ERROR, js.JSON.stringify(e))  // signalling ERROR
+                  peerJsPanel = (PanelType.P_ERROR, js.JSON.stringify(e))  // signalling ERROR
               )
             }
             Outcome(())
@@ -279,11 +275,6 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
             conn.foreach(_.close())
             Outcome(())
 
-          case Freeze.PanelContent(typeOfPanel,messageToDisplay) =>
-            panelMsg = (typeOfPanel, messageToDisplay)
-            Outcome(())
-
-
           case _ =>
             if (TickTimer.expired(timerT1)) then 
                 timerT1 = TickTimer.stop()
@@ -293,37 +284,62 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
                 end if
             end if 
 
-//            if (TimerTick.expired(timerTT)) then 
-//                scribe.debug("@@@ TimerTT restarting from " + timerTT)
-//                timerTT = TimerTick.start(TT_THREE_SECONDS)
-//            end if 
-
+            val outcome0 = Outcome(()) // ........................ Assume no additional events to add
 
             val bEvents = !eventQueue.isEmpty
-            (bEvents, latestUpdate) match
-              case (true, Some(update)) => // ......................... Both Event(s) and Game Update Info
+            val outcome1 =
+              if (eventQueue.isEmpty) then outcome0
+              else // ............................................ Adding in queued events generated from non-call back PeerJs code
                 val events = eventQueue.dequeueAll(_ => true)
-                latestUpdate = None
-                Outcome(()).addGlobalEvents(events*).addGlobalEvents(update)
-              case (true, None) => // ................................. Just Event(s)
-                val events = eventQueue.dequeueAll(_ => true)
-                Outcome(()).addGlobalEvents(events*)
-              case (false, Some(update)) => // ........................ Just Game Update Info
-                latestUpdate = None
-                Outcome(()).addGlobalEvents(update)
-              case (false, None) => // ................................ Idling
-                Outcome(())
+                outcome0.addGlobalEvents(events*)
+              end if
+
+            val outcome2 = 
+              latestUpdate match
+                case Some(update) =>
+                  latestUpdate = None
+                  outcome1.addGlobalEvents(update) // ............ Adding in event generated from a callback
+                case None => 
+                  outcome1
+
+            val outcome3 =
+              if (peerJsPanel._1 == PanelType.P_INVISIBLE) then 
+                outcome2 // ...................................... Adding in error messages from non-call back PeerJs code
+              else 
+                val errorEvent = Freeze.PanelContent(peerJsPanel._1, peerJsPanel._2)
+                peerJsPanel = (PanelType.P_INVISIBLE, "")
+                outcome2.addGlobalEvents(errorEvent)
+              end if
+            
+            outcome3 // .......................................... The final outcome           
+            
+/*---
+            val outcome1 = 
+              (bEvents, latestUpdate) match
+                case (true, Some(update)) => // ......................... Both Event(s) and Game Update Info
+                  val events = eventQueue.dequeueAll(_ => true)
+                  latestUpdate = None
+                  Outcome(()).addGlobalEvents(events*).addGlobalEvents(update)
+                case (true, None) => // ................................. Just Event(s)
+                  val events = eventQueue.dequeueAll(_ => true)
+                  Outcome(()).addGlobalEvents(events*)
+                case (false, Some(update)) => // ........................ Just Game Update Info
+                  latestUpdate = None
+                  Outcome(()).addGlobalEvents(update)
+                case (false, None) => // ................................ Idling
+                  Outcome(())
+---*/
         } 
         catch {
           case e : PeerJsException => 
             val errorMsg = e.getMessage()
             scribe.error("@@@ SubSystemPeerJS update PeerJsCustomException handler " + errorMsg)
-            panelMsg = (PanelType.P_ERROR, errorMsg)
+            peerJsPanel = (PanelType.P_ERROR, errorMsg)
             Outcome(())
           case e : Throwable =>
             val errorMsg = e.getMessage()
             scribe.error("@@@ SubSystemPeerJS update ThrowableException handler " + errorMsg)
-            panelMsg = (PanelType.P_ERROR, errorMsg)
+            peerJsPanel = (PanelType.P_ERROR, errorMsg)
             Outcome(())
         }  
   end update
@@ -347,15 +363,17 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
         Outcome(SceneUpdateFragment.empty)        
     }
   --*/
+  /*---
     val topXandY = 250
     Outcome (
       SceneUpdateFragment.empty
       |+| SceneUpdateFragment(Shape.Box(Rectangle(topXandY, topXandY, 200, 200), Fill.Color(RGBA.Olive)).withDepth(Depth(12))) // ...... (C)
       |+| SceneUpdateFragment(Shape.Box(Rectangle(topXandY+4, topXandY+4, 192, 192), Fill.Color(RGBA.Cyan)).withDepth(Depth(13))) // ... (D)
     )
-
+  ---*/
+    Outcome(SceneUpdateFragment.empty)
   end present
-
+/*--
   def displayErrorPanel(msg:String) : Outcome[SceneUpdateFragment] =
     val boxX = 260
     val boxY = 136
@@ -371,26 +389,33 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
     val textError3 = TextBox("(Click on any part of the white border to dismiss this notification)", boxW-16, boxH-16)
       .withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(boxX+8, boxY+140)
 
-    Outcome(
+
+//    Outcome(
+//      SceneUpdateFragment.empty
+//      |+| SceneUpdateFragment(Shape.Box(Rectangle(boxX, boxY, boxW, boxH), Fill.Color(RGBA.Red)))
+//      |+| SceneUpdateFragment(Shape.Box(Rectangle(boxX+4, boxY+4, boxW-8, boxH-8), Fill.Color(RGBA.Cyan)))
+//      |+| SceneUpdateFragment(textError1)
+//      |+| SceneUpdateFragment(textError2)
+//      |+| SceneUpdateFragment(textError3)
+//    )
+
+
+    val topXandY = 250
+    val boxOlive = Shape.Box(Rectangle(topXandY, topXandY, 200, 200), Fill.Color(RGBA.Olive)).withDepth(Depth(5))
+    val boxCyan = Shape.Box(Rectangle(topXandY+4, topXandY+4, 192, 192), Fill.Color(RGBA.Cyan)).withDepth(Depth(6))
+    val frag1 = SceneUpdateFragment(BindingKey("Foreground") -> Layer.Content(Batch(boxOlive, boxCyan)))
+
+    Outcome (
       SceneUpdateFragment.empty
-      |+| SceneUpdateFragment(Shape.Box(Rectangle(boxX, boxY, boxW, boxH), Fill.Color(RGBA.Red)))
-      |+| SceneUpdateFragment(Shape.Box(Rectangle(boxX+4, boxY+4, boxW-8, boxH-8), Fill.Color(RGBA.Cyan)))
-      |+| SceneUpdateFragment(textError1)
-      |+| SceneUpdateFragment(textError2)
-      |+| SceneUpdateFragment(textError3)
-    )
+      |+| frag1
+    )    
 
   end displayErrorPanel
-
-  def displayPausePanel(msg:String) : Outcome[SceneUpdateFragment] = 
-    Outcome(SceneUpdateFragment.empty) // FIXME not implemented yet    
-  end displayPausePanel
   
   def displayResultsPanel(msg:String) : Outcome[SceneUpdateFragment] = 
     Outcome(SceneUpdateFragment.empty) // FIXME not implemented yet    
   end displayResultsPanel
-
-
+  --*/
 
   def decodeRxJsonObject(data: js.Object, errNo: Int): FlicFlacGameModel =
     val str = js.JSON.stringify(data)
@@ -418,7 +443,7 @@ final case class SSGame(initialMessage: String) extends SubSystem[FlicFlacGameMo
         latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm.copy(gameState = gs)))
   end setGameState
   
-end SSGame
+end SSPeerJS
 
 class PeerJsException(cause: String) extends Exception(cause)
 

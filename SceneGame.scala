@@ -26,8 +26,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
   def eventFilters: EventFilters = EventFilters.Permissive
 
-  //val subSystems: Set[SubSystem[FlicFlacGameModel]] = Set(SSGame("SubSystemPeerJS"))
-  val subSystems: Set[SubSystem[FlicFlacGameModel]] = Set.empty
+  // FIXME ... will SubSystemParams be able to service this scene as well?
+  val subSystems: Set[SubSystem[FlicFlacGameModel]] = Set(SSGame("InitialMsgFromSceneGame"))
   
   var bBlinkOn = true
   var dMsg = "-----"
@@ -309,6 +309,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
             else if k.keyCode == Key.SUBTRACT then Outcome(model).addGlobalEvents(ButtonMinusEvent)
             else if k.keyCode == Key.ENTER then Outcome(model).addGlobalEvents(ButtonTurnEvent.Occurence())
             else if k.keyCode == Key.F3 then Outcome(model).addGlobalEvents(SceneEvent.Previous)
+            else if k.keyCode == Key.F4 then Outcome(model).addGlobalEvents(Freeze.PanelContent(PanelType.P_ERROR,"Test Error from GAME FKEY_F4"))
             else Outcome(model)
             end if
 
