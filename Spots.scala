@@ -171,19 +171,18 @@ final case class Spots(
     ring1
   end spotRingQRS
 
-  def paint(model: FlicFlacGameModel): SceneUpdateFragment =
-    var frag = SceneUpdateFragment.empty
+  def paint(model: FlicFlacGameModel): Layer =
     val dSF = model.scalingFactor
     val pb = model.hexBoard3.pBase
     val layer = GameAssets.gSpot(dSF)
+    var multiSpot = Layer.empty
 
     for pos <- model.possibleMoveSpots.indices do
       val pPos = model.hexBoard3.getXpYp(Point(pos._1, pos._2))
       val spotLayer = Layer(layer.moveTo(model.hexBoard3.pBase.x + pPos.x, model.hexBoard3.pBase.y + pPos.y))
-      val newFrag = SceneUpdateFragment(spotLayer)
-      frag = frag |+| newFrag
+      multiSpot = multiSpot |+| spotLayer
     end for
-    frag
+    multiSpot
   end paint
 
   // scribe.debug("@@@ case class Spots Finish")

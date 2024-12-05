@@ -21,6 +21,8 @@ object GameAssets:
   val spAssetPath = "assets/ScorePanelx50.png"
   val tsAssetName = "timeSlider"
   val tsAssetPath = "assets/TimeSlider.png"
+  val pmAssetName = "params"
+  val pmAssetPath = "assets/Params.png"
 
   scribe.debug("@@@ Object GameAssets START")
 
@@ -40,7 +42,8 @@ object GameAssets:
       AssetType.Image(AssetName(blAssetName), AssetPath(blAssetPath)),
       AssetType.Image(AssetName(cnAssetName), AssetPath(cnAssetPath)),
       AssetType.Image(AssetName(spAssetName), AssetPath(spAssetPath)),
-      AssetType.Image(AssetName(tsAssetName), AssetPath(tsAssetPath))
+      AssetType.Image(AssetName(tsAssetName), AssetPath(tsAssetPath)),
+      AssetType.Image(AssetName(pmAssetName), AssetPath(pmAssetPath))
     )
 
   def gHex(sf: Double): Graphic[Material.ImageEffects] =
@@ -193,6 +196,15 @@ object GameAssets:
 
     Batch(layerC1, layerC2, layerC3, layerC4)
   end cornerLayers
+
+  def paramsFlag(sf: Double):  Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(0, 0, 210, 210), 3, Material.ImageEffects(AssetName(pmAssetName)))
+  def paramsTube(sf: Double):  Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(230, 0, 50, 210), 3, Material.ImageEffects(AssetName(pmAssetName)))
+  def paramsGate(sf: Double):  Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(280, 0, 180, 210), 3, Material.ImageEffects(AssetName(pmAssetName)))
+  def paramsBolt(sf: Double):  Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(460, 0, 150, 210), 3, Material.ImageEffects(AssetName(pmAssetName)))
 
   def scaleButtonBounds(r: Rectangle, sf: Double): Rectangle =
     val iXpos = (r.position.x * sf).toInt

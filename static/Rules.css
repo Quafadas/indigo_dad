@@ -98,7 +98,7 @@ table, th, tr, td {
 
 .configLabel {
   width: 12em;
-  height:1.2em;
+  height:1em;
   display:inline-block;
   text-align: right;
   color:black;
@@ -121,7 +121,7 @@ table, th, tr, td {
 .configNumberValue {
   font-size: 1em;
   font-family: Arial;
-  width: 6em;
+  width: 2em;
   height:1.6em;
   display:inline-block;
   text-align: left;
@@ -129,6 +129,16 @@ table, th, tr, td {
   color:black;
   margin-top: 0.25em;
   margin-bottom: 0.25em;
+}
+
+.configUnit {
+  width: auto;
+  height:1em;
+  display:inline-block;
+  text-align: left;
+  color:black;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .configErrorMsg {

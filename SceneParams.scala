@@ -26,8 +26,8 @@ object SceneParams extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
 
   def eventFilters: EventFilters = EventFilters.Permissive
 
-//  val subSystems: Set[SubSystem[FlicFlacGameModel]] = Set(SSGame("SubSystemPeerJS"))
-  val subSystems: Set[SubSystem[FlicFlacGameModel]] = Set(SSParams("InitMsgFromSceneParams"))
+  val subSystems: Set[SubSystem[FlicFlacGameModel]] = Set.empty
+  //val subSystems: Set[SubSystem[FlicFlacGameModel]] = Set(SSParams("InitMsgFromSceneParams"))
 
   var timerCON3 = TickTimer.stop() // this timer used to transmit initial settings
   
@@ -108,15 +108,13 @@ object SceneParams extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFla
 
     val topXandY = 200
     val testMsg = TextBox("Hello World", 800, 30).withColor(RGBA.Blue).withFontSize(Pixels(20)).moveTo(topXandY+20,topXandY+20)
-    val boxMagenta = Shape.Box(Rectangle(topXandY, topXandY, 200, 200), Fill.Color(RGBA.Magenta)).withDepth(Depth(9)) // ...... (A)
-    val boxWhite = Shape.Box(Rectangle(topXandY+4, topXandY+4, 192, 192), Fill.Color(RGBA.White)).withDepth(Depth(8)) // .... (B)
-    val frag1 = SceneUpdateFragment(BindingKey("Background") -> Layer.Content(Batch(boxMagenta, boxWhite)))
+    val boxMagenta = Shape.Box(Rectangle(topXandY, topXandY, 200, 200), Fill.Color(RGBA.Magenta)) // ...... (A)
+    val boxWhite = Shape.Box(Rectangle(topXandY+4, topXandY+4, 192, 192), Fill.Color(RGBA.White)) // .... (B)
 
     Outcome (
-          SceneUpdateFragment.empty
-          |+| frag1
-          |+| SceneUpdateFragment(BindingKey("Foreground") -> Layer.Content(Batch(textGameState)).withDepth(Depth(7)))
-          |+| SceneUpdateFragment(BindingKey("Foreground") -> Layer.Content(Batch(testMsg)).withDepth(Depth(7)))
+          SceneUpdateFragment(LayerKeys.Background -> Layer.Content(Batch(boxMagenta, boxWhite)))
+          |+| SceneUpdateFragment(LayerKeys.Background -> Layer.Content(Batch(textGameState)))
+          |+| SceneUpdateFragment(LayerKeys.Background -> Layer.Content(Batch(testMsg)))
     )
   }
 

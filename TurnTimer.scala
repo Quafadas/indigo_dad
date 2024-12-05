@@ -33,7 +33,7 @@ object TurnTimer:
     (tt.iThisTurnTime >= tt.iThisTurnExpires)
   end expired
 
-  def show(model: FlicFlacGameModel): SceneUpdateFragment =
+  def show(model: FlicFlacGameModel): Layer =
     // all measurements before scaling ...
     // for 0% ...
     // cap part is 25 high ...... and starts-ends at (70-95)
@@ -66,12 +66,14 @@ object TurnTimer:
     val iCapTop = (math.round(T * dSF)).toInt
     val iWidth = (math.round(52 * dSF)).toInt // changed from 50 to 52 to eliminate sporadic veritcal lines
 
-    val frag1 = SceneUpdateFragment(GameAssets.gTimeSliderBody(dSF).moveTo(iSliderXPos, iBodyTop))
-    val frag2 = SceneUpdateFragment(GameAssets.gTimeSliderTop(dSF).moveTo(iSliderXPos, iCapTop))
+    val content1 = Layer.Content(GameAssets.gTimeSliderBody(dSF).moveTo(iSliderXPos, iBodyTop))
+    val content2 = Layer.Content(GameAssets.gTimeSliderTop(dSF).moveTo(iSliderXPos, iCapTop))
     val r3 = Rectangle(iSliderXPos, 0, iWidth, iCapTop)
-    val frag3 = SceneUpdateFragment(Shape.Box(r3, Fill.Color(RGBA.White)))
+    val content3 = Layer.Content(Shape.Box(r3, Fill.Color(RGBA.White)))
+    val content4 = content1 |+| content2 |+| content3
 
-    frag1 |+| frag2 |+| frag3
+    content4
   end show
 
 end TurnTimer
+//          |+| SceneUpdateFragment(LayerKeys.Background -> Layer.Content(Batch(textGameState)))

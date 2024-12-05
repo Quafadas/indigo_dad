@@ -19,8 +19,8 @@ final case class FlicFlacGameModel(
     possibleMoveSpots: Spots, // .. Updates
     highLighter: HighLighter, // .. Updates
     turnTimer: TurnTimer, // ...... Updates
-    hexBoard3: HexBoard3, // ...... No change by model
-    scalingFactor: Double // ...... No change by model
+    hexBoard3: HexBoard3, // ...... FIXME No change by model so get it out
+    scalingFactor: Double // ...... FIXME No change by model so get it out
 ) derives Encoder.AsObject,
       Decoder
 

@@ -26,8 +26,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
   def eventFilters: EventFilters = EventFilters.Permissive
 
-  // FIXME ... will SubSystemParams be able to service this scene as well?
-  val subSystems: Set[SubSystem[FlicFlacGameModel]] = Set(SSGame("InitialMsgFromSceneGame"))
+  //val subSystems: Set[SubSystem[FlicFlacGameModel]] = Set(SSGame("InitialMsgFromSceneGame"))
+  val subSystems: Set[SubSystem[FlicFlacGameModel]] = Set.empty
   
   var bBlinkOn = true
   var dMsg = "-----"
@@ -463,6 +463,27 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         .withFontSize(Pixels(100))
         .moveTo(blockScoreX, 430)
 
+    val pFlag = 
+      TextBox((model.winningScore).toString(), 300, 80)
+        .withColor(RGBA.Black)
+        .withFontSize(Pixels(60))
+        .moveTo(100, 600)
+    val pTube = 
+      TextBox((model.turnTimer.iTotalTurnTime).toString(), 300, 80)
+        .withColor(RGBA.Black)
+        .withFontSize(Pixels(60))
+        .moveTo(100, 680)
+    val pGate = 
+      TextBox((model.turnTimer.iCaptorsTurnTime).toString(), 300, 80)
+        .withColor(RGBA.Black)
+        .withFontSize(Pixels(60))
+        .moveTo(100, 760)
+    val pBolt = 
+      TextBox((model.randEventFreq).toString(), 300, 80)
+        .withColor(RGBA.Black)
+        .withFontSize(Pixels(60))
+        .moveTo(100, 840)
+
     val width = GameAssets.GameSceneDimensions.width
     val height = GameAssets.GameSceneDimensions.height
 
@@ -474,26 +495,36 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val rCorners = Rectangle(Point(iLeftWidth, 0), Size(iRightWidth + model.hexBoard3.pBase.x, iHeight))
 
     Outcome(
-      SceneUpdateFragment(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Black)))
-        |+| SceneUpdateFragment(Shape.Box(rLeft, Fill.Color(RGBA.White)))
-        |+| SceneUpdateFragment(Shape.Box(rRight, Fill.Color(RGBA.White)))
-        |+| SceneUpdateFragment(GameAssets.cornerLayers(rCorners, 1.0, RGBA.Magenta))
-        |+| SceneUpdateFragment(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Magenta)))
-        |+| SceneUpdateFragment(textDiag)
-        |+| SceneUpdateFragment(viewModel.newGameButton.draw)
-        |+| SceneUpdateFragment(viewModel.plusButton.draw)
-        |+| SceneUpdateFragment(viewModel.minusButton.draw)
-        |+| SceneUpdateFragment(viewModel.turnButton.draw)
-        |+| SceneUpdateFragment(Layer(GameAssets.gScorePanel(1.0).moveTo(0, 130)))
-        |+| SceneUpdateFragment(cylinderPlayer)
-        |+| SceneUpdateFragment(blockPlayer)
-        |+| SceneUpdateFragment(cylinderScore)
-        |+| SceneUpdateFragment(blockScore)
-        |+| TurnTimer.show(model)
-        |+| model.hexBoard3.paint(model, dSF)
-        |+| model.possibleMoveSpots.paint(model)
-        |+| model.highLighter.paint(model, dSF)
-        |+| model.pieces.paint(model, dSF, bBlinkOn, viewModel.optDragPos)
+        SceneUpdateFragment(LayerKeys.Background -> Layer.empty)        
+        |+| SceneUpdateFragment(LayerKeys.Background -> Layer.Content(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Black))))
+        |+| SceneUpdateFragment(LayerKeys.Background -> Layer.Content(Shape.Box(rLeft, Fill.Color(RGBA.White))))
+        |+| SceneUpdateFragment(LayerKeys.Background -> Layer.Content(Shape.Box(rRight, Fill.Color(RGBA.White))))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.cornerLayers(rCorners, 1.0, RGBA.Magenta)))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Magenta))))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(textDiag))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.turnButton.draw))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.gScorePanel(1.0).moveTo(0, 130)))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(cylinderPlayer))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(blockPlayer))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(cylinderScore))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(blockScore))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.paramsFlag(1.0).moveTo(10,600).scaleBy(0.4d,0.4d)))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(pFlag))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.paramsTube(1.0).moveTo(10,680).scaleBy(0.4d,0.4d)))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(pTube))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.paramsGate(1.0).moveTo(10,760).scaleBy(0.4d,0.4d)))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(pGate))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.paramsBolt(1.0).moveTo(10,840).scaleBy(0.4d,0.4d)))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(pBolt))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.plusButton.draw))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.minusButton.draw))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.newGameButton.draw))      
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> TurnTimer.show(model))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> model.hexBoard3.paint(model, dSF))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> model.highLighter.paint(model, dSF))
+        |+| SceneUpdateFragment(LayerKeys.ForegroundSpots -> model.possibleMoveSpots.paint(model))
+        |+| SceneUpdateFragment(LayerKeys.ForegroundPieces -> model.pieces.paint(model, dSF, bBlinkOn, viewModel.optDragPos))
+
     )
   end present
 
@@ -569,9 +600,9 @@ end GameSceneViewModel
 
 object GameSceneViewModel:
   val turnBounds = Rectangle(10, 30, 90, 80)
-  val plusBounds = Rectangle(10, 600, 90, 80)
-  val minusBounds = Rectangle(160, 600, 90, 80)
-  val newGameBounds = Rectangle(10, 700, 240, 80)
+  val plusBounds = Rectangle(10, 920, 90, 80)
+  val minusBounds = Rectangle(160, 920, 90, 80)
+  val newGameBounds = Rectangle(10, 1020, 240, 80)
 
   val initial: GameSceneViewModel =
     GameSceneViewModel(

@@ -366,9 +366,11 @@ case class HexBoard3():
   paint supplies the "SceneUpdateFragment" that contains all the graphics required to paint the hexboard
   Experience shows that this routine is time critical, so optimisation is key
    */
+
+  // FIXME hexboard paint calculation can be stored according to magnification changes
   
-  def paint(model: FlicFlacGameModel, dSF: Double): SceneUpdateFragment =
-    var hexFragsCombined = SceneUpdateFragment.empty // start this combination with an empty update
+  def paint(model: FlicFlacGameModel, dSF: Double): Layer =
+    var hexLayer = Layer.empty // start this combination with an empty layer
 
     var y = 0
     while y < arrayHeight do
@@ -380,14 +382,13 @@ case class HexBoard3():
           val layer = GameAssets.gHex(dSF).modifyMaterial(_.withTint(mix(hh.c)))
           val scaledX = hh.xS + pBase.x
           val scaledY = hh.yS + pBase.y
-          val frag = SceneUpdateFragment(Layer(layer.moveTo(scaledX, scaledY)))
-          hexFragsCombined = hexFragsCombined |+| frag
+          hexLayer = hexLayer |+| Layer(layer.moveTo(scaledX, scaledY))
         end if
         x += 1
       end while
       y += 1
     end while
-    hexFragsCombined // returns the previous calculation if updateNeeded is false
+    hexLayer
   end paint
 
 

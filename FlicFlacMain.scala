@@ -2,6 +2,7 @@ package game
 
 import indigo.*
 import indigo.scenes.*
+import scala.scalajs.js.annotation.JSExportTopLevel
 import indigoextras.ui.*
 import indigo.shared.assets.AssetType
 import indigo.shared.scenegraph.SceneUpdateFragment
@@ -16,6 +17,15 @@ import org.scalajs.dom
 import tyrian.TyrianSubSystem
 import cats.effect.IO
 import tyrian.TyrianIndigoBridge
+
+object LayerKeys:
+  val Background: BindingKey = BindingKey("Background")
+  val Middleground: BindingKey = BindingKey("Middleground")
+  val ForegroundSpots: BindingKey = BindingKey("ForegroundSpots")
+  val ForegroundPieces: BindingKey = BindingKey("ForegroundPieces")
+  val Overlay: BindingKey = BindingKey("Overlay")
+
+@JSExportTopLevel("IndigoGame")
 
 case class FlicFlacGame(
     tyrianSubSystem: TyrianSubSystem[IO, Int, FlicFlacGameModel]
@@ -41,39 +51,11 @@ case class FlicFlacGame(
   val assets: Set[AssetType] =
     GameAssets.get()
 
-  val eventFilters: EventFilters =
-    EventFilters.Permissive
-
-  def setup(
-      flicFlacBootData: FlicFlacBootData,
-      assetCollection: AssetCollection,
-      dice: Dice
-  ): Outcome[Startup[FlicFlacStartupData]] =
-    scribe.debug("@@@ FlicFlacMain-setup()")
-    val outCome = FlicFlacStartupData.initialise(flicFlacBootData)
-    outCome
-  end setup
-
-  def initialModel(flicFlacStartupData: FlicFlacStartupData): Outcome[FlicFlacGameModel] =
-    scribe.debug("@@@ FlicFlacMain-initialModel()")
-    val cachedParamsOrNew = FlicFlacPlayerParams.getParams(flicFlacStartupData)
-    scribe.debug(s"@@@ PlayerParams: $cachedParamsOrNew")
-    val newTurnTime = cachedParamsOrNew.playPams4_TurnTime
-    val newCaptorsTime = cachedParamsOrNew.playPams5_CaptorsTime
-    val newTT = TurnTimer(newTurnTime, newCaptorsTime)
-    val cachedGameOrNew = FlicFlacGameModel.retrieve(flicFlacStartupData)
-    val updatedGame = cachedGameOrNew.copy(turnTimer = newTT)
-    Outcome(updatedGame).addGlobalEvents(WebRtcEvent.MakePeerEntity)
-  end initialModel
-
   def initialScene(flicFlacBootData: FlicFlacBootData): Option[SceneName] =
     scribe.debug("@@@ FlicFlacMain-initialScene()")
-    Some(SceneParams.name)
+    //Some(SceneParams.name)
+    None
   end initialScene
-
-  // JP 30/06/24
-  // To get the hexboard back as the main screen, comment out the populated "NonEmptyList" and ...
-  // restore the line NonEmptyList(Scene.empty)
 
   def scenes(
       flicFlacBootData: FlicFlacBootData
@@ -81,6 +63,9 @@ case class FlicFlacGame(
     scribe.debug("@@@ FlicFlacMain-scenes()")
     NonEmptyList(SceneParams, SceneGame)
   end scenes
+
+  val eventFilters: EventFilters =
+    EventFilters.Permissive
 
   def boot(flags: Map[String, String]): Outcome[BootResult[FlicFlacBootData, FlicFlacGameModel]] =
     scribe.debug("@@@ FlicFlacMain-boot")
@@ -107,6 +92,18 @@ case class FlicFlacGame(
     }
   end boot
 
+  def initialModel(flicFlacStartupData: FlicFlacStartupData): Outcome[FlicFlacGameModel] =
+    scribe.debug("@@@ FlicFlacMain-initialModel()")
+    val cachedParamsOrNew = FlicFlacPlayerParams.getParams(flicFlacStartupData)
+    scribe.debug(s"@@@ PlayerParams: $cachedParamsOrNew")
+    val newTurnTime = cachedParamsOrNew.playPams4_TurnTime
+    val newCaptorsTime = cachedParamsOrNew.playPams5_CaptorsTime
+    val newTT = TurnTimer(newTurnTime, newCaptorsTime)
+    val cachedGameOrNew = FlicFlacGameModel.retrieve(flicFlacStartupData)
+    val updatedGame = cachedGameOrNew.copy(turnTimer = newTT)
+    Outcome(updatedGame).addGlobalEvents(WebRtcEvent.MakePeerEntity)
+  end initialModel
+
   def initialViewModel(
       flicFlacStartupData: FlicFlacStartupData,
       flicFlacGameModel: FlicFlacGameModel
@@ -124,6 +121,25 @@ case class FlicFlacGame(
       )
     )
   end initialViewModel
+
+  def setup(
+      flicFlacBootData: FlicFlacBootData,
+      assetCollection: AssetCollection,
+      dice: Dice
+  ): Outcome[Startup[FlicFlacStartupData]] =
+    scribe.debug("@@@ FlicFlacMain-setup()")
+    val outCome = FlicFlacStartupData.initialise(flicFlacBootData)
+    outCome
+  end setup
+
+  def updateModel(
+      context: FrameContext[FlicFlacStartupData],
+      flicFlacGameModel: FlicFlacGameModel
+  ): GlobalEvent => Outcome[FlicFlacGameModel] =
+
+    case _ =>
+      Outcome(flicFlacGameModel)
+  end updateModel
 
   def updateViewModel(
       context: FrameContext[FlicFlacStartupData],
@@ -150,23 +166,20 @@ case class FlicFlacGame(
       Outcome(flicFlacViewModel)
   end updateViewModel
 
-  def updateModel(
-      context: FrameContext[FlicFlacStartupData],
-      flicFlacGameModel: FlicFlacGameModel
-  ): GlobalEvent => Outcome[FlicFlacGameModel] =
-
-    case _ =>
-      Outcome(flicFlacGameModel)
-  end updateModel
-
   def present(
       context: FrameContext[FlicFlacStartupData],
       flicFlacGameModel: FlicFlacGameModel,
       flicFlacViewModel: FlicFlacViewModel
-  ): Outcome[SceneUpdateFragment] = Outcome {
-
-    SceneUpdateFragment.empty
-  }
+  ): Outcome[SceneUpdateFragment] =   // this technique supplied by DaveSmith
+    Outcome(
+      SceneUpdateFragment(
+        LayerKeys.Background -> Layer.empty, // Initialising keys early (root level), in the desired order
+        LayerKeys.Middleground -> Layer.empty,
+        LayerKeys.ForegroundSpots -> Layer.empty,
+        LayerKeys.ForegroundPieces -> Layer.empty,
+        LayerKeys.Overlay -> Layer.empty
+      )
+  )
 
   scribe.debug("@@@ FlicFlacMain class FlicFlacGame Finish")
 end FlicFlacGame

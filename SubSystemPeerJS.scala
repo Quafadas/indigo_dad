@@ -275,6 +275,11 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
             conn.foreach(_.close())
             Outcome(())
 
+          case Freeze.PanelContent(typeOfPanel,messageToDisplay) =>
+            peerJsPanel = (typeOfPanel, messageToDisplay)
+            scribe.debug("@@@ SubSystemPeerJS Freeze.PanelContent")
+            Outcome(())
+
           case _ =>
             if (TickTimer.expired(timerT1)) then 
                 timerT1 = TickTimer.stop()
@@ -284,12 +289,12 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
                 end if
             end if 
 
-            val outcome0 = Outcome(()) // ........................ Assume no additional events to add
+            val outcome0 = Outcome(()) // ................................................. Assume no additional events to add
 
             val bEvents = !eventQueue.isEmpty
             val outcome1 =
               if (eventQueue.isEmpty) then outcome0
-              else // ............................................ Adding in queued events generated from non-call back PeerJs code
+              else // ..................................................................... Adding in queued events generated from non-call back PeerJs code
                 val events = eventQueue.dequeueAll(_ => true)
                 outcome0.addGlobalEvents(events*)
               end if
@@ -298,20 +303,21 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
               latestUpdate match
                 case Some(update) =>
                   latestUpdate = None
-                  outcome1.addGlobalEvents(update) // ............ Adding in event generated from a callback
+                  outcome1.addGlobalEvents(update) // ..................................... Adding in event generated from a callback
                 case None => 
                   outcome1
+                  
+            outcome2
 
-            val outcome3 =
-              if (peerJsPanel._1 == PanelType.P_INVISIBLE) then 
-                outcome2 // ...................................... Adding in error messages from non-call back PeerJs code
-              else 
-                val errorEvent = Freeze.PanelContent(peerJsPanel._1, peerJsPanel._2)
-                peerJsPanel = (PanelType.P_INVISIBLE, "")
-                outcome2.addGlobalEvents(errorEvent)
-              end if
-            
-            outcome3 // .......................................... The final outcome           
+//            val outcome3 =
+//              if (peerJsPanel._1 == PanelType.P_INVISIBLE) then 
+//                outcome2 
+//              else 
+//                val errorEvent = Freeze.PanelContent(peerJsPanel._1, peerJsPanel._2) // ... Adding in error messages from non-call back PeerJs code
+//                outcome2.addGlobalEvents(errorEvent)
+//              end if
+//            
+//            outcome3 // .......................................... The final outcome           
             
 /*---
             val outcome1 = 
@@ -350,30 +356,18 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
       message: Unit
   ): Outcome[SceneUpdateFragment] =
 
-  /*--
 
-    panelMsg  match {
+    peerJsPanel  match {
       case (PanelType.P_ERROR, msg) =>
         displayErrorPanel(msg)
-      case (PanelType.P_PAUSE, msg) =>
-        displayPausePanel(msg)
       case (PanelType.P_RESULTS, msg) =>
         displayResultsPanel(msg)
       case _ => // including P_INVISIBLE
         Outcome(SceneUpdateFragment.empty)        
     }
-  --*/
-  /*---
-    val topXandY = 250
-    Outcome (
-      SceneUpdateFragment.empty
-      |+| SceneUpdateFragment(Shape.Box(Rectangle(topXandY, topXandY, 200, 200), Fill.Color(RGBA.Olive)).withDepth(Depth(12))) // ...... (C)
-      |+| SceneUpdateFragment(Shape.Box(Rectangle(topXandY+4, topXandY+4, 192, 192), Fill.Color(RGBA.Cyan)).withDepth(Depth(13))) // ... (D)
-    )
-  ---*/
-    Outcome(SceneUpdateFragment.empty)
+
   end present
-/*--
+
   def displayErrorPanel(msg:String) : Outcome[SceneUpdateFragment] =
     val boxX = 260
     val boxY = 136
@@ -389,33 +383,18 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
     val textError3 = TextBox("(Click on any part of the white border to dismiss this notification)", boxW-16, boxH-16)
       .withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(boxX+8, boxY+140)
 
-
-//    Outcome(
-//      SceneUpdateFragment.empty
-//      |+| SceneUpdateFragment(Shape.Box(Rectangle(boxX, boxY, boxW, boxH), Fill.Color(RGBA.Red)))
-//      |+| SceneUpdateFragment(Shape.Box(Rectangle(boxX+4, boxY+4, boxW-8, boxH-8), Fill.Color(RGBA.Cyan)))
-//      |+| SceneUpdateFragment(textError1)
-//      |+| SceneUpdateFragment(textError2)
-//      |+| SceneUpdateFragment(textError3)
-//    )
-
-
-    val topXandY = 250
-    val boxOlive = Shape.Box(Rectangle(topXandY, topXandY, 200, 200), Fill.Color(RGBA.Olive)).withDepth(Depth(5))
-    val boxCyan = Shape.Box(Rectangle(topXandY+4, topXandY+4, 192, 192), Fill.Color(RGBA.Cyan)).withDepth(Depth(6))
-    val frag1 = SceneUpdateFragment(BindingKey("Foreground") -> Layer.Content(Batch(boxOlive, boxCyan)))
-
-    Outcome (
-      SceneUpdateFragment.empty
-      |+| frag1
-    )    
+    Outcome(
+      SceneUpdateFragment(LayerKeys.Overlay -> Layer.Content(Shape.Box(Rectangle(boxX, boxY, boxW, boxH), Fill.Color(RGBA.Red))))
+      |+| SceneUpdateFragment(LayerKeys.Overlay -> Layer.Content(Shape.Box(Rectangle(boxX+4, boxY+4, boxW-8, boxH-8), Fill.Color(RGBA.Cyan))))
+      |+| SceneUpdateFragment(LayerKeys.Overlay -> Layer.Content(Batch(textError1, textError2, textError3)))
+    )
 
   end displayErrorPanel
   
   def displayResultsPanel(msg:String) : Outcome[SceneUpdateFragment] = 
     Outcome(SceneUpdateFragment.empty) // FIXME not implemented yet    
   end displayResultsPanel
-  --*/
+
 
   def decodeRxJsonObject(data: js.Object, errNo: Int): FlicFlacGameModel =
     val str = js.JSON.stringify(data)
