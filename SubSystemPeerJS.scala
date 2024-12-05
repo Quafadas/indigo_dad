@@ -54,6 +54,9 @@ object WebRtcEvent:
 
 end WebRtcEvent
 
+val INITIATOR = true
+val RESPONDER = false
+
 var timerT1 = TickTimer.stop() // .............................timerT1 used by INITIATOR to repeat connect request if previous fail
 
 final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGameModel]:
@@ -106,9 +109,11 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
                 if (context.reference.ourName.compare(context.reference.oppoName) < 0) then 
                   // we are the connection initiator so attempt to make the request
                   eventQueue.enqueue(WebRtcEvent.Connect(context.reference.oppoName))
+                  // peer is established so bump Game State
+                  setGameState(GameState.START_CON2, context.reference, INITIATOR)
+                else
+                  setGameState(GameState.START_CON2, context.reference, RESPONDER)
                 end if
-                // peer is established so bump Game State
-                setGameState(GameState.START_CON2 ,context.reference)
             )
 
             localPeer.on(
@@ -215,14 +220,14 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
             // successful connectionas as RESPONDER so bump Game State
             scribe.debug("@@@-50 SubSystemPeerJS WebRtcEvent.PeerCreatedConnection")
             conn = Some(connLocal)
-            setGameState(GameState.START_CON3 ,context.reference)
+            setGameState(GameState.START_CON3, context.reference, RESPONDER)
             Outcome(())
 
           case WebRtcEvent.ConnectionOpen =>
             // successful connection as INITIATOR so stop timerT1 and bump Game State
             scribe.debug("@@@-60 SubSystemPeerJS WebRtcEvent.ConnectionOpen")
             timerT1 = TickTimer.stop() 
-            setGameState(GameState.START_CON3 ,context.reference)
+            setGameState(GameState.START_CON3 ,context.reference, INITIATOR)
             conn.foreach { c =>
               c.on(
                 "data",
@@ -409,17 +414,25 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
     ffgm
   end decodeRxJsonObject
 
-  def setGameState(gs: GameState, ffgm: FlicFlacGameModel) : Unit = 
+  def setGameState(gs: GameState, ffgm: FlicFlacGameModel, initiator: Boolean) : Unit = 
     //
     latestUpdate match
       case Some(update) =>
         // peerJs has already modified the model, so we must update the modification
         val existingModel = update.ffgm
-        latestUpdate = Some(FlicFlacGameUpdate.Info(existingModel.copy(gameState = gs)))
+        if (initiator) then 
+          latestUpdate = Some(FlicFlacGameUpdate.Info(existingModel.copy(initiatorGameState = gs)))
+        else
+          latestUpdate = Some(FlicFlacGameUpdate.Info(existingModel.copy(responderGameState = gs)))
+        end if
 
       case None =>
         // peerJs has not modified the model so we need a new model to report
-        latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm.copy(gameState = gs)))
+        if (initiator) then 
+          latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm.copy(initiatorGameState = gs)))
+        else
+          latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm.copy(responderGameState = gs)))
+        end if          
   end setGameState
   
 end SSPeerJS

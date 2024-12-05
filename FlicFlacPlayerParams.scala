@@ -10,8 +10,8 @@ final case class FlicFlacPlayerParams(
     playPams1_Name1: String, // ........... default "Player1"
     playPams2_Name2: String, // ........... default "Player2"
     playPams3_ScoreToWin: Int, // ......... default 11
-    playPams4_TurnTime: Int, // ........... default 30 seconds
-    playPams5_CaptorsTime: Int, // ........ default 15 seconds
+    playPams4_TurnTime: Int, // ........... default 20 seconds
+    playPams5_CaptorsTime: Int, // ........ default 10 seconds
     playPams6_RandEventProb: Int // ....... default 1 (in 100)
 ) derives Encoder.AsObject,
       Decoder
@@ -35,8 +35,8 @@ object FlicFlacPlayerParams:
             "Player1", // ..... Our name
             "Player2", // ..... Opponents name
             11, // ............ ScoreToWin
-            10, // ............ TurnTime
-            5, // ............. CaptorsTime
+            20, // ............ TurnTime
+            10, // ............. CaptorsTime
             1 // .............. cfgRandEventProb
           )
     scribe.debug("@@@ FlicFlacPlayerParams getParams " + cacheConfigOrDefault)

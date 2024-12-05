@@ -8,19 +8,21 @@ import io.circe.parser.decode
 import game.Piece.pieceShape
 
 final case class FlicFlacGameModel(
-    ourName: String, // ........... Subject to negotiation during startup
-    oppoName: String, // .......... Subject to negotiation during startup
-    ourPieceType: Int, // ......... Subject to negotiation during startup
-    winningScore: Int, // ......... Subject to negotiation during startup
-    randEventFreq: Int, // ........ Subject to negotiation during startup
-    gameState: GameState, // ...... Updates
-    gameScore: (Int, Int), // ..... Updates
-    pieces: Pieces, // ............ Updates
-    possibleMoveSpots: Spots, // .. Updates
-    highLighter: HighLighter, // .. Updates
-    turnTimer: TurnTimer, // ...... Updates
-    hexBoard3: HexBoard3, // ...... FIXME No change by model so get it out
-    scalingFactor: Double // ...... FIXME No change by model so get it out
+    ourName: String, // ................. Subject to negotiation during startup
+    oppoName: String, // ................ Subject to negotiation during startup
+    ourPieceType: Int, // ............... Subject to negotiation during startup
+    winningScore: Int, // ............... Subject to negotiation during startup
+    randEventFreq: Int, // .............. Subject to negotiation during startup
+    initiatorGameState: GameState, // ... Subject to negotiation during startup
+    responderGameState: GameState, // ... Subject to negotiation during startup
+    gameState: GameState, // ............ Updates
+    gameScore: (Int, Int), // ........... Updates
+    pieces: Pieces, // .................. Updates
+    possibleMoveSpots: Spots, // ........ Updates
+    highLighter: HighLighter, // ........ Updates
+    turnTimer: TurnTimer, // ............ Updates
+    hexBoard3: HexBoard3, // ............ FIXME No change by model so get it out
+    scalingFactor: Double // ............ FIXME No change by model so get it out
 ) derives Encoder.AsObject,
       Decoder
 
@@ -67,7 +69,6 @@ object FlicFlacGameModel:
     val iOurPieceType = pieceType
     val iWinningScore = playerParams.playPams3_ScoreToWin
     val iRandEventFreq = playerParams.playPams6_RandEventProb
-    val state = GameState.START_CON1
     val score = (0, 0)
     // pieces
     val startingSpots: Spots = Spots(Set.empty)
@@ -83,7 +84,9 @@ object FlicFlacGameModel:
       iOurPieceType,
       iWinningScore,
       iRandEventFreq,
-      state,
+      GameState.START_CON1,
+      GameState.START_CON1,
+      GameState.START_CON1,
       score,
       summonPieces(hexBoard3),
       startingSpots,
@@ -189,7 +192,6 @@ object FlicFlacGameModel:
     val iOurPieceType = previousModel.ourPieceType
     val iWinningScore = previousModel.winningScore
     val iRandEventFreq = previousModel.randEventFreq
-    val resetGameState = GameState.START_CON1
     val score = (0, 0)
     val defaultSF = 1.0
     val hexBoard3 = HexBoard3()
@@ -204,7 +206,9 @@ object FlicFlacGameModel:
       iOurPieceType,
       iWinningScore,
       iRandEventFreq,
-      resetGameState,
+      GameState.START_CON1,
+      GameState.START_CON1,
+      GameState.START_CON1,
       score,
       summonPieces(hexBoard3),
       emptySpots,
