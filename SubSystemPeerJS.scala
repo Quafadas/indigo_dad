@@ -289,7 +289,7 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
             if (TickTimer.expired(timerT1)) then 
                 timerT1 = TickTimer.stop()
                 if (context.reference.ourName.compare(context.reference.oppoName) < 0) then 
-                  // we are the connection initiator and timerT1 has expired so attempt to the connection request again
+                  // we are the connection initiator and timerT1 has expired so attempt to make the connection request again
                   eventQueue.enqueue(WebRtcEvent.Connect(context.reference.oppoName))                
                 end if
             end if 
@@ -375,7 +375,7 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
 
   def displayErrorPanel(msg:String) : Outcome[SceneUpdateFragment] =
     val boxX = 260
-    val boxY = 136
+    val boxY = 176
     val boxW = (16 + (12 * (msg.length()))).max(1000)
     val boxH = 180
 
@@ -385,7 +385,7 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
     val textError2 = TextBox(msg , boxW-16, boxH-16)
       .withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(boxX+8, boxY+100)
 
-    val textError3 = TextBox("(Click on any part of the white border to dismiss this notification)", boxW-16, boxH-16)
+    val textError3 = TextBox("... click on any part of the background to dismiss this notification.", boxW-16, boxH-16)
       .withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(boxX+8, boxY+140)
 
     Outcome(

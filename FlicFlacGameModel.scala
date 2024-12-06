@@ -31,6 +31,10 @@ enum GameState:
   case START_CON2 // a state included in the set return by getStartUpStates
   case START_CON3 // a state included in the set return by getStartUpStates
   case START_CON4 // a state included in the set return by getStartUpStates
+  case START_CON5 // a state included in the set return by getStartUpStates
+  case START_CON6 // a state included in the set return by getStartUpStates
+  case START_CON7 // a state included in the set return by getStartUpStates
+  case START_CON8 // a state included in the set return by getStartUpStates
   case BLOCK_TURN
   case BLOCK_PAUSE
   case BLOCK_RESOLVE
@@ -237,7 +241,11 @@ object FlicFlacGameModel:
         GameState.START_CON1, 
         GameState.START_CON2, 
         GameState.START_CON3, 
-        GameState.START_CON4
+        GameState.START_CON4,
+        GameState.START_CON5,
+        GameState.START_CON6,
+        GameState.START_CON7,
+        GameState.START_CON8
         )
     startUpStateSet
   end  getStartUpStates
