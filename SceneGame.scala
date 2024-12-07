@@ -437,6 +437,15 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       end if
     end blockName
 
+    val scorePanel = 
+      if (bBlinkOn == true ) && (model.gameState == GameState.CYLINDER_TURN) then
+        GameAssets.gScorePanelBlinkCylinder(1.0).moveTo(0, 130)
+      else if (bBlinkOn == true ) && (model.gameState == GameState.BLOCK_TURN) then
+        GameAssets.gScorePanelBlinkBlock(1.0).moveTo(0, 130)
+      else
+        GameAssets.gScorePanelBlinkOff(1.0).moveTo(0, 130)
+      end if
+ 
     val cylinderPlayer =
       TextBox((cylinderName).toString(), 220, 50)
         .withColor(RGBA.Black)
@@ -462,27 +471,30 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         .withColor(RGBA.Black)
         .withFontSize(Pixels(100))
         .moveTo(blockScoreX, 430)
-
-    val pFlag = 
-      TextBox((model.winningScore).toString(), 300, 80)
+    val param1 = 
+      TextBox((model.winningScore).toString(),100,70)
+        .bold
         .withColor(RGBA.Black)
         .withFontSize(Pixels(60))
-        .moveTo(100, 600)
-    val pTube = 
-      TextBox((model.turnTimer.iTotalTurnTime).toString(), 300, 80)
+        .moveTo(140, 670)
+    val param2 = 
+      TextBox((model.turnTimer.iTotalTurnTime).toString(),100,70)
+        .bold
         .withColor(RGBA.Black)
         .withFontSize(Pixels(60))
-        .moveTo(100, 680)
-    val pGate = 
-      TextBox((model.turnTimer.iCaptorsTurnTime).toString(), 300, 80)
+        .moveTo(140, 670+85)
+    val param3 = 
+      TextBox((model.turnTimer.iCaptorsTurnTime).toString(),100,70)
+        .bold
         .withColor(RGBA.Black)
         .withFontSize(Pixels(60))
-        .moveTo(100, 760)
-    val pBolt = 
-      TextBox((model.randEventFreq).toString(), 300, 80)
+        .moveTo(140, 670+170)
+    val param4 = 
+      TextBox((model.randEventFreq).toString(),100,70)
+        .bold
         .withColor(RGBA.Black)
         .withFontSize(Pixels(60))
-        .moveTo(100, 840)
+        .moveTo(140, 670+255)
 
     val width = GameAssets.GameSceneDimensions.width
     val height = GameAssets.GameSceneDimensions.height
@@ -503,19 +515,15 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Magenta))))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(textDiag))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.turnButton.draw))
-        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.gScorePanel(1.0).moveTo(0, 130)))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(scorePanel))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(cylinderPlayer))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(blockPlayer))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(cylinderScore))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(blockScore))
-        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.paramsFlag(1.0).moveTo(10,600).scaleBy(0.4d,0.4d)))
-        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(pFlag))
-        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.paramsTube(1.0).moveTo(10,680).scaleBy(0.4d,0.4d)))
-        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(pTube))
-        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.paramsGate(1.0).moveTo(10,760).scaleBy(0.4d,0.4d)))
-        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(pGate))
-        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.paramsBolt(1.0).moveTo(10,840).scaleBy(0.4d,0.4d)))
-        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(pBolt))
+
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.gParamsPanel(1.0).moveTo(0, 590)))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(Batch(param1, param2, param3, param4)))
+
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.plusButton.draw))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.minusButton.draw))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.newGameButton.draw))      
@@ -600,9 +608,9 @@ end GameSceneViewModel
 
 object GameSceneViewModel:
   val turnBounds = Rectangle(10, 30, 90, 80)
-  val plusBounds = Rectangle(10, 920, 90, 80)
-  val minusBounds = Rectangle(160, 920, 90, 80)
-  val newGameBounds = Rectangle(10, 1020, 240, 80)
+  val plusBounds = Rectangle(10, 1020, 90, 80)
+  val minusBounds = Rectangle(160, 1020, 90, 80)
+  val newGameBounds = Rectangle(10, 1120, 240, 80)
 
   val initial: GameSceneViewModel =
     GameSceneViewModel(

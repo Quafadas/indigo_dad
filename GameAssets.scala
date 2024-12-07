@@ -21,8 +21,8 @@ object GameAssets:
   val spAssetPath = "assets/ScorePanelx50.png"
   val tsAssetName = "timeSlider"
   val tsAssetPath = "assets/TimeSlider.png"
-  val pmAssetName = "params"
-  val pmAssetPath = "assets/Params.png"
+  val pmAssetName = "paramsPanel"
+  val pmAssetPath = "assets/ParamsPanelx50.png"
 
   scribe.debug("@@@ Object GameAssets START")
 
@@ -64,8 +64,17 @@ object GameAssets:
       .withCrop(100, 0, 91, 81)
       .scaleBy(sf, sf)
 
-  def gScorePanel(sf: Double): Graphic[Material.ImageEffects] =
+  def gScorePanelBlinkOff(sf: Double): Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 250, 440), 3, Material.ImageEffects(AssetName(spAssetName)))
+
+  def gScorePanelBlinkCylinder(sf: Double): Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(250, 0, 250, 440), 3, Material.ImageEffects(AssetName(spAssetName)))
+
+  def gScorePanelBlinkBlock (sf: Double): Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(500, 0, 250, 440), 3, Material.ImageEffects(AssetName(spAssetName)))
+
+  def gParamsPanel(sf: Double): Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(0, 0, 250, 425), 3, Material.ImageEffects(AssetName(pmAssetName)))
 
   def gTimeSliderBody(sf: Double): Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 50, 1220), 3, Material.ImageEffects(AssetName(tsAssetName)))
@@ -196,15 +205,6 @@ object GameAssets:
 
     Batch(layerC1, layerC2, layerC3, layerC4)
   end cornerLayers
-
-  def paramsFlag(sf: Double):  Graphic[Material.ImageEffects] =
-    Graphic(Rectangle(0, 0, 210, 210), 3, Material.ImageEffects(AssetName(pmAssetName)))
-  def paramsTube(sf: Double):  Graphic[Material.ImageEffects] =
-    Graphic(Rectangle(230, 0, 50, 210), 3, Material.ImageEffects(AssetName(pmAssetName)))
-  def paramsGate(sf: Double):  Graphic[Material.ImageEffects] =
-    Graphic(Rectangle(280, 0, 180, 210), 3, Material.ImageEffects(AssetName(pmAssetName)))
-  def paramsBolt(sf: Double):  Graphic[Material.ImageEffects] =
-    Graphic(Rectangle(460, 0, 150, 210), 3, Material.ImageEffects(AssetName(pmAssetName)))
 
   def scaleButtonBounds(r: Rectangle, sf: Double): Rectangle =
     val iXpos = (r.position.x * sf).toInt
