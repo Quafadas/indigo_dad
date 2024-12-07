@@ -29,8 +29,22 @@ object TurnTimer:
     end if
   end update
 
+  def isActive(tt: TurnTimer): Boolean =
+    if (tt.iThisTurnTime == 0) && (tt.iThisTurnExpires == 0) then 
+      false
+    else
+      true
+    end if
+  end isActive
+
   def expired(tt: TurnTimer): Boolean =
-    (tt.iThisTurnTime >= tt.iThisTurnExpires)
+    if (tt.iThisTurnTime == 0) || (tt.iThisTurnExpires == 0) then
+      false
+    else if (tt.iThisTurnTime >= tt.iThisTurnExpires) then
+      true
+    else
+      false
+    end if
   end expired
 
   def show(model: FlicFlacGameModel): Layer =
@@ -66,8 +80,23 @@ object TurnTimer:
     val iCapTop = (math.round(T * dSF)).toInt
     val iWidth = (math.round(52 * dSF)).toInt // changed from 50 to 52 to eliminate sporadic veritcal lines
 
-    val content1 = Layer.Content(GameAssets.gTimeSliderBody(dSF).moveTo(iSliderXPos, iBodyTop))
-    val content2 = Layer.Content(GameAssets.gTimeSliderTop(dSF).moveTo(iSliderXPos, iCapTop))
+    val bCylinder = (model.gameState == GameState.CYLINDER_TURN) && (model.ourPieceType == CYLINDER)
+    val bBlock = (model.gameState == GameState.BLOCK_TURN) && (model.ourPieceType == BLOCK)
+    
+    val content1 = 
+      if (bCylinder == true) || (bBlock == true) then
+        Layer.Content(GameAssets.gTimeSliderActiveBody(dSF).moveTo(iSliderXPos, iBodyTop))
+      else
+        Layer.Content(GameAssets.gTimeSliderInactiveBody(dSF).moveTo(iSliderXPos, iBodyTop))
+      end if
+
+    val content2 = 
+      if (bCylinder == true) || (bBlock == true) then     
+        Layer.Content(GameAssets.gTimeSliderActiveTop(dSF).moveTo(iSliderXPos, iCapTop))
+      else
+        Layer.Content(GameAssets.gTimeSliderInactiveTop(dSF).moveTo(iSliderXPos, iCapTop))
+      end if
+
     val r3 = Rectangle(iSliderXPos, 0, iWidth, iCapTop)
     val content3 = Layer.Content(Shape.Box(r3, Fill.Color(RGBA.White)))
     val content4 = content1 |+| content2 |+| content3

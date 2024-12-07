@@ -197,11 +197,12 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
               "data",
               (data: js.Object) =>
                 scribe.debug("@@@-41 ConnectionOpen.on data")
+
                 val str = js.JSON.stringify(data)
                 val ffgm = decodeRxJsonObject(data, 48) // 48 is the error number
-                latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm))
+                val ffgm1 = convertRxGameModel(ffgm)
+                latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm1))
             )
-
             c.on(
               "close",
               (c: DataConnection) =>
@@ -217,7 +218,7 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
             Outcome(())
 
           case WebRtcEvent.PeerCreatedConnection(connLocal: DataConnection) =>
-            // successful connectionas as RESPONDER so bump Game State
+            // successful connection as as RESPONDER so bump Game State
             scribe.debug("@@@-50 SubSystemPeerJS WebRtcEvent.PeerCreatedConnection")
             conn = Some(connLocal)
             setGameState(GameState.START_CON3, context.reference, RESPONDER)
@@ -234,7 +235,8 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
                 (data: js.Object) =>
                   scribe.debug("@@@-61 ConnectionOpen.on data ")
                   val ffgm = decodeRxJsonObject(data, 68) // 68 is the error number
-                  latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm))
+                  val ffgm1 = convertRxGameModel(ffgm)
+                  latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm1))
               )
 
               c.on(
@@ -268,11 +270,16 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
 
           case WebRtcEvent.ReceivedData(data: js.Object) =>
             scribe.debug("@@@-80 SubSystemPeerJS WebRtcEvent.ReceiveData")
-            conn.foreach { c =>
-              scribe.debug("@@@-81 ReceiveData " + c.label + "->" + peer.get.id)
-              val ffgm = decodeRxJsonObject(data, 88) // 88 is the error number
-              latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm))
-            }
+// ********************************************************************************************************            
+// It appears that sections 41 and 61 do the same job as this one, which ends up as a duplication of effort
+//
+//            conn.foreach { c =>
+//              scribe.debug("@@@-81 ReceiveData " + c.label + "->" + peer.get.id)
+//              val ffgm = decodeRxJsonObject(data, 88) // 88 is the error number
+//              val ffgm1 = convertRxGameModel(ffgm)
+//              latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm1))
+//            }
+// *********************************************************************************************************
             Outcome(())
 
           case WebRtcEvent.Close =>
@@ -313,33 +320,6 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
                   outcome1
                   
             outcome2
-
-//            val outcome3 =
-//              if (peerJsPanel._1 == PanelType.P_INVISIBLE) then 
-//                outcome2 
-//              else 
-//                val errorEvent = Freeze.PanelContent(peerJsPanel._1, peerJsPanel._2) // ... Adding in error messages from non-call back PeerJs code
-//                outcome2.addGlobalEvents(errorEvent)
-//              end if
-//            
-//            outcome3 // .......................................... The final outcome           
-            
-/*---
-            val outcome1 = 
-              (bEvents, latestUpdate) match
-                case (true, Some(update)) => // ......................... Both Event(s) and Game Update Info
-                  val events = eventQueue.dequeueAll(_ => true)
-                  latestUpdate = None
-                  Outcome(()).addGlobalEvents(events*).addGlobalEvents(update)
-                case (true, None) => // ................................. Just Event(s)
-                  val events = eventQueue.dequeueAll(_ => true)
-                  Outcome(()).addGlobalEvents(events*)
-                case (false, Some(update)) => // ........................ Just Game Update Info
-                  latestUpdate = None
-                  Outcome(()).addGlobalEvents(update)
-                case (false, None) => // ................................ Idling
-                  Outcome(())
----*/
         } 
         catch {
           case e : PeerJsException => 
@@ -434,6 +414,13 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
           latestUpdate = Some(FlicFlacGameUpdate.Info(ffgm.copy(responderGameState = gs)))
         end if          
   end setGameState
+
+  def convertRxGameModel(rxModel: FlicFlacGameModel) : FlicFlacGameModel = 
+    val name1 = rxModel.ourName // .............................................. used to swap into oppoName
+    val name2 = rxModel.oppoName // ............................................. used to swap into ourName
+    val pieceType = (rxModel.ourPieceType & 1) ^ 1 // ........................... inverting piece type
+    rxModel.copy(ourName = name2, oppoName = name1, ourPieceType = pieceType)
+  end convertRxGameModel
   
 end SSPeerJS
 

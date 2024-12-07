@@ -76,14 +76,24 @@ object GameAssets:
   def gParamsPanel(sf: Double): Graphic[Material.ImageEffects] =
     Graphic(Rectangle(0, 0, 250, 425), 3, Material.ImageEffects(AssetName(pmAssetName)))
 
-  def gTimeSliderBody(sf: Double): Graphic[Material.ImageEffects] =
-    Graphic(Rectangle(0, 0, 50, 1220), 3, Material.ImageEffects(AssetName(tsAssetName)))
+  def gTimeSliderActiveBody(sf: Double): Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(0, 0, 150, 1220), 3, Material.ImageEffects(AssetName(tsAssetName)))
       .withCrop(0, 25, 50, 1195)
       .scaleBy(sf, sf)
 
-  def gTimeSliderTop(sf: Double): Graphic[Material.ImageEffects] =
-    Graphic(Rectangle(0, 0, 50, 1220), 3, Material.ImageEffects(AssetName(tsAssetName)))
+  def gTimeSliderActiveTop(sf: Double): Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(0, 0, 150, 1220), 3, Material.ImageEffects(AssetName(tsAssetName)))
       .withCrop(0, 0, 50, 25)
+      .scaleBy(sf, sf)
+
+  def gTimeSliderInactiveBody(sf: Double): Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(0, 0, 150, 1220), 3, Material.ImageEffects(AssetName(tsAssetName)))
+      .withCrop(100, 25, 50, 1195)
+      .scaleBy(sf, sf)
+
+  def gTimeSliderInactiveTop(sf: Double): Graphic[Material.ImageEffects] =
+    Graphic(Rectangle(0, 0, 150, 1220), 3, Material.ImageEffects(AssetName(tsAssetName)))
+      .withCrop(100, 0, 50, 25)
       .scaleBy(sf, sf)
 
   // Check FlacFont.txt for details

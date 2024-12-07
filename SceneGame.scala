@@ -42,7 +42,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         e match
           case e: FlicFlacGameUpdate.Info =>
             scribe.debug("@@@ FlicFlacGameUpdate.Info")
-            // FXIME I need to call some kind of "FlicFlac Game modify"
+            FlicFlacGameModel.modify(e.ffgm, None, None)
             Outcome(e.ffgm)
 
           case e: PointerEvent.PointerDown =>
@@ -51,6 +51,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
             hexPosn match
               case Some(pos) =>
                 // Pointer Down, Pos on Grid
+                checkTurn(model,"PDOWN")
                 FlicFlacGameModel.findPieceSelected(model) match
                   case Some(piece) =>
                     // Pointer Down, Pos on Grid, Piece Selected
@@ -224,6 +225,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
             end match // hexXYCoordsFromDisplayXY
 
           case ButtonNewGameEvent =>
+            checkTurn(model,"NEWGAME")
             Outcome(FlicFlacGameModel.reset(model))
 
           case ButtonPlusEvent =>
@@ -234,7 +236,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
             val newModel = model.copy(scalingFactor = newSF, hexBoard3 = newHexBoard3)
             val asJson = newModel.asJson.noSpaces
             FlicFlacGameModel.modify(newModel, None, None)
-            Outcome(newModel)
 
           case ButtonMinusEvent =>
             scribe.debug("@@@ ButtonMinusEvent")
@@ -244,7 +245,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
             val newModel = model.copy(scalingFactor = newSF, hexBoard3 = newHexBoard3)
             val asJson = newModel.asJson.noSpaces
             FlicFlacGameModel.modify(newModel, None, None)
-            Outcome(newModel)
 
           case ViewportResize(gameViewPort) =>
             var dSF = 1.0
@@ -264,43 +264,40 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
             val newModel = model.copy(scalingFactor = dSF, hexBoard3 = newHexBoard3, gameState = GameState.CYLINDER_TURN)
             val asJson = newModel.asJson.noSpaces
             FlicFlacGameModel.modify(newModel, None, None)
-            Outcome(newModel)
 
           case ButtonTurnEvent.Occurence() =>
             scribe.debug("@@@ ButtonTurnEvent")
+            checkTurn(model, "BTURN")
             val emptySpots = Spots(Set.empty)
             val newScore = model.pieces.extraTurnScoring(model)
             val captors = Melee(model).detectCaptors(model)
             if captors.isEmpty then
               val newTT = TurnTimer.restartForTurn(model.turnTimer)
               val newPieces = model.pieces.newTurn(model)
-              if model.gameState == GameState.CYLINDER_TURN then
-                scribe.debug("@@@ BLOCK TURN @@@")
-                Outcome(
-                  model.copy(
-                    gameState = GameState.BLOCK_TURN,
-                    pieces = newPieces,
-                    possibleMoveSpots = emptySpots,
-                    gameScore = newScore,
-                    turnTimer = newTT
-                  )
-                )
-              else
-                scribe.debug("@@@ CYLINDER TURN @@@")
-                Outcome(
-                  model.copy(
-                    gameState = GameState.CYLINDER_TURN,
-                    pieces = newPieces,
-                    possibleMoveSpots = emptySpots,
-                    gameScore = newScore,
-                    turnTimer = newTT
-                  )
-                )
-              end if
+              val newGameState = 
+                if model.gameState == GameState.CYLINDER_TURN then
+                  scribe.debug("@@@@ BLOCK TURN @@@")
+                  GameState.BLOCK_TURN
+                else
+                  scribe.debug("@@@ CYLINDER TURN @@@")
+                  GameState.CYLINDER_TURN
+                end if
+
+              val newModel = model.copy(
+                gameState = newGameState,
+                pieces = newPieces,
+                possibleMoveSpots = emptySpots,
+                gameScore = newScore,
+                turnTimer = newTT
+              )
+              scribe.debug("@@@ " + model.gameState.toString() + " -> " + newModel.gameState.toString()) 
+              FlicFlacGameModel.modify(newModel, None, None)
             else
+              scribe.debug("@@@ CAPTORS @@@")
               val newTT = TurnTimer.restartForCaptors(model.turnTimer)
               val newPieces = Melee(model).rewardCaptors(model, captors)
-              Outcome(model.copy(pieces = newPieces, possibleMoveSpots = emptySpots, gameScore = newScore, turnTimer = newTT))
+              val newModel = model.copy(pieces = newPieces, possibleMoveSpots = emptySpots, gameScore = newScore, turnTimer = newTT)
+              FlicFlacGameModel.modify(newModel, None, None)
             end if
 
           // Keyboard Interface for testing purposes only ...
@@ -321,9 +318,18 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               bBlinkOn = bNewBlinkOn
             end if
 
-            if TurnTimer.expired(model.turnTimer) then
-              // signal a button turn event to switch players
-              Outcome(model).addGlobalEvents(ButtonTurnEvent.Occurence())
+            if (TurnTimer.isActive(model.turnTimer) == false) then
+              val tt = TurnTimer.restartForTurn((model.turnTimer))
+              Outcome(model.copy(turnTimer = tt))              
+            else if TurnTimer.expired(model.turnTimer) then
+              val bCylinder = (model.gameState == GameState.CYLINDER_TURN) && (model.ourPieceType == CYLINDER)
+              val bBlock = (model.gameState == GameState.BLOCK_TURN) && (model.ourPieceType == BLOCK)
+              if (bCylinder == true) || (bBlock == true) then
+                // signal a button turn event to switch players
+                Outcome(model).addGlobalEvents(ButtonTurnEvent.Occurence())
+              else
+                Outcome(model)
+              end if
             else
               val possibleTT = TurnTimer.update(model.turnTimer)
               possibleTT match
@@ -347,7 +353,14 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
   end updateModel
 
-
+  def checkTurn(model: FlicFlacGameModel, errPos: String) : Unit = 
+    val bCylinder = (model.gameState == GameState.CYLINDER_TURN) && (model.ourPieceType == BLOCK)
+    val bBlock = (model.gameState == GameState.BLOCK_TURN) && (model.ourPieceType == CYLINDER)
+    if (bCylinder == true) || (bBlock == true) then
+      throw new Exception(errPos + " ... Please wait for your turn")
+    end if
+  end checkTurn
+  
   def increaseScaleFactor(oldSF: Double): Double =
     val newSF =
       if oldSF >= 0.9 then 1.0
@@ -408,9 +421,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     case _ =>
       Outcome(viewModel)
   end updateViewModel
-
-  // Show some text
-  // When the user clicks anywhere in the screen, trigger an event to jump to the other scene.    val x = context.
 
   def present(
       context: SceneContext[FlicFlacStartupData],
@@ -506,6 +516,15 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val rRight = Rectangle(Point(iLeftWidth, 0), Size(iRightWidth, iHeight))
     val rCorners = Rectangle(Point(iLeftWidth, 0), Size(iRightWidth + model.hexBoard3.pBase.x, iHeight))
 
+    val youAre = 
+      TextBox(model.ourName +"    ", iRightWidth, 50)  // adding 4 spaces to get a simple central alignment
+        .bold
+        .alignCenter
+        .withColor(RGBA.Black)
+        .withFontSize(Pixels(40))
+        .moveTo(iLeftWidth, 2)
+
+
     Outcome(
         SceneUpdateFragment(LayerKeys.Background -> Layer.empty)        
         |+| SceneUpdateFragment(LayerKeys.Background -> Layer.Content(Shape.Box(Rectangle(0, 0, width, height), Fill.Color(RGBA.Black))))
@@ -515,15 +534,14 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(Shape.Box(Rectangle(0, 0, 24, 24), Fill.Color(RGBA.Magenta))))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(textDiag))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.turnButton.draw))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(youAre))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(scorePanel))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(cylinderPlayer))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(blockPlayer))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(cylinderScore))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(blockScore))
-
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(GameAssets.gParamsPanel(1.0).moveTo(0, 590)))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(Batch(param1, param2, param3, param4)))
-
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.plusButton.draw))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.minusButton.draw))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.newGameButton.draw))      

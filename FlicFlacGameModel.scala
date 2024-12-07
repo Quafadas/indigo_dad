@@ -8,13 +8,13 @@ import io.circe.parser.decode
 import game.Piece.pieceShape
 
 final case class FlicFlacGameModel(
-    ourName: String, // ................. Subject to negotiation during startup
-    oppoName: String, // ................ Subject to negotiation during startup
-    ourPieceType: Int, // ............... Subject to negotiation during startup
-    winningScore: Int, // ............... Subject to negotiation during startup
-    randEventFreq: Int, // .............. Subject to negotiation during startup
-    initiatorGameState: GameState, // ... Subject to negotiation during startup
-    responderGameState: GameState, // ... Subject to negotiation during startup
+    ourName: String, // ................. Negotiated at startup - rx packets SWAP
+    oppoName: String, // ................ Negotiated at startup - rx packets SWAP
+    ourPieceType: Int, // ............... Negotiated at startup - rx packets INVERT
+    winningScore: Int, // ............... Negotiated at startup
+    randEventFreq: Int, // .............. Negotiated at startup
+    initiatorGameState: GameState, // ... Negotiated at startup
+    responderGameState: GameState, // ... Negotiated at startup
     gameState: GameState, // ............ Updates
     gameScore: (Int, Int), // ........... Updates
     pieces: Pieces, // .................. Updates
