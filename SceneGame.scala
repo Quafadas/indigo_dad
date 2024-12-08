@@ -318,10 +318,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               bBlinkOn = bNewBlinkOn
             end if
 
-            if (TurnTimer.isActive(model.turnTimer) == false) then
-              val tt = TurnTimer.restartForTurn((model.turnTimer))
-              Outcome(model.copy(turnTimer = tt))              
-            else if TurnTimer.expired(model.turnTimer) then
+            if TurnTimer.expired(model.turnTimer) then
               val bCylinder = (model.gameState == GameState.CYLINDER_TURN) && (model.ourPieceType == CYLINDER)
               val bBlock = (model.gameState == GameState.BLOCK_TURN) && (model.ourPieceType == BLOCK)
               if (bCylinder == true) || (bBlock == true) then
