@@ -21,6 +21,7 @@ import tyrian.TyrianIndigoBridge
 object LayerKeys:
   val Background: BindingKey = BindingKey("Background")
   val Middleground: BindingKey = BindingKey("Middleground")
+  val ForegroundHighL: BindingKey = BindingKey("ForegroundHighL")
   val ForegroundSpots: BindingKey = BindingKey("ForegroundSpots")
   val ForegroundPieces: BindingKey = BindingKey("ForegroundPieces")
   val Overlay: BindingKey = BindingKey("Overlay")
@@ -176,6 +177,7 @@ case class FlicFlacGame(
       SceneUpdateFragment(
         LayerKeys.Background -> Layer.empty, // Initialising keys early (root level), in the desired order
         LayerKeys.Middleground -> Layer.empty,
+        LayerKeys.ForegroundHighL -> Layer.empty,        
         LayerKeys.ForegroundSpots -> Layer.empty,
         LayerKeys.ForegroundPieces -> Layer.empty,
         LayerKeys.Overlay -> Layer.empty

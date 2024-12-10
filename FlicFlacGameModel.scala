@@ -75,7 +75,7 @@ object FlicFlacGameModel:
     // pieces
     val startingSpots: Spots = Spots(Set.empty)
     val turnTimer = TurnTimer(playerParams.playPams4_TurnTime, playerParams.playPams5_CaptorsTime)
-    val highLighter = HighLighter(false, Point(0, 0))
+    val highLighter = new HighLighter(false, Point(0, 0))
 
     FlicFlacGameModel(
       sOurName,
@@ -165,7 +165,11 @@ object FlicFlacGameModel:
   end modifyPiece
 
   def modifyPieces(previousModel: FlicFlacGameModel, newPieces: Pieces): Outcome[FlicFlacGameModel] =
-    Outcome(previousModel.copy(pieces = newPieces))
+    val m1 = previousModel.copy(pieces = newPieces) 
+    val asJson = m1.asJson.noSpaces
+    val gameCache = getGameName(previousModel.ourName, previousModel.oppoName)
+    org.scalajs.dom.window.localStorage.setItem(gameCache, asJson)
+    Outcome(m1).addGlobalEvents(WebRtcEvent.SendData(m1))
   end modifyPieces
 
   def modifyHighLighter(previousModel: FlicFlacGameModel, possibleHighLighter: Option[HighLighter]): FlicFlacGameModel =
@@ -190,7 +194,7 @@ object FlicFlacGameModel:
     val iWinningScore = previousModel.winningScore
     val iRandEventFreq = previousModel.randEventFreq
     val score = (0, 0)
-    val highLighter = HighLighter(false, Point(0, 0))
+    val highLighter = new HighLighter(false, Point(0, 0))
     val emptySpots: Spots = Spots(Set.empty)
     val turnTime = previousModel.turnTimer.iTotalTurnTime
     val captorsTime = previousModel.turnTimer.iCaptorsTurnTime
