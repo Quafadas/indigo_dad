@@ -18,9 +18,9 @@ final case class Melee(model: FlicFlacGameModel):
     var allPiecesQRS = Vector.empty[(Int, Int, Int)]
     var allPiecesEmpowered = Vector.empty[(Boolean)]
     allPieces.foreach { piece =>
-      val qrs = model.hexBoard3.getQRSfromAxAy(piece.pCurPos.x, piece.pCurPos.y)
+      val qrs = hexBoard4.getQRSfromAxAy(piece.pCurPos.x, piece.pCurPos.y)
       allPiecesQRS = allPiecesQRS :+ qrs
-      if model.hexBoard3.getHexColor(piece.pCurPos) == piece.pieceIdentity then
+      if hexBoard4.getHexColor(piece.pCurPos) == piece.pieceIdentity then
         // body color same as hex color detected
         allPiecesEmpowered = allPiecesEmpowered :+ true
       else
@@ -133,13 +133,13 @@ final case class Melee(model: FlicFlacGameModel):
     var setCaptors = Set.empty[(Piece)]
 
     vPrisoners.foreach { p =>
-      val qrs = model.hexBoard3.getQRSfromAxAy(p.pCurPos.x, p.pCurPos.y)
+      val qrs = hexBoard4.getQRSfromAxAy(p.pCurPos.x, p.pCurPos.y)
       val spotQRS = model.possibleMoveSpots.spotRingQRS(qrs._1, qrs._2, qrs._3)
       val prisonerColor = p.pieceIdentity
       val possibleCaptors = if model.gameState == GameState.CYLINDER_TURN then cylinders else blocks
 
       possibleCaptors.foreach { pp =>
-        val qrs1 = model.hexBoard3.getQRSfromAxAy(pp.pCurPos.x, pp.pCurPos.y)
+        val qrs1 = hexBoard4.getQRSfromAxAy(pp.pCurPos.x, pp.pCurPos.y)
         if spotQRS.contains(qrs1) then
           val captorColor1 = if pp.bFlipped then (pp.pieceIdentity + 4) % 6 else (pp.pieceIdentity + 1) % 6
           val captorColor2 = if pp.bFlipped then (pp.pieceIdentity + 5) % 6 else (pp.pieceIdentity + 2) % 6

@@ -78,7 +78,7 @@ final case class Pieces(
   def paint(model: FlicFlacGameModel, fS: Double, bBlinkOn: Boolean, optDragPos: Option[Point]): Layer =
     var layerPieces = Layer.empty
 
-    val pB = model.hexBoard3.pBase // extract GridBasePoint for later
+    val pB = hexBoard4.pBase // extract GridBasePoint for later
 
     // first draw all the unselected pieces ...
 
@@ -114,7 +114,7 @@ final case class Pieces(
       end bShow
 
       if Piece.selected(p) == false && bShow == true then
-        val pPos = model.hexBoard3.getXpYp(pSrc)
+        val pPos = hexBoard4.getXpYp(pSrc)
         val newLayer = Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS))
         layerPieces = layerPieces |+| newLayer
       end if
@@ -133,7 +133,7 @@ final case class Pieces(
             val newLayer = Layer(layer.scaleBy(fS, fS).moveTo(pPos))
             layerPieces = layerPieces |+| newLayer
           case None =>
-            val pPos = model.hexBoard3.getXpYp(pSrc)
+            val pPos = hexBoard4.getXpYp(pSrc)
             val newLayer = Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS))
             layerPieces = layerPieces |+| newLayer
         end match

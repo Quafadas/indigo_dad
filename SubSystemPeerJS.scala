@@ -341,32 +341,33 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
       message: Unit
   ): Outcome[SceneUpdateFragment] =
 
+    val dSF = hexBoard4.scalingFactor
 
     peerJsPanel  match {
       case (PanelType.P_ERROR, msg) =>
-        displayErrorPanel(msg)
+        displayErrorPanel(msg, dSF)
       case (PanelType.P_RESULTS, msg) =>
-        displayResultsPanel(msg)
+        displayResultsPanel(msg, dSF)
       case _ => // including P_INVISIBLE
         Outcome(SceneUpdateFragment.empty)        
     }
 
   end present
 
-  def displayErrorPanel(msg:String) : Outcome[SceneUpdateFragment] =
+  def displayErrorPanel(msg: String, dSF: Double) : Outcome[SceneUpdateFragment] =
     val boxX = 260
     val boxY = 176
-    val boxW = (16 + (12 * (msg.length()))).max(1000)
-    val boxH = 180
+    val boxW = (((16 + (12 * (msg.length()))).max(1000)) * dSF).toInt
+    val boxH = (180 * dSF).toInt
 
     val textError1 = TextBox("*** FlicFlac ERROR ***" , boxW-16, boxH-16)
-      .alignCenter.bold.withColor(RGBA.Red).withFontSize(Pixels(60)).moveTo(boxX+8, boxY+8)
+      .alignCenter.bold.withColor(RGBA.Red).withFontSize(Pixels(60)).moveTo(boxX+8, boxY+8).scaleBy(dSF, dSF)
 
     val textError2 = TextBox(msg , boxW-16, boxH-16)
-      .withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(boxX+8, boxY+100)
+      .withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(boxX+8, boxY+100).scaleBy(dSF, dSF)
 
     val textError3 = TextBox("... click on any part of the background to dismiss this notification.", boxW-16, boxH-16)
-      .withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(boxX+8, boxY+140)
+      .withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(boxX+8, boxY+140).scaleBy(dSF, dSF)
 
     Outcome(
       SceneUpdateFragment(LayerKeys.Overlay -> Layer.Content(Shape.Box(Rectangle(boxX, boxY, boxW, boxH), Fill.Color(RGBA.Red))))
@@ -376,7 +377,7 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
 
   end displayErrorPanel
   
-  def displayResultsPanel(msg:String) : Outcome[SceneUpdateFragment] = 
+  def displayResultsPanel(msg:String, dSF: Double) : Outcome[SceneUpdateFragment] = 
     Outcome(SceneUpdateFragment.empty) // FIXME not implemented yet    
   end displayResultsPanel
 

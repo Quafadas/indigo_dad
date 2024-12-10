@@ -52,7 +52,7 @@ final case class Spots(
 
     val ax = piece.pCurPos.x
     val ay = piece.pCurPos.y
-    val qrs = model.hexBoard3.getQRSfromAxAy(ax, ay)
+    val qrs = hexBoard4.getQRSfromAxAy(ax, ay)
     val q = qrs._1
     val r = qrs._2
     val s = qrs._3
@@ -83,7 +83,7 @@ final case class Spots(
           end if
       end match
 
-      val ss2 = ss1.filter { case (aX, aY) => model.hexBoard3.isThisHexFree(Point(aX, aY), vPieces) }
+      val ss2 = ss1.filter { case (aX, aY) => hexBoard4.isThisHexFree(Point(aX, aY), vPieces) }
       scribe.debug("@@@ spotify Home free hex count: " + ss2.size)
       Spots(ss2)
     else if piece.bMoved then
@@ -102,10 +102,10 @@ final case class Spots(
       var setInnerRingQRS = Set.empty[(Int, Int, Int)]
 
       setInnerRing.foreach { case (q1, r1, s1) =>
-        val aX1aY1 = model.hexBoard3.getAxAyfromQRS(q1, r1, s1)
+        val aX1aY1 = hexBoard4.getAxAyfromQRS(q1, r1, s1)
         val q1r1s1 = (q1, r1, s1)
-        if model.hexBoard3.isThisHexValid(q1, r1, s1)
-          && model.hexBoard3.isThisHexFree(q1, r1, s1, vPieces)
+        if hexBoard4.isThisHexValid(q1, r1, s1)
+          && hexBoard4.isThisHexFree(q1, r1, s1, vPieces)
         then
           setInnerRingAxAy = setInnerRingAxAy + aX1aY1
           setInnerRingQRS = setInnerRingQRS + q1r1s1
@@ -118,15 +118,15 @@ final case class Spots(
       var setMiddleRingAxAy = Set.empty[(Int, Int)]
       var setMiddleRingQRS = Set.empty[(Int, Int, Int)]
       val setInnerRingNotBlackQRS =
-        setInnerRingQRS.filter((q2f, r2f, s2f) => model.hexBoard3.isThisHexBlack(q2f, r2f, s2f) == false)
+        setInnerRingQRS.filter((q2f, r2f, s2f) => hexBoard4.isThisHexBlack(q2f, r2f, s2f) == false)
       setInnerRingNotBlackQRS.foreach { case (q2, r2, s2) =>
         val set2M = spotRingQRS(q2, r2, s2)
         set2M.foreach { case (q2m, r2m, s2m) =>
-          if model.hexBoard3.isThisHexValid(q2m, r2m, s2m)
-            && model.hexBoard3.isThisHexBlack(q2m, r2m, s2m) == false
-            && model.hexBoard3.isThisHexFree(q2m, r2m, s2m, vPieces)
+          if hexBoard4.isThisHexValid(q2m, r2m, s2m)
+            && hexBoard4.isThisHexBlack(q2m, r2m, s2m) == false
+            && hexBoard4.isThisHexFree(q2m, r2m, s2m, vPieces)
           then
-            val aX2aY2 = model.hexBoard3.getAxAyfromQRS(q2m, r2m, s2m)
+            val aX2aY2 = hexBoard4.getAxAyfromQRS(q2m, r2m, s2m)
             val q2r2s2 = (q2m, r2m, s2m)
             setMiddleRingAxAy = setMiddleRingAxAy + aX2aY2
             setMiddleRingQRS = setMiddleRingQRS + q2r2s2
@@ -138,15 +138,15 @@ final case class Spots(
       var setOuterRingAxAy = Set.empty[(Int, Int)]
       var setOuterRingQRS = Set.empty[(Int, Int, Int)]
       val setMiddleRingNotBlackQRS =
-        setMiddleRingQRS.filter((q3f, r3f, s3f) => model.hexBoard3.isThisHexBlack(q3f, r3f, s3f) == false)
+        setMiddleRingQRS.filter((q3f, r3f, s3f) => hexBoard4.isThisHexBlack(q3f, r3f, s3f) == false)
       setMiddleRingNotBlackQRS.foreach { case (q3, r3, s3) =>
         val set3M = spotRingQRS(q3, r3, s3)
         set3M.foreach { case (q3m, r3m, s3m) =>
-          if model.hexBoard3.isThisHexValid(q3m, r3m, s3m)
-            && model.hexBoard3.isThisHexBlack(q3m, r3m, s3m) == false
-            && model.hexBoard3.isThisHexFree(q3m, r3m, s3m, vPieces)
+          if hexBoard4.isThisHexValid(q3m, r3m, s3m)
+            && hexBoard4.isThisHexBlack(q3m, r3m, s3m) == false
+            && hexBoard4.isThisHexFree(q3m, r3m, s3m, vPieces)
           then
-            val aX3aY3 = model.hexBoard3.getAxAyfromQRS(q3m, r3m, s3m)
+            val aX3aY3 = hexBoard4.getAxAyfromQRS(q3m, r3m, s3m)
             val q3r3s3 = (q3m, r3m, s3m)
             setOuterRingAxAy = setOuterRingAxAy + aX3aY3
             setOuterRingQRS = setOuterRingQRS + q3r3s3
@@ -172,14 +172,14 @@ final case class Spots(
   end spotRingQRS
 
   def paint(model: FlicFlacGameModel): Layer =
-    val dSF = model.scalingFactor
-    val pb = model.hexBoard3.pBase
+    val dSF = hexBoard4.scalingFactor
+    val pb = hexBoard4.pBase
     val layer = GameAssets.gSpot(dSF)
     var multiSpot = Layer.empty
 
     for pos <- model.possibleMoveSpots.indices do
-      val pPos = model.hexBoard3.getXpYp(Point(pos._1, pos._2))
-      val spotLayer = Layer(layer.moveTo(model.hexBoard3.pBase.x + pPos.x, model.hexBoard3.pBase.y + pPos.y))
+      val pPos = hexBoard4.getXpYp(Point(pos._1, pos._2))
+      val spotLayer = Layer(layer.moveTo(hexBoard4.pBase.x + pPos.x, hexBoard4.pBase.y + pPos.y))
       multiSpot = multiSpot |+| spotLayer
     end for
     multiSpot

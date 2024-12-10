@@ -47,16 +47,7 @@ object GameAssets:
     )
 
   def gHex(sf: Double): Graphic[Material.ImageEffects] =
-    if (sf < 0.25) || (sf > 1.0) then
-      // FIXME we should not need this trap in the end
-      scribe.error("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-      scribe.error("@@@ BAD sf:" + sf)
-      scribe.error("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-      Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName))) // .scaleBy(sf,sf)
-    else
-      // valid scale factor
-      Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName))).scaleBy(sf, sf)
-    end if
+    Graphic(Rectangle(0, 0, 91, 81), 2, Material.ImageEffects(AssetName(hxAssetName))).scaleBy(sf, sf)
   end gHex
 
   def gSpot(sf: Double): Graphic[Material.ImageEffects] =

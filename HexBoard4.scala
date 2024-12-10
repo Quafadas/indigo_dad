@@ -19,9 +19,9 @@ case class HH3(
     yS: Int // .... pixel y scaled offset from base point for origin of png to paint this hex
 )
 
-case class HexBoard3():
+class HexBoard4 ():
 
-  scribe.debug("@@@ Class HexBoard3 Start")
+  scribe.debug("@@@ Class HexBoard4 Start")
 
 // format: off
 
@@ -67,8 +67,9 @@ case class HexBoard3():
   val xWidth = 70 // ................... amount to add to a hex centre x coord to reach the vertical line of the next column
   val yHeight = 40 // .................. half the amount to add to a hex centre y coord to reach the next hexagon below
   val xHalfway = 10 // ................. xcoord of halfway along the top left diagonal line of first hex
+  var hexArray = createArrayOfHH(arrayWidth, arrayHeight)
+  var scalingFactor: Double = 1.0 // ... scaling factor as controlled by +/- buttons
 
-  val hexArray = createArrayOfHH(arrayWidth, arrayHeight)
 
   // start with black board, populates q,r,s (for debugging the helper routine printBoard can follow this line)
   fillBoard(arrayWidth, arrayHeight, mix(CK))
@@ -294,21 +295,21 @@ case class HexBoard3():
   calculateXpYp calculates the positions of the origins for the graphics used to paint each cell
   This function is invoked when a resize event occurs or the scale changes
    */
-  def calculateXpYp(fS: Double, hexboard3: HexBoard3): HexBoard3 =
+  def calculateXpYp(fS: Double): Unit =
 
     var y = 0
     while y < arrayHeight do
       var x = 0
       while x < arrayWidth do
-        val hh = hexboard3.hexArray(x)(y)
+        val hh = hexArray(x)(y)
         val xP = math.round(hh.xR * fS).toInt
         val yP = math.round(hh.yR * fS).toInt
-        hexboard3.hexArray(x)(y) = HH3(hh.x,hh.y,hh.c,hh.q,hh.r,hh.s,hh.xR,hh.yR,xP,yP) // writing xS and yS away
+        hexArray(x)(y) = HH3(hh.x,hh.y,hh.c,hh.q,hh.r,hh.s,hh.xR,hh.yR,xP,yP) // writing xS and yS away
         x += 1
       end while
       y += 1
     end while
-    hexboard3 
+    hexBoard4.scalingFactor = fS
   end calculateXpYp
 
   def getXpYp(pSrc: Point) : Point =
@@ -517,14 +518,7 @@ case class HexBoard3():
     (aX,aY)
   end getAxAyfromQRS
 
+  scribe.debug("@@@ Class HexBoard4 Finish")
 
-
-
-
-
-
-  scribe.debug("@@@ Class HexBoard3 Finish")
-
-
-end HexBoard3
+end HexBoard4
 

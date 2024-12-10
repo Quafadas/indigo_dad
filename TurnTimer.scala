@@ -73,9 +73,9 @@ object TurnTimer:
 
     val T: Double = ((1170 * iTimeSpent) / iTotalTime) + 70
 
-    val dSF = model.scalingFactor
-    val scalableX = GameAssets.GameSceneDimensions.right - model.hexBoard3.pBase.x - 120
-    val iSliderXPos = (math.round(scalableX * dSF)).toInt + model.hexBoard3.pBase.x
+    val dSF = hexBoard4.scalingFactor
+    val scalableX = GameAssets.GameSceneDimensions.right - hexBoard4.pBase.x - 120
+    val iSliderXPos = (math.round(scalableX * dSF)).toInt + hexBoard4.pBase.x
     val iBodyTop = (math.round(95 * dSF)).toInt
     val iCapTop = (math.round(T * dSF)).toInt
     val iWidth = (math.round(52 * dSF)).toInt // changed from 50 to 52 to eliminate sporadic veritcal lines

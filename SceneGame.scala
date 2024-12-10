@@ -47,7 +47,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
           case e: PointerEvent.PointerDown =>
             val clickPoint = e.position
-            val hexPosn = model.hexBoard3.getAxAyFromDisplayXY(clickPoint, model.scalingFactor)
+            val hexPosn = hexBoard4.getAxAyFromDisplayXY(clickPoint, hexBoard4.scalingFactor)
             hexPosn match
               case Some(pos) =>
                 // Pointer Down, Pos on Grid
@@ -122,7 +122,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
           case e: PointerEvent.PointerUp =>
             val clickPoint = e.position
-            val hexPosn = model.hexBoard3.getAxAyFromDisplayXY(clickPoint, model.scalingFactor)
+            val hexPosn = hexBoard4.getAxAyFromDisplayXY(clickPoint, hexBoard4.scalingFactor)
             hexPosn match
               case Some(pos) =>
                 // Pointer Up, Pos on Grid
@@ -132,7 +132,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                     if model.possibleMoveSpots.indices((pos.x, pos.y)) then
                       // Pointer Up, Pos on Grid, Piece Selected, Valid Move
                       val newHL = model.highLighter.shine(model.highLighter, false)
-                      if model.hexBoard3.isThisHexBlack(pos) == true && piece.bMoved == false then
+                      if hexBoard4.isThisHexBlack(pos) == true && piece.bMoved == false then
                         // we only flip piece if this is a new move
                         dMsg = "##H##"
                         scribe.debug("@@@ PointerEvent " + dMsg)
@@ -187,11 +187,11 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
                     val w = pos.x
                     val h = pos.y
-                    val x = model.hexBoard3.hexArray(w)(h).x
-                    val y = model.hexBoard3.hexArray(w)(h).y
-                    val q = model.hexBoard3.hexArray(w)(h).q
-                    val r = model.hexBoard3.hexArray(w)(h).r
-                    val s = model.hexBoard3.hexArray(w)(h).s
+                    val x = hexBoard4.hexArray(w)(h).x
+                    val y = hexBoard4.hexArray(w)(h).y
+                    val q = hexBoard4.hexArray(w)(h).q
+                    val r = hexBoard4.hexArray(w)(h).r
+                    val s = hexBoard4.hexArray(w)(h).s
                     scribe.debug(
                       "@@@ Magenta hexboard3: (w,h) x,y,q,r,s = (" + w + "," + h + ") : "
                         + x + "," + y + " : " + q + "," + r + "," + s
@@ -230,39 +230,34 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
 
           case ButtonPlusEvent =>
             scribe.debug("@@@ ButtonPlusEvent")
-            val oldSF = model.scalingFactor
+            val oldSF = hexBoard4.scalingFactor
             val newSF = increaseScaleFactor(oldSF)
-            val newHexBoard3 = model.hexBoard3.calculateXpYp(newSF, model.hexBoard3)
-            val newModel = model.copy(scalingFactor = newSF, hexBoard3 = newHexBoard3)
-            val asJson = newModel.asJson.noSpaces
-            FlicFlacGameModel.modify(newModel, None, None)
+            hexBoard4.calculateXpYp(newSF)
+            Outcome(model)
 
           case ButtonMinusEvent =>
             scribe.debug("@@@ ButtonMinusEvent")
-            val oldSF = model.scalingFactor
+            val oldSF = hexBoard4.scalingFactor
             val newSF = decreaseScaleFactor(oldSF)
-            val newHexBoard3 = model.hexBoard3.calculateXpYp(newSF, model.hexBoard3)
-            val newModel = model.copy(scalingFactor = newSF, hexBoard3 = newHexBoard3)
-            val asJson = newModel.asJson.noSpaces
-            FlicFlacGameModel.modify(newModel, None, None)
+            hexBoard4.calculateXpYp(newSF)
+            Outcome(model)
 
           case ViewportResize(gameViewPort) =>
             var dSF = 1.0
             if (FlicFlacGameModel.getStartUpStates().contains(model.gameState)) then
               scribe.debug("@@@ ViewPortResize from scratch")
-              val w = gameViewPort.width - model.hexBoard3.pBase.x
-              val h = gameViewPort.height - model.hexBoard3.pBase.y
+              val w = gameViewPort.width - hexBoard4.pBase.x
+              val h = gameViewPort.height - hexBoard4.pBase.y
               dSF = GetScaleFactor(w, h, GameAssets.GameSceneDimensions)
               scribe.debug("@@@ updateModel ViewportResize w:h->s " + w + ":" + h + "->" + dSF)
             else
-              dSF = model.scalingFactor
+              dSF = hexBoard4.scalingFactor
               scribe.debug("@@@ ViewPortResize from previous model sf=" + dSF)
             end if
 
-            val newHexBoard3 = model.hexBoard3.calculateXpYp(dSF, model.hexBoard3)
-            // FIXME ... should the cylinders always have the fiest move?
-            val newModel = model.copy(scalingFactor = dSF, hexBoard3 = newHexBoard3, gameState = GameState.CYLINDER_TURN)
-            val asJson = newModel.asJson.noSpaces
+            hexBoard4.calculateXpYp(dSF)
+            // FIXME ... resizing and maybe first event
+            val newModel = model.copy(gameState = GameState.CYLINDER_TURN)
             FlicFlacGameModel.modify(newModel, None, None)
 
           case ButtonTurnEvent.Occurence() =>
@@ -425,7 +420,7 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       viewModel: SceneViewModel
   ): Outcome[SceneUpdateFragment] =
 
-    val dSF = model.scalingFactor
+    val dSF = hexBoard4.scalingFactor
     val sFactor = ((10 * dSF).toInt).toString()
 
     val textDiag = TextBox(sFactor + " " + dMsg, 200, 40) // FIXME 200,40 just some convenient numbers for text box size
@@ -503,15 +498,17 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         .withFontSize(Pixels(60))
         .moveTo(140, 670+255)
 
+    val pB = hexBoard4.pBase // ................... for HighLighter
+
     val width = GameAssets.GameSceneDimensions.width
     val height = GameAssets.GameSceneDimensions.height
 
     val iHeight = (math.round(GameAssets.GameSceneDimensions.height * dSF)).toInt
-    val iLeftWidth = model.hexBoard3.pBase.x
-    val iRightWidth = (math.round(GameAssets.GameSceneDimensions.right - model.hexBoard3.pBase.x) * dSF).toInt
+    val iLeftWidth = hexBoard4.pBase.x
+    val iRightWidth = (math.round(GameAssets.GameSceneDimensions.right - hexBoard4.pBase.x) * dSF).toInt
     val rLeft = Rectangle(0, 0, iLeftWidth, iHeight)
     val rRight = Rectangle(Point(iLeftWidth, 0), Size(iRightWidth, iHeight))
-    val rCorners = Rectangle(Point(iLeftWidth, 0), Size(iRightWidth + model.hexBoard3.pBase.x, iHeight))
+    val rCorners = Rectangle(Point(iLeftWidth, 0), Size(iRightWidth + hexBoard4.pBase.x, iHeight))
 
     val youAre = 
       TextBox(model.ourName +"    ", iRightWidth, 50)  // adding 4 spaces to get a simple central alignment
@@ -543,8 +540,8 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.minusButton.draw))
         |+| SceneUpdateFragment(LayerKeys.Middleground -> Layer.Content(viewModel.newGameButton.draw))      
         |+| SceneUpdateFragment(LayerKeys.Middleground -> TurnTimer.show(model))
-        |+| SceneUpdateFragment(LayerKeys.Middleground -> model.hexBoard3.paint(model, dSF))
-        |+| SceneUpdateFragment(LayerKeys.Middleground -> model.highLighter.paint(model, dSF))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> hexBoard4.paint(model, dSF))
+        |+| SceneUpdateFragment(LayerKeys.Middleground -> model.highLighter.paint(model, dSF, pB))
         |+| SceneUpdateFragment(LayerKeys.ForegroundSpots -> model.possibleMoveSpots.paint(model))
         |+| SceneUpdateFragment(LayerKeys.ForegroundPieces -> model.pieces.paint(model, dSF, bBlinkOn, viewModel.optDragPos))
 

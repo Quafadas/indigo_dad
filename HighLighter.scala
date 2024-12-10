@@ -3,7 +3,6 @@ package game
 import indigo.*
 
 final case class HighLighter(
-    val hexBoard3: HexBoard3,
     val displayOn: Boolean,
     val currentPos: Point
 ):
@@ -26,15 +25,13 @@ final case class HighLighter(
   paint generates a "SceneUpdateFragment" containing the new position of the Highligter Hex
    */
 
-  def paint(model: FlicFlacGameModel, fS: Double): Layer =
-    var highLighterLayer = Layer.empty
+  def paint(model: FlicFlacGameModel, fS: Double, pB: Point): Layer =
     if model.highLighter.displayOn then
-      val pB = model.hexBoard3.pBase // ................. Base Corner (Top LHS) of Rectangle containing board
-      val pPos = model.hexBoard3.getXpYp(currentPos)
       val layer = GameAssets.gHex(fS).modifyMaterial(_.withTint(mix(CM)))
-      highLighterLayer = Layer(layer.moveTo(pB.x + pPos.x, pB.y + pPos.y))
+      Layer(layer.moveTo(pB.x + currentPos.x, pB.y + currentPos.y))
+    else
+      Layer.empty
     end if
-    highLighterLayer
   end paint
 
 end HighLighter

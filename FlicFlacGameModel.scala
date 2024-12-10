@@ -20,9 +20,7 @@ final case class FlicFlacGameModel(
     pieces: Pieces, // .................. Updates
     possibleMoveSpots: Spots, // ........ Updates
     highLighter: HighLighter, // ........ Updates
-    turnTimer: TurnTimer, // ............ Updates
-    hexBoard3: HexBoard3, // ............ FIXME No change by model so get it out
-    scalingFactor: Double // ............ FIXME No change by model so get it out
+    turnTimer: TurnTimer // ............. Updates
 ) derives Encoder.AsObject,
       Decoder
 
@@ -76,11 +74,8 @@ object FlicFlacGameModel:
     val score = (0, 0)
     // pieces
     val startingSpots: Spots = Spots(Set.empty)
-    // val highLighter = HighLighter(hexBoard3, false, Point(0, 0)) // moved to bottom as forward reference
     val turnTimer = TurnTimer(playerParams.playPams4_TurnTime, playerParams.playPams5_CaptorsTime)
-    val hexBoard3 = HexBoard3()
-    val highLighter = HighLighter(hexBoard3, false, Point(0, 0))
-    val defaultScalingFactor = 1.0
+    val highLighter = HighLighter(false, Point(0, 0))
 
     FlicFlacGameModel(
       sOurName,
@@ -92,28 +87,26 @@ object FlicFlacGameModel:
       GameState.START_CON1,
       GameState.START_CON1,
       score,
-      summonPieces(hexBoard3),
+      summonPieces(hexBoard4),
       startingSpots,
       highLighter,
-      turnTimer,
-      hexBoard3,
-      defaultScalingFactor
+      turnTimer
     )
   end creation
 
-  def summonPieces(hexBoard3: HexBoard3): Pieces =
-    val cy1 = hexBoard3.getCylinderHomePos(CB)
-    val cy2 = hexBoard3.getCylinderHomePos(CG)
-    val cy3 = hexBoard3.getCylinderHomePos(CY)
-    val cy4 = hexBoard3.getCylinderHomePos(CO)
-    val cy5 = hexBoard3.getCylinderHomePos(CR)
-    val cy6 = hexBoard3.getCylinderHomePos(CP)
-    val bk1 = hexBoard3.getBlockHomePos(CB)
-    val bk2 = hexBoard3.getBlockHomePos(CG)
-    val bk3 = hexBoard3.getBlockHomePos(CY)
-    val bk4 = hexBoard3.getBlockHomePos(CO)
-    val bk5 = hexBoard3.getBlockHomePos(CR)
-    val bk6 = hexBoard3.getBlockHomePos(CP)
+  def summonPieces(hexBoard4: HexBoard4): Pieces =
+    val cy1 = hexBoard4.getCylinderHomePos(CB)
+    val cy2 = hexBoard4.getCylinderHomePos(CG)
+    val cy3 = hexBoard4.getCylinderHomePos(CY)
+    val cy4 = hexBoard4.getCylinderHomePos(CO)
+    val cy5 = hexBoard4.getCylinderHomePos(CR)
+    val cy6 = hexBoard4.getCylinderHomePos(CP)
+    val bk1 = hexBoard4.getBlockHomePos(CB)
+    val bk2 = hexBoard4.getBlockHomePos(CG)
+    val bk3 = hexBoard4.getBlockHomePos(CY)
+    val bk4 = hexBoard4.getBlockHomePos(CO)
+    val bk5 = hexBoard4.getBlockHomePos(CR)
+    val bk6 = hexBoard4.getBlockHomePos(CP)
 
     val startingModelPieces: Vector[Piece] = Vector(
       Piece(CYLINDER, CB, cy1, cy1, cy1, false),
@@ -197,9 +190,7 @@ object FlicFlacGameModel:
     val iWinningScore = previousModel.winningScore
     val iRandEventFreq = previousModel.randEventFreq
     val score = (0, 0)
-    val defaultSF = 1.0
-    val hexBoard3 = HexBoard3()
-    val highLighter = HighLighter(hexBoard3, false, Point(0, 0))
+    val highLighter = HighLighter(false, Point(0, 0))
     val emptySpots: Spots = Spots(Set.empty)
     val turnTime = previousModel.turnTimer.iTotalTurnTime
     val captorsTime = previousModel.turnTimer.iCaptorsTurnTime
@@ -214,12 +205,10 @@ object FlicFlacGameModel:
       GameState.START_CON1,
       GameState.START_CON1,
       score,
-      summonPieces(hexBoard3),
+      summonPieces(hexBoard4),
       emptySpots,
       highLighter,
-      turnTimer,
-      hexBoard3,
-      defaultSF
+      turnTimer
     )
   end reset
 

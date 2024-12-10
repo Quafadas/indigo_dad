@@ -27,6 +27,8 @@ object LayerKeys:
 
 @JSExportTopLevel("IndigoGame")
 
+val hexBoard4 = new HexBoard4()
+
 case class FlicFlacGame(
     tyrianSubSystem: TyrianSubSystem[IO, Int, FlicFlacGameModel]
 ) extends IndigoGame[FlicFlacBootData, FlicFlacStartupData, FlicFlacGameModel, FlicFlacViewModel]:
@@ -153,7 +155,6 @@ case class FlicFlacGame(
       val w = gameViewPort.width
       val h = gameViewPort.height
       scribe.debug("@@@ FlicFlacMain-updateViewModel ViewportResize w:h " + w + ":" + h)
-      // flicFlacGameModel.hexBoard3.calculateXpYp(1.0) // FIXME this needs to be immutable!!!
       Outcome(flicFlacViewModel.copy(theGameViewPort = gameViewPort))
 
     case ButtonPlayEvent =>
