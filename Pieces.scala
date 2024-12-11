@@ -114,7 +114,7 @@ final case class Pieces(
       end bShow
 
       if Piece.selected(p) == false && bShow == true then
-        val pPos = hexBoard4.getXpYp(pSrc)
+        val pPos = hexBoard4.getXsYs(pSrc)
         val newLayer = Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS))
         layerPieces = layerPieces |+| newLayer
       end if
@@ -133,7 +133,7 @@ final case class Pieces(
             val newLayer = Layer(layer.scaleBy(fS, fS).moveTo(pPos))
             layerPieces = layerPieces |+| newLayer
           case None =>
-            val pPos = hexBoard4.getXpYp(pSrc)
+            val pPos = hexBoard4.getXsYs(pSrc)
             val newLayer = Layer(layer.moveTo(pB + pPos).scaleBy(fS, fS))
             layerPieces = layerPieces |+| newLayer
         end match

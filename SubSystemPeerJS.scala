@@ -357,24 +357,32 @@ final case class SSPeerJS(initialMessage: String) extends SubSystem[FlicFlacGame
   def displayErrorPanel(msg: String, dSF: Double) : Outcome[SceneUpdateFragment] =
     val boxX = 260
     val boxY = 176
-    val boxW = (((16 + (12 * (msg.length()))).max(1000)) * dSF).toInt
-    val boxH = (180 * dSF).toInt
 
-    val textError1 = TextBox("*** FlicFlac ERROR ***" , boxW-16, boxH-16)
-      .alignCenter.bold.withColor(RGBA.Red).withFontSize(Pixels(60)).moveTo(boxX+8, boxY+8).scaleBy(dSF, dSF)
+    val iSF = (10 * dSF).toInt // dSF is one of 1.0 0.9 0.8 0.75 0.67 0.5 0.33
 
-    val textError2 = TextBox(msg , boxW-16, boxH-16)
-      .withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(boxX+8, boxY+100).scaleBy(dSF, dSF)
+    val (boxW, boxH, titleFontSize, msgFontSize, box4Yoffset, box5Yoffset) = iSF match
+      case 10 => (((16 + (12 * (msg.length()))).max(1000)), 180, 60, 20, 100, 140)
+      case 9 => (((14 + (11 * (msg.length()))).max(900)), 162, 54, 18, 90, 126)
+      case 8 => (((13 + (10 * (msg.length()))).max(800)), 135, 48, 16, 80, 110)
+      case 7 => (((12 + (9 * (msg.length()))).max(750)), 135, 45, 15, 75, 105)
+      case 6 => (((10 + (7 * (msg.length()))).max(600)), 108, 36, 12, 65, 88)
+      case 5 => (((8 + (6 * (msg.length()))).max(500)), 90, 30, 10, 50, 70)
+      case _ => (((5 + (5 * (msg.length()))).max(400)), 60, 20, 8, 34, 45)
+           
+    val textError3 = TextBox("*** FlicFlac ERROR ***" , boxW-16, boxH-16)
+      .alignCenter.bold.withColor(RGBA.Red).withFontSize(Pixels(titleFontSize)).moveTo(boxX+8, boxY+8)
 
-    val textError3 = TextBox("... click on any part of the background to dismiss this notification.", boxW-16, boxH-16)
-      .withColor(RGBA.Black).withFontSize(Pixels(20)).moveTo(boxX+8, boxY+140).scaleBy(dSF, dSF)
+    val textError4 = TextBox(msg, boxW-16, boxH-16)
+      .withColor(RGBA.Black).withFontSize(Pixels(msgFontSize)).moveTo(boxX+8, boxY+box4Yoffset)
+
+    val textError5 = TextBox("... click on any part of the background to dismiss this notification.", boxW-16, boxH-16)
+      .withColor(RGBA.Black).withFontSize(Pixels(msgFontSize)).moveTo(boxX+8, boxY+box5Yoffset)
 
     Outcome(
       SceneUpdateFragment(LayerKeys.Overlay -> Layer.Content(Shape.Box(Rectangle(boxX, boxY, boxW, boxH), Fill.Color(RGBA.Red))))
       |+| SceneUpdateFragment(LayerKeys.Overlay -> Layer.Content(Shape.Box(Rectangle(boxX+4, boxY+4, boxW-8, boxH-8), Fill.Color(RGBA.Cyan))))
-      |+| SceneUpdateFragment(LayerKeys.Overlay -> Layer.Content(Batch(textError1, textError2, textError3)))
+      |+| SceneUpdateFragment(LayerKeys.Overlay -> Layer.Content(Batch(textError3, textError4, textError5)))
     )
-
   end displayErrorPanel
   
   def displayResultsPanel(msg:String, dSF: Double) : Outcome[SceneUpdateFragment] = 

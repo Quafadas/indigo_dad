@@ -142,8 +142,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                           val newPieces = Melee(um).combat(um)
                           FlicFlacGameModel.modifyPieces(um, newPieces)
                         }
-
-                        // val newPieces = Melee(updatedModel.unsafeGet).combat(updatedModel.unsafeGet)
                       else
                         dMsg = "##I##"
                         scribe.debug("@@@ PointerEvent " + dMsg)
@@ -152,13 +150,6 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
                           val newPieces = Melee(updatedModel).combat(updatedModel)
                           FlicFlacGameModel.modifyPieces(updatedModel, newPieces)
                         }
-/*--- FIXME start
-                        val model1 = FlicFlacGameModel.modify(model, Some(updatedPiece), Some(newHL))
-                        val model2 = model1.unsafeGet
-                        val newPieces = Melee(model2).combat(model2)
-                        val model3 = FlicFlacGameModel.modifyPieces(model2, newPieces)
-                        model3
- FXIME end ---*/
                       end if
                     else
                       // Pointer Up, Pos on Grid, Piece Selected
@@ -239,14 +230,16 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
             scribe.debug("@@@ ButtonPlusEvent")
             val oldSF = hexBoard4.scalingFactor
             val newSF = increaseScaleFactor(oldSF)
-            hexBoard4.calculateXpYp(newSF)
+            hexBoard4.calculateXsYs(newSF)
+            hexBoard4.calculateGridPaintLayer()
             Outcome(model)
 
           case ButtonMinusEvent =>
             scribe.debug("@@@ ButtonMinusEvent")
             val oldSF = hexBoard4.scalingFactor
             val newSF = decreaseScaleFactor(oldSF)
-            hexBoard4.calculateXpYp(newSF)
+            hexBoard4.calculateXsYs(newSF)
+            hexBoard4.calculateGridPaintLayer()
             Outcome(model)
 
           case ViewportResize(gameViewPort) =>
@@ -262,8 +255,9 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
               scribe.debug("@@@ ViewPortResize from previous model sf=" + dSF)
             end if
 
-            hexBoard4.calculateXpYp(dSF)
-            // FIXME ... resizing and maybe first event
+            hexBoard4.calculateXsYs(dSF)
+            hexBoard4.calculateGridPaintLayer()
+
             val newModel = model.copy(gameState = GameState.CYLINDER_TURN)
             FlicFlacGameModel.modify(newModel, None, None)
 
@@ -367,16 +361,14 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
       else if oldSF >= 0.75 then 0.8
       else if oldSF >= 0.67 then 0.75
       else if oldSF >= 0.5 then 0.67
-      else if oldSF >= 0.33 then 0.5
-      else 0.33
+      else 0.5
     scribe.debug("@@@ increaseScaleFactor to:" + newSF)
     newSF
   end increaseScaleFactor
 
   def decreaseScaleFactor(oldSF: Double): Double =
     val newSF =
-      if oldSF <= 0.33 then 0.25
-      else if oldSF <= 0.5 then 0.33
+      if oldSF <= 0.5 then 0.33
       else if oldSF <= 0.67 then 0.5
       else if oldSF <= 0.75 then 0.67
       else if oldSF <= 0.8 then 0.75
@@ -517,11 +509,19 @@ object SceneGame extends Scene[FlicFlacStartupData, FlicFlacGameModel, FlicFlacV
     val rRight = Rectangle(Point(iLeftWidth, 0), Size(iRightWidth, iHeight))
     val rCorners = Rectangle(Point(iLeftWidth, 0), Size(iRightWidth + hexBoard4.pBase.x, iHeight))
 
+    val colorOurNameTitle = 
+      if (model.gameState == GameState.CYLINDER_TURN) && (model.ourPieceType == CYLINDER) then 
+        RGBA.Magenta
+      else if (model.gameState == GameState.BLOCK_TURN) && (model.ourPieceType == BLOCK) then 
+        RGBA.Magenta
+      else
+        RGBA.Black
+
     val youAre = 
       TextBox(model.ourName +"    ", iRightWidth, 50)  // adding 4 spaces to get a simple central alignment
         .bold
         .alignCenter
-        .withColor(RGBA.Black)
+        .withColor(colorOurNameTitle)
         .withFontSize(Pixels(40))
         .moveTo(iLeftWidth, 2)
 

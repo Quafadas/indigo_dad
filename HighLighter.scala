@@ -28,7 +28,7 @@ final case class HighLighter(
   def paint(hexBoard4: HexBoard4, fS: Double, pB: Point): Layer =
     if displayOn then
       val layer = GameAssets.gHex(fS).modifyMaterial(_.withTint(mix(CM)))
-      val paintPos = hexBoard4.getXpYp(currentPos)
+      val paintPos = hexBoard4.getXsYs(currentPos)
       Layer(layer.moveTo(pB.x + paintPos.x, pB.y + paintPos.y))
     else
       Layer.empty

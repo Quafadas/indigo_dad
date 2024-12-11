@@ -59,16 +59,17 @@ class HexBoard4 ():
 ...... xP,yP are display coords for cell (and these are the coords that are scaled)
 */
 
-  val arrayWidth = 9 // ................ forcing arrayWidth=9 (calculated from sZ=3)
-  val arrayHeight = 34 // .............. forcing arrayHeight=34 (calculated from sZ=3)
-  val graphicWidth = 90 // ............. the width of the graphic crop for each hex
-  val graphicHeight = 80 // ............ the width of the graphic crop for each hex
-  val pBase = Point(260,0) // .......... coords of invisible left hand corner
-  val xWidth = 70 // ................... amount to add to a hex centre x coord to reach the vertical line of the next column
-  val yHeight = 40 // .................. half the amount to add to a hex centre y coord to reach the next hexagon below
-  val xHalfway = 10 // ................. xcoord of halfway along the top left diagonal line of first hex
+  val arrayWidth = 9 // .............................. forcing arrayWidth=9 (calculated from sZ=3)
+  val arrayHeight = 34 // ............................ forcing arrayHeight=34 (calculated from sZ=3)
+  val graphicWidth = 90 // ........................... the width of the graphic crop for each hex
+  val graphicHeight = 80 // .......................... the width of the graphic crop for each hex
+  val pBase = Point(260,0) // ........................ coords of invisible left hand corner
+  val xWidth = 70 // ................................. amount to add to a hex centre x coord to reach the vertical line of the next column
+  val yHeight = 40 // ................................ half the amount to add to a hex centre y coord to reach the next hexagon below
+  val xHalfway = 10 // ............................... xcoord of halfway along the top left diagonal line of first hex
   var hexArray = createArrayOfHH(arrayWidth, arrayHeight)
-  var scalingFactor: Double = 1.0 // ... scaling factor as controlled by +/- buttons
+  var scalingFactor: Double = 1.0 // ................. scaling factor as controlled by +/- buttons
+  var hexGridLayer: Layer.Content = Layer.empty // ... Layer recalculated at start and on each +/-
 
 
   // start with black board, populates q,r,s (for debugging the helper routine printBoard can follow this line)
@@ -95,6 +96,12 @@ class HexBoard4 ():
 
   // establish extra hexes for homepositions of pieces
   establishHomeHexes( arrayWidth, arrayHeight)
+
+  // establish the paint positions for each hex
+  calculateXsYs(scalingFactor)
+
+  // establish the first GridPaintLayer scaled to 1.0
+  calculateGridPaintLayer()
 
   // ########################################################
 
@@ -292,33 +299,52 @@ class HexBoard4 ():
   end setHexColor
 
   /*
-  calculateXpYp calculates the positions of the origins for the graphics used to paint each cell
+  calculateXsYs calculates the positions of the origins for the graphics used to paint each cell
   This function is invoked when a resize event occurs or the scale changes
    */
-  def calculateXpYp(fS: Double): Unit =
-
+  def calculateXsYs(fS: Double): Unit =
     var y = 0
     while y < arrayHeight do
       var x = 0
       while x < arrayWidth do
         val hh = hexArray(x)(y)
-        val xP = math.round(hh.xR * fS).toInt
-        val yP = math.round(hh.yR * fS).toInt
-        hexArray(x)(y) = HH3(hh.x,hh.y,hh.c,hh.q,hh.r,hh.s,hh.xR,hh.yR,xP,yP) // writing xS and yS away
+        val xS = math.round(hh.xR * fS).toInt
+        val yS = math.round(hh.yR * fS).toInt
+        hexArray(x)(y) = HH3(hh.x,hh.y,hh.c,hh.q,hh.r,hh.s,hh.xR,hh.yR,xS,yS) // writing xS and yS away
         x += 1
       end while
       y += 1
     end while
-    hexBoard4.scalingFactor = fS
-  end calculateXpYp
+    scalingFactor = fS
+  end calculateXsYs
 
-  def getXpYp(pSrc: Point) : Point =
+  def calculateGridPaintLayer() : Unit = 
+    hexGridLayer = Layer.empty // start this combination with an empty layer
+    var y = 0
+    while y < arrayHeight do
+      var x = 0
+      while x < arrayWidth do
+        val hh = hexArray(x)(y)
+        if hh.c != CX then
+          // this hex is visible so paint it
+          val layer = GameAssets.gHex(scalingFactor).modifyMaterial(_.withTint(mix(hh.c)))
+          val scaledX = hh.xS + pBase.x
+          val scaledY = hh.yS + pBase.y
+          hexGridLayer = hexGridLayer |+| Layer(layer.moveTo(scaledX, scaledY))
+        end if
+        x += 1
+      end while
+      y += 1
+    end while
+  end calculateGridPaintLayer
+
+  def getXsYs(pSrc: Point) : Point =
     var pValidated = Point(0,0)
     val x = pSrc.x
     val y = pSrc.y
     val pResult = Point(hexArray(x)(y).xS, hexArray(x)(y).yS)
     pResult
-  end getXpYp
+  end getXsYs
 
   // detected a valid hex (ie is it part of the board) using Array Coordinates (as a point)
   def isThisHexValid(pAxAy: Point) : Boolean = 
@@ -367,29 +393,9 @@ class HexBoard4 ():
   paint supplies the "SceneUpdateFragment" that contains all the graphics required to paint the hexboard
   Experience shows that this routine is time critical, so optimisation is key
    */
-
-  // FIXME hexboard paint calculation can be stored according to magnification changes
-  
+ 
   def paint(model: FlicFlacGameModel, dSF: Double): Layer =
-    var hexLayer = Layer.empty // start this combination with an empty layer
-
-    var y = 0
-    while y < arrayHeight do
-      var x = 0
-      while x < arrayWidth do
-        val hh = hexArray(x)(y)
-        if hh.c != CX then
-          // this hex is visible so paint it
-          val layer = GameAssets.gHex(dSF).modifyMaterial(_.withTint(mix(hh.c)))
-          val scaledX = hh.xS + pBase.x
-          val scaledY = hh.yS + pBase.y
-          hexLayer = hexLayer |+| Layer(layer.moveTo(scaledX, scaledY))
-        end if
-        x += 1
-      end while
-      y += 1
-    end while
-    hexLayer
+    hexGridLayer
   end paint
 
 

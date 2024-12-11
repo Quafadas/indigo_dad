@@ -178,7 +178,7 @@ final case class Spots(
     var multiSpot = Layer.empty
 
     for pos <- model.possibleMoveSpots.indices do
-      val pPos = hexBoard4.getXpYp(Point(pos._1, pos._2))
+      val pPos = hexBoard4.getXsYs(Point(pos._1, pos._2))
       val spotLayer = Layer(layer.moveTo(hexBoard4.pBase.x + pPos.x, hexBoard4.pBase.y + pPos.y))
       multiSpot = multiSpot |+| spotLayer
     end for
